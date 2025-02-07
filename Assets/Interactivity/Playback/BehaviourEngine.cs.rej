@@ -1,0 +1,16 @@
+diff a/Assets/Interactivity/Playback/BehaviourEngine.cs b/Assets/Interactivity/Playback/BehaviourEngine.cs	(rejected hunks)
+@@ -78,13 +78,5 @@
+ 
+             return ConvertValue(type, v.value);
+         }
+-        public (System.Type type, object value) GetVariableValue(int variableIndex)
+-        {
+-            var variable = graph.variables[variableIndex];
+-
+-            var type = GetType(variable.type ?? default);
+-
+-            return ConvertValue(type, variable.value);
+-        }
+     }
+ }
+\ No newline at end of file
