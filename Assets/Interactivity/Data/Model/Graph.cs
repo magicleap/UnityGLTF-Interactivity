@@ -18,6 +18,7 @@ namespace UnityGLTF.Interactivity
         public event Action<InteractivityType> onTypeAdded;
 
         public event Action<Node> onNodeRemoved;
+        public event Action<Variable> onVariableRemoved;
 
         public Variable AddVariable<T>(string id, T initialValue)
         {
@@ -33,6 +34,17 @@ namespace UnityGLTF.Interactivity
             onVariableAdded?.Invoke(variable);
 
             return variable;
+        }
+
+        public bool RemoveVariable(Variable variable)
+        {
+            var success = variables.Remove(variable);
+
+            if (!success)
+                return false;
+
+            onVariableRemoved?.Invoke(variable);
+            return true;
         }
 
         public Customevent AddEvent(string id)

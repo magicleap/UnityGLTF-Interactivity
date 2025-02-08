@@ -1,4 +1,3 @@
-using Newtonsoft.Json.Linq;
 using System;
 using UnityEngine;
 
@@ -8,7 +7,12 @@ namespace UnityGLTF.Interactivity
     {
         public static System.Type GetSystemType(InteractivityType type)
         {
-            switch (type.signature)
+            return GetSystemTypeBySignature(type.signature);
+        }
+
+        public static System.Type GetSystemTypeBySignature(string signature)
+        {
+            switch (signature)
             {
                 case "bool":
                     return typeof(bool);
@@ -27,6 +31,18 @@ namespace UnityGLTF.Interactivity
                 default:
                     return typeof(string);
             }
+        }
+
+        public static string GetSignatureBySystemType(Type type)
+        {
+            if (type == typeof(bool)) return "bool";
+            if (type == typeof(int)) return "int";
+            if (type == typeof(float)) return "float";
+            if (type == typeof(Vector2)) return "float2";
+            if (type == typeof(Vector3)) return "float3";
+            if (type == typeof(Vector4)) return "float4";
+            if (type == typeof(Matrix4x4)) return "float4x4";
+            throw new InvalidOperationException($"Invalid type {type} used!");
         }
 
         public static IProperty CreateProperty(System.Type type, object value)

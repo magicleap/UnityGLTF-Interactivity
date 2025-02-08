@@ -14,9 +14,11 @@ namespace UnityGLTF.Interactivity.Frontend
         [SerializeField] private Transform _nodesContainer;
 
         [field: Header("Scene References")]
-        [field: SerializeField] public CreateNodeMenuUI createNodeMenuUI;
-        [field: SerializeField] public InteractivityManager loader;
+        [field: SerializeField] public CreateNodeMenuUI createNodeMenuUI { get; private set; }
+        [field: SerializeField] public InteractivityManager loader { get; private set; }
         [field: SerializeField] public FlowsUIManager flowsManager { get; private set; }
+        [field: SerializeField] public VariableMenuUI variablesMenu { get; private set; }
+
 
         private readonly Dictionary<Node, NodeUI> _nodes = new();
         public ReadOnlyDictionary<Node, NodeUI> nodes;
@@ -32,6 +34,7 @@ namespace UnityGLTF.Interactivity.Frontend
             nodes = new(_nodes);
             flowsManager.SetData(this);
             createNodeMenuUI.SetData(this);
+            variablesMenu.SetData(this);
             loader.onGraphLoadComplete += OnGraphLoaded;
         }
 
