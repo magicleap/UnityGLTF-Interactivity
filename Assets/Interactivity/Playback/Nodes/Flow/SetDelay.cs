@@ -61,13 +61,17 @@ namespace UnityGLTF.Interactivity
 
             while (duration > 0)
             {
-                if (_cancel)
+                if (_cancel || IsCanceled())
                 {
                     _cancel = false;
                     break;
                 }
 
-                duration -= Time.deltaTime;
+                if(IsPaused() == false)
+                {
+                    duration -= Time.deltaTime;
+                }
+
                 await Task.Yield();
             }
 

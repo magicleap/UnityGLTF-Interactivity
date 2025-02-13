@@ -25,6 +25,8 @@ namespace UnityGLTF.Interactivity
         public event Action onModelLoadComplete;
         public event Action<Graph> onGraphLoadComplete;
 
+        private EventWrapper _eventWrapper = null;
+
         private void Start()
         {
             _loader = new();
@@ -79,6 +81,7 @@ namespace UnityGLTF.Interactivity
 
             var eventWrapper = importer.SceneParent.gameObject.AddComponent<EventWrapper>();
             eventWrapper.SetData(new BehaviourEngine(interactivityGraph.graph, new PointerResolver(importer), animationWrapper));
+            _eventWrapper = eventWrapper;
 
             _lastLoadPacket = new LoadPacket()
             {
@@ -92,6 +95,14 @@ namespace UnityGLTF.Interactivity
         public void SaveModel()
         {
             _loader.SaveModel(_saveToFile, _lastLoadPacket.importer, _lastLoadPacket.graph);
+        }
+
+        public void PauseResume()
+        {
+            if(_eventWrapper != null)
+            {
+                _eventWrapper.PauseResume();
+            }
         }
     }
 }

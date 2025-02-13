@@ -23,6 +23,13 @@ namespace UnityGLTF.Interactivity
         public readonly Dictionary<string, Flow> flows = new();
         public readonly Dictionary<string, Configuration> configuration = new();
 
+        private bool _isPaused = false;
+        private bool _isCanceled = false;
+
+        protected bool IsPaused() => _isPaused;
+        protected bool IsCanceled() => _isCanceled;
+        
+
         public BehaviourEngineNode(BehaviourEngine engine, Node node)
         {
             this.node = node;
@@ -79,7 +86,7 @@ namespace UnityGLTF.Interactivity
             var hasFlow = flows.TryGetValue(outputSocketName, out Flow flow);
 
             if (hasFlow)
-                engine.ExecuteFlow(flow);
+                engine.PushFlowForExecution(flow);
 
             return hasFlow;
         }
@@ -112,6 +119,31 @@ namespace UnityGLTF.Interactivity
                 value = default;
                 return false;
             }
+        }
+
+        public void Pause()
+        {
+            _isPaused = true;
+        }
+
+        public void Resume()
+        {
+            _isPaused = false;
+        }
+
+        public void Cancel()
+        {
+            _isCanceled = true;
+        }
+
+        protected void StartLongOperation()
+        {
+            engine.StartLongOperation(this);
+        }
+
+        protected void EndLongOperation()
+        {
+            engine.EndLongOperation(this);
         }
     }
 }

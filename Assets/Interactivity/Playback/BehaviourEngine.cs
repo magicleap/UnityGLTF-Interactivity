@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -18,6 +19,11 @@ namespace UnityGLTF.Interactivity
 
         public readonly PointerResolver pointerResolver;
 
+        private Queue<Flow> _flowsToExecute = new();
+        private LinkedList<BehaviourEngineNode> _nodesRunning = new();
+
+        private bool _paused = false;
+
         public BehaviourEngine(Graph graph, PointerResolver pointerResolver, AnimationWrapper animationWrapper)
         {
             this.graph = graph;
@@ -35,9 +41,70 @@ namespace UnityGLTF.Interactivity
             onStart?.Invoke();
         }
 
+        public void StopPlayback()
+        {
+            Cancel();
+        }
+
         public void Tick()
         {
+            if(_paused)
+            {
+                return;
+            }
+
+            while(_flowsToExecute.Count > 0)
+            {
+                var f = _flowsToExecute.Dequeue();
+                ExecuteFlow(f);
+            }
             onTick?.Invoke();
+        }
+
+        public void Pause()
+        {
+            if(_paused)
+            {
+                return;
+            }
+            _paused = true;
+
+            Debug.LogWarning("ENGINE PAUSED");
+
+            foreach(var n in _nodesRunning)
+            {
+                n.Pause();
+            }
+        }
+
+        public bool IsPaused()
+        {
+            return _paused;
+        }
+
+        public void Resume()
+        {
+            if(_paused == false)
+            {
+                return;
+            }
+            _paused = false;
+
+            Debug.LogWarning("ENGINE RESUMED");
+
+            foreach(var n in _nodesRunning)
+            {
+                n.Resume();
+            }
+        }
+
+        public void Cancel()
+        {
+            Debug.LogWarning($"ENGINE CANCELED ({_nodesRunning.Count} objects running)");
+            foreach(var n in _nodesRunning)
+            {
+                n.Cancel();
+            }
         }
 
         public void Select(GameObject go)
@@ -53,7 +120,7 @@ namespace UnityGLTF.Interactivity
             return instantiateFunc(this, node);
         }
 
-        public void ExecuteFlow(Flow flow)
+        private void ExecuteFlow(Flow flow)
         {
             if (!Application.isPlaying)
                 return;
@@ -63,6 +130,11 @@ namespace UnityGLTF.Interactivity
 
             var node = engineNodes[flow.toNode];
             node.ValidateAndExecute(flow.toSocket);
+        }
+
+        public void PushFlowForExecution(Flow flow)
+        {
+            _flowsToExecute.Enqueue(flow);
         }
 
         public void FireCustomEvent(int eventIndex, Dictionary<string, IProperty> outValues = null)
@@ -121,6 +193,16 @@ namespace UnityGLTF.Interactivity
             }
 
             await animationWrapper.PlayAnimationAsync(animationIndex, startTime, endTime, speed);
+        }
+
+        public void StartLongOperation(BehaviourEngineNode n)
+        {
+            _nodesRunning.AddLast(n);
+        }
+
+        public void EndLongOperation(BehaviourEngineNode n)
+        {
+            _nodesRunning.Remove(n);
         }
     }
 }

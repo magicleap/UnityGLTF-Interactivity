@@ -16,6 +16,11 @@ namespace UnityGLTF.Interactivity
             engine.StartPlayback();
         }
 
+        private void OnDisable()
+        {
+            engine.StopPlayback();
+        }
+
         private void Update()
         {
             engine.Tick();
@@ -24,6 +29,14 @@ namespace UnityGLTF.Interactivity
         public void Select(GameObject go)
         {
             engine.Select(go);
+        }
+
+        public void PauseResume()
+        {
+            if(engine.IsPaused())
+                engine.Resume();
+            else
+                engine.Pause();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace UnityGLTF.Interactivity
         {
             for (int i = 0; i < node.flows.Count; i++)
             {
-                engine.ExecuteFlow(node.flows[i]);
+                engine.PushFlowForExecution(node.flows[i]);
             }
         }
     }
