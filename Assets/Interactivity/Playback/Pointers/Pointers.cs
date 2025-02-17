@@ -44,4 +44,14 @@ namespace UnityGLTF.Interactivity
             return getter();
         }
     }
+
+    public interface IValue
+    {
+
+    }
+
+    public struct Value<T> : IValue
+    {
+        public T value;
+    }
 }

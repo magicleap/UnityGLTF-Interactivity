@@ -11,6 +11,8 @@ namespace UnityGLTF.Interactivity
         private IProperty _interpGoal;
         private float _duration;
 
+        private IValue _initialValue; // container for initial value from _pointer
+
         public PointerInterpolate(BehaviourEngine engine, Node node) : base(engine, node)
         {
         }
@@ -75,67 +77,11 @@ namespace UnityGLTF.Interactivity
 
         private async Task SafeInterpolateAsync()
         {
-            var d = 0.0f;
-
-            int fromInt = 0;
-            float fromFloat = 0.0f;
-            Vector2 fromVec2 = Vector2.zero;
-            Vector3 fromVec3 = Vector3.zero;
-            Vector4 fromVec4 = Vector4.zero;
-            Color fromColor = Color.white;
-            Quaternion fromQuaternion = Quaternion.identity;
-            Matrix4x4 fromMatrix = Matrix4x4.identity;
-
-            switch (_interpGoal)
+            var t = 0.0f;        
+            _initialValue = null;
+          
+            while(t <= 1.0f)
             {
-                case Property<int>: // Cast to float so we can interp with int arguments.
-                    fromInt = ((Pointer<int>)_pointer).getter();
-                    break;
-                case Property<float>:
-                    fromFloat = ((Pointer<float>)_pointer).getter();
-                    break;
-                case Property<Vector2>:
-                    fromVec2 = ((Pointer<Vector2>)_pointer).getter();
-                    break;
-                case Property<Vector3>:
-                    {
-                        switch(_pointer)
-                        {
-                            case Pointer<Color>:
-                                fromColor = ((Pointer<Color>)_pointer).getter();
-                                break;
-                            case Pointer<Quaternion>:
-                                fromQuaternion = ((Pointer<Quaternion>)_pointer).getter();
-                                break;
-                            case Pointer<Vector3>:
-                                fromVec3 = ((Pointer<Vector3>)_pointer).getter();
-                                break;
-                        }
-                    }
-                    break;
-                case Property<Vector4>:
-                    {
-                        switch(_pointer)
-                        {
-                            case Pointer<Color>:
-                                fromColor = ((Pointer<Color>)_pointer).getter();
-                                break;
-                            case Pointer<Vector4>:
-                                fromVec4 = ((Pointer<Vector4>)_pointer).getter();
-                                break;
-                        }
-                    }
-                    break;
-                case Property<Matrix4x4>:
-                    fromMatrix = ((Pointer<Matrix4x4>)_pointer).getter();
-                    break;
-                default:
-                    throw new InvalidOperationException("No supported type found for interpolation.");
-            }
-
-            while(d <= 1.0f)
-            {
-                //Debug.Log($"INTERPOLATE {d}");
                 if (IsCanceled())
                 {
                     break;
@@ -143,62 +89,62 @@ namespace UnityGLTF.Interactivity
 
                 if(IsPaused() == false)
                 {
-                // TODO: Replace these with the proper interpolate methods to match spec. Currently all linear interp.
-                    switch (_interpGoal)
-                    {
-                        case Property<int> intProp: // Cast to float so we can interp with int arguments.
+                    ExecuteStep(t);
 
-                            Helpers.Interpolate(fromInt, intProp.value, (Pointer<float>)_pointer, d);
-                            break;
-                        case Property<float> floatProp:
-                            Helpers.Interpolate(fromFloat, floatProp.value, (Pointer<float>)_pointer, d);
-                            break;
-                        case Property<Vector2> vec2Prop:
-                            Helpers.Interpolate(fromVec2, vec2Prop.value, (Pointer<Vector2>)_pointer, d);
-                            break;
-                        case Property<Vector3> vec3Prop:
-                            {
-                                switch (_pointer)
-                                {
-                                    case Pointer<Vector3>:
-                                        Helpers.Interpolate(fromVec3, vec3Prop.value, (Pointer<Vector3>)_pointer, d);
-                                        break;
-                                    case Pointer<Color>:
-                                        {
-                                            Helpers.Interpolate(fromColor, vec3Prop.value.ToColor(), (Pointer<Color>)_pointer, d);
-                                        }
-                                        break;
-                                    case Pointer<Quaternion>:
-                                        {
-                                            Helpers.Interpolate(fromQuaternion, Quaternion.Euler(vec3Prop.value), (Pointer<Quaternion>)_pointer, d);
-                                        }
-                                        break;
-                                }           
-                            }
-                            break;
-                        case Property<Vector4> vec4Prop:
-                            {
-                                switch(_pointer)
-                                {
-                                    case Pointer<Color>:
-                                        Helpers.Interpolate(fromColor, vec4Prop.value, (Pointer<Color>)_pointer, d);
-                                        break;
-                                    case Pointer<Vector4>:
-                                        Helpers.Interpolate(fromVec4, vec4Prop.value, (Pointer<Vector4>)_pointer, d);
-                                        break;
-                                }
-                            }
-                            break;
-                        case Property<Matrix4x4> matrixProp:
-                            Helpers.Interpolate(fromMatrix, matrixProp.value, (Pointer<Matrix4x4>)_pointer, d);
-                            break;
-                        default:
-                            throw new InvalidOperationException("No supported type found for interpolation.");
-                    }
-
-                    d += Time.deltaTime / _duration;
+                    t += Time.deltaTime / _duration;
                 }
                 await Task.Yield();
+            }
+        }
+
+        protected void ExecuteStep(float t)
+        {
+            // TODO: Replace these with the proper interpolate methods to match spec. Currently all linear interp.
+            switch (_interpGoal)
+            {
+                case Property<int> intProp: // Cast to float so we can interp with int arguments.
+                    Helpers.Interpolate(ref _initialValue, intProp.value, (Pointer<float>)_pointer, t);
+                    break;
+                case Property<float> floatProp:
+                    Helpers.Interpolate(ref _initialValue, floatProp.value, (Pointer<float>)_pointer, t);
+                    break;
+                case Property<Vector2> vec2Prop:
+                    Helpers.Interpolate(ref _initialValue, vec2Prop.value, (Pointer<Vector2>)_pointer, t);
+                    break;
+                case Property<Vector3> vec3Prop:
+                    {
+                        switch (_pointer)
+                        {
+                            case Pointer<Vector3>:
+                                Helpers.Interpolate(ref _initialValue, vec3Prop.value, (Pointer<Vector3>)_pointer, t);
+                                break;
+                            case Pointer<Color>:
+                                Helpers.Interpolate(ref _initialValue, vec3Prop.value.ToColor(), (Pointer<Color>)_pointer, t);
+                                break;
+                            case Pointer<Quaternion>:
+                                Helpers.Interpolate(ref _initialValue, Quaternion.Euler(vec3Prop.value), (Pointer<Quaternion>)_pointer, t);
+                                break;
+                        }           
+                    }
+                    break;
+                case Property<Vector4> vec4Prop:
+                    {
+                        switch(_pointer)
+                        {
+                            case Pointer<Color>:
+                                Helpers.Interpolate(ref _initialValue, vec4Prop.value, (Pointer<Color>)_pointer, t);
+                                break;
+                            case Pointer<Vector4>:
+                                Helpers.Interpolate(ref _initialValue, vec4Prop.value, (Pointer<Vector4>)_pointer, t);
+                                break;
+                        }
+                    }
+                    break;
+                case Property<Matrix4x4> matrixProp:
+                    Helpers.Interpolate(ref _initialValue, matrixProp.value, (Pointer<Matrix4x4>)_pointer, t);
+                    break;
+                default:
+                    throw new InvalidOperationException("No supported type found for interpolation.");
             }
         }
 

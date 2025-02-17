@@ -60,6 +60,21 @@ namespace UnityGLTF.Interactivity
             pointer.setter(pointer.evaluator(from, to, t));
         }
 
+        public static void Interpolate<T>(ref IValue initialValue, T to, Pointer<T> pointer, float t)
+        {
+            if (to is not T) throw new InvalidOperationException("Argument 'to' is not the given type!");
+
+            if(initialValue == null)
+            {
+                var p = new Value<T>();
+                p.value = pointer.GetValue();
+                initialValue = p;
+            }
+
+            T from = ((Value<T>)initialValue).value;
+            pointer.setter(pointer.evaluator(from, to, t));
+        }
+
         public static void Interpolate<T>(T to, Pointer<T> pointer, float t)
         {
             if (to is not T) throw new InvalidOperationException("Argument 'to' is not the given type!");
