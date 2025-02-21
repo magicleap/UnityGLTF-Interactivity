@@ -65,6 +65,7 @@ namespace UnityGLTF.Interactivity
         public const string A = "a";
         public const string B = "b";
         public const string C = "c";
+        public const string D = "d";
         public const string DONE = "done";
         public const string IN = "in";
         public const string OUT = "out";

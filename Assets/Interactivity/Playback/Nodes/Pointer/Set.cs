@@ -45,11 +45,14 @@ namespace UnityGLTF.Interactivity
                 case Property<Vector4> prop when _pointer is Pointer<Color> p:
                     p.setter(prop.value.ToColor());
                     break;
+                case Property<Vector4> prop when _pointer is Pointer<Quaternion> p:
+                    p.setter(prop.value.ToQuaternion());
+                    break;
                 case Property<bool> prop when _pointer is Pointer<bool> p:
                     p.setter(prop.value);
                     break;
                 default:
-                    throw new InvalidOperationException("Either the property type you're attempting to set is unsupported or the pointer type does not match it.");
+                    throw new InvalidOperationException($"Either the property type you're attempting to set is unsupported ({_property.GetType()}) or the pointer type does not match it ({_pointer.GetType()}).");
             }
 
             TryExecuteFlow(ConstStrings.OUT);

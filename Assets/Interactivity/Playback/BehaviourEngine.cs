@@ -83,13 +83,6 @@ namespace UnityGLTF.Interactivity
             return node.GetOutputValue(v.socket);
         }
 
-        public T ParseValueProperty<T>(Value v)
-        {
-            var property = ParseValue(v);
-
-            return ((Property<T>)property).value;
-        }
-
         public IProperty GetVariableProperty(int variableIndex)
         {
             return graph.variables[variableIndex].property;

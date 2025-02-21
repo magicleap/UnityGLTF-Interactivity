@@ -4,6 +4,7 @@ namespace UnityGLTF.Interactivity
 {
     public interface IPointer
     {
+        public Type GetSystemType();
     }
 
     public interface IPointer<T> : IPointer
@@ -31,6 +32,11 @@ namespace UnityGLTF.Interactivity
         {
             return new ReadOnlyPointer<T>() { getter = pointer.getter };
         }
+
+        public Type GetSystemType()
+        {
+            return typeof(T);
+        }
     }
 
     public struct Pointer<T> : IPointer<T>
@@ -42,6 +48,11 @@ namespace UnityGLTF.Interactivity
         public T GetValue()
         {
             return getter();
+        }
+
+        public Type GetSystemType()
+        {
+            return typeof(T);
         }
     }
 }
