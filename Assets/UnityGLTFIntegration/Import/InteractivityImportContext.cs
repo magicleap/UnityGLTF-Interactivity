@@ -18,12 +18,12 @@ namespace UnityGLTF.Interactivity
         /// </summary>
         public override void OnBeforeImport()
         {
-            Debug.Log($"InteractivityImportContext::OnBeforeImport Complete");
+            Util.Log($"InteractivityImportContext::OnBeforeImport Complete");
         }
 
         public override void OnBeforeImportRoot()
         {
-            Debug.Log($"InteractivityImportContext::OnBeforeImportRoot Complete");
+            Util.Log($"InteractivityImportContext::OnBeforeImportRoot Complete");
         }
 
         /// <summary>
@@ -31,37 +31,37 @@ namespace UnityGLTF.Interactivity
         /// </summary>
         public override void OnAfterImportRoot(GLTFRoot gltfRoot)
         {
-            Debug.Log($"InteractivityImportContext::OnAfterImportRoot Complete: {gltfRoot.ToString()}");
+            Util.Log($"InteractivityImportContext::OnAfterImportRoot Complete: {gltfRoot.ToString()}");
         }
 
         public override void OnBeforeImportScene(GLTFScene scene)
         {
-            Debug.Log($"InteractivityImportContext::OnBeforeImportScene Complete: {scene.ToString()}");
+            Util.Log($"InteractivityImportContext::OnBeforeImportScene Complete: {scene.ToString()}");
         }
 
         public override void OnAfterImportNode(GLTF.Schema.Node node, int nodeIndex, GameObject nodeObject)
         {
-            Debug.Log($"InteractivityImportContext::OnAfterImportNode Complete: {node.ToString()}");
+            Util.Log($"InteractivityImportContext::OnAfterImportNode Complete: {node.ToString()}");
         }
 
         public override void OnAfterImportMaterial(GLTFMaterial material, int materialIndex, Material materialObject)
         {
-            Debug.Log($"InteractivityImportContext::OnAfterImportMaterial Complete: {material.ToString()}");
+            Util.Log($"InteractivityImportContext::OnAfterImportMaterial Complete: {material.ToString()}");
         }
 
         public override void OnAfterImportTexture(GLTFTexture texture, int textureIndex, Texture textureObject)
         {
-            Debug.Log($"InteractivityImportContext::OnAfterImportTexture Complete: {texture.ToString()}");
+            Util.Log($"InteractivityImportContext::OnAfterImportTexture Complete: {texture.ToString()}");
         }
 
         public override void OnAfterImportScene(GLTFScene scene, int sceneIndex, GameObject sceneObject)
         {
-            Debug.Log($"InteractivityImportContext::OnAfterImportScene Complete: {scene.Extensions}");
+            Util.Log($"InteractivityImportContext::OnAfterImportScene Complete: {scene.Extensions}");
         }
 
         public override void OnAfterImport()
         {
-            Debug.Log($"InteractivityImportContext::OnAfterImport Complete");
+            Util.Log($"InteractivityImportContext::OnAfterImport Complete");
         }
     }
 

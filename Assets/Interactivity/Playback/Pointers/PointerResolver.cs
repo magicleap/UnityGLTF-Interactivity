@@ -66,7 +66,7 @@ namespace UnityGLTF.Interactivity
 
         private IPointer GetPointer(string pointerString)
         {
-            Debug.Log($"Getting pointer: {pointerString}");
+            Util.Log($"Getting pointer: {pointerString}");
 
             var path = pointerString.Split("/");
 

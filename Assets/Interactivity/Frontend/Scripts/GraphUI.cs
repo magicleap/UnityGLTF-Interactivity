@@ -96,12 +96,12 @@ namespace UnityGLTF.Interactivity.Frontend
             }
             else if (Input.GetKeyUp(KeyCode.G))
             {
-                Debug.Log("Removing node");
+                Util.Log("Removing node");
                 graph.RemoveNode(graph.nodes[0]);
             }
             else if (Input.GetKeyUp(KeyCode.H))
             {
-                Debug.Log("Removing flow");
+                Util.Log("Removing flow");
 
                 graph.nodes[0].RemoveFlow(graph.nodes[0].flows[0]);
             }

@@ -133,7 +133,7 @@ namespace UnityGLTF.Interactivity
                     socket = socket
                 });
 
-                Debug.Log($"Created property {kvp.Key} connected to node {node?.type} and socket {socket} with type {type}");
+                Util.Log($"Created property {kvp.Key} connected to node {node?.type} and socket {socket} with type {type}");
             }
 
             return values;

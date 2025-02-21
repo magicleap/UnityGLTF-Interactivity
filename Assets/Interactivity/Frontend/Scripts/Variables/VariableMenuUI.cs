@@ -61,7 +61,7 @@ namespace UnityGLTF.Interactivity.Frontend
 
         private void OnVariableAddedToGraph(Variable variable)
         {
-            Debug.Log("Variable added to graph");
+            Util.Log("Variable added to graph");
             CreateVariableUI(variable);
         }
 

@@ -14,7 +14,7 @@ namespace UnityGLTF.Interactivity
             if (!TryEvaluateValue("message", out string message))
                 TryExecuteFlow(ConstStrings.ERR);
 
-            Debug.Log(message);
+            Util.Log(message);
 
             TryExecuteFlow(ConstStrings.OUT);
         }

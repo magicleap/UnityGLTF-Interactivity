@@ -71,7 +71,7 @@ namespace UnityGLTF.Interactivity.Frontend
         {
             var hasFlowUI = _valueUIs.TryGetValue(value, out FlowUI flowUI);
 
-            Debug.Log($"On connection changed for node {_node.type}'s value {value.id}. Has existing UI? {hasFlowUI}, Node is null? {value.node == null}");
+            Util.Log($"On connection changed for node {_node.type}'s value {value.id}. Has existing UI? {hasFlowUI}, Node is null? {value.node == null}");
 
             if (hasFlowUI)
             {
@@ -121,7 +121,7 @@ namespace UnityGLTF.Interactivity.Frontend
         {
             if (!_flowUIs.TryGetValue(flow, out FlowUI flowUI))
             { 
-                Debug.LogWarning($"No flow found for {flow.fromSocket}");
+                Util.LogWarning($"No flow found for {flow.fromSocket}");
                 return;
             }
 

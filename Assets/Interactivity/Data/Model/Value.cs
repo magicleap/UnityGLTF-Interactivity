@@ -21,7 +21,7 @@ namespace UnityGLTF.Interactivity
         {
             if (node == null && socket == Constants.EMPTY_SOCKET_STRING)
             {
-                Debug.LogWarning($"Value {id} is already disconnected from any nodes.");
+                Util.LogWarning($"Value {id} is already disconnected from any nodes.");
                 return false;
             }
 
@@ -37,7 +37,7 @@ namespace UnityGLTF.Interactivity
         {
             if (this.node == node && this.socket == socket)
             {
-                Debug.LogWarning($"Value {id} is already connected to node {node.type} on socket {socket}.");
+                Util.LogWarning($"Value {id} is already connected to node {node.type} on socket {socket}.");
                 return false;
             }
 

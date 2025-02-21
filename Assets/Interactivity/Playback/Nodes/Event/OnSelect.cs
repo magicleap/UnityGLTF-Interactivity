@@ -32,7 +32,7 @@ namespace UnityGLTF.Interactivity
             _nodeIndex = nodeIndex;
             _selectionPerformed = true;
 
-            Debug.Log($"OnSelect node {nodeIndex} corresponding to GO {go.name}", go);
+            Util.Log($"OnSelect node {nodeIndex} corresponding to GO {go.name}", go);
 
             TryExecuteFlow(ConstStrings.OUT);
         }

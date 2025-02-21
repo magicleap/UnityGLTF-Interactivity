@@ -27,7 +27,7 @@ namespace UnityGLTF.Interactivity
 
             values.Add(v);
 
-            Debug.Log($"Added value {id} with payload {value.ToString()}");
+            Util.Log($"Added value {id} with payload {value.ToString()}");
 
             return v;
         }
@@ -61,7 +61,7 @@ namespace UnityGLTF.Interactivity
                     if (!value.TryConnectToSocket(node, socket))
                         return false;
 
-                    Debug.Log($"Changed value {id} on {type} to reference the output of {node.type}'s value {socket}");
+                    Util.Log($"Changed value {id} on {type} to reference the output of {node.type}'s value {socket}");
                     return true;
                 }
             }
@@ -81,7 +81,7 @@ namespace UnityGLTF.Interactivity
 
             flows.Add(flow);
 
-            Debug.Log($"Created flow between {type} and {node.type} from {id} to {socket}");
+            Util.Log($"Created flow between {type} and {node.type} from {id} to {socket}");
 
             onFlowAdded?.Invoke(flow);
 

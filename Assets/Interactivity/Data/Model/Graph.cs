@@ -96,7 +96,7 @@ namespace UnityGLTF.Interactivity
             {
                 if (types[i].signature == signature)
                 {
-                    Debug.LogWarning($"Type {signature} has already been added to the list of types.");
+                    Util.LogWarning($"Type {signature} has already been added to the list of types.");
                     return types[i];
                 }
             }

@@ -22,7 +22,7 @@ namespace UnityGLTF.Interactivity
                 return;
             }
 
-            Debug.Log($"Playing animation index {_animationIndex} with speed {_speed} and start/end times of {_startTime}/{_endTime}");
+            Util.Log($"Playing animation index {_animationIndex} with speed {_speed} and start/end times of {_startTime}/{_endTime}");
 
             TryExecuteFlow(ConstStrings.OUT);
 

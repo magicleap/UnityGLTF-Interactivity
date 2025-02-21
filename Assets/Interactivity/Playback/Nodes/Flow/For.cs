@@ -25,7 +25,7 @@ namespace UnityGLTF.Interactivity
 
         protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
-            Debug.Log($"Starting a loop with start index {_startIndex} and end index {_endIndex}");
+            Util.Log($"Starting a loop with start index {_startIndex} and end index {_endIndex}");
 
             for (_index = _startIndex; _index < _endIndex; _index++)
             {

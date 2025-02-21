@@ -18,7 +18,7 @@ namespace UnityGLTF.Interactivity
 
             SaveGraph(serializer, extensionData);
 
-            //Debug.Log($"Nodes: {graph.nodes.Count}, Variables: {graph.variables.Count}, Types: {graph.types.Count}, Events: {graph.customEvents.Count}");
+            //Util.Log($"Nodes: {graph.nodes.Count}, Variables: {graph.variables.Count}, Types: {graph.types.Count}, Events: {graph.customEvents.Count}");
 
             //engine = new BehaviourEngine(graph, go);
 

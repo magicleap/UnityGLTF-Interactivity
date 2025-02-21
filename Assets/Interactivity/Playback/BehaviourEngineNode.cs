@@ -32,22 +32,22 @@ namespace UnityGLTF.Interactivity
             for (int i = 0; i < node.values.Count; i++)
             {
                 values.Add(node.values[i].id, node.values[i]);
-                Debug.Log($"Adding value {node.values[i].id} to BehaviourGraphNode {node.type}");
+                Util.Log($"Adding value {node.values[i].id} to BehaviourGraphNode {node.type}");
             }
 
             for (int i = 0; i < node.flows.Count; i++)
             {
                 flows.Add(node.flows[i].fromSocket, node.flows[i]);
-                Debug.Log($"Adding flow {node.flows[i].fromSocket} to BehaviourGraphNode {node.type}");
+                Util.Log($"Adding flow {node.flows[i].fromSocket} to BehaviourGraphNode {node.type}");
             }
 
             for (int i = 0; i < node.configuration.Count; i++)
             {
                 configuration.Add(node.configuration[i].id, node.configuration[i]);
-                Debug.Log($"Adding config {node.configuration[i].id} to BehaviourGraphNode {node.type}");
+                Util.Log($"Adding config {node.configuration[i].id} to BehaviourGraphNode {node.type}");
             }
 
-            Debug.Log($"Finished creating BehaviourGraphNode {node.type}");
+            Util.Log($"Finished creating BehaviourGraphNode {node.type}");
         }
 
         public void ValidateAndExecute(string socket, CancellationToken cancellationToken)

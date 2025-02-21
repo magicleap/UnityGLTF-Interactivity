@@ -108,7 +108,7 @@ namespace UnityGLTF.Interactivity
         {
             if (animationWrapper == null)
             {
-                Debug.LogWarning("Tried to play an animation on a glb that has no animations.");
+                Util.LogWarning("Tried to play an animation on a glb that has no animations.");
                 return;
             }
 

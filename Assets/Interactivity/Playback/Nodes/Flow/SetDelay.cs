@@ -54,7 +54,7 @@ namespace UnityGLTF.Interactivity
                 return;
             }
 
-            Debug.Log($"Starting a delay of {_duration}s");
+            Util.Log($"Starting a delay of {_duration}s");
 
             TryExecuteFlow(ConstStrings.OUT);
 

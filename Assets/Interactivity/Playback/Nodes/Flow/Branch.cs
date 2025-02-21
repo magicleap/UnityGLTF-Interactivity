@@ -17,7 +17,7 @@ namespace UnityGLTF.Interactivity
             if (socket != ConstStrings.IN)
                 throw new ArgumentException($"Only valid input socket for this node is \"{ConstStrings.IN}\"");
 
-            Debug.Log($"Branch condition is {_condition}");
+            Util.Log($"Branch condition is {_condition}");
 
             var outSocket = _condition ? ConstStrings.TRUE : ConstStrings.FALSE;
 
