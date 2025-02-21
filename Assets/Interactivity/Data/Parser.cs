@@ -35,7 +35,7 @@ namespace UnityGLTF.Interactivity
             var sanitized = SanitizeObjectString(o).Split(',');
 
             if (sanitized.Length != 2)
-                throw new InvalidOperationException($"Json property is not a vector2!\nValue: {o.ToString()}");
+                throw new InvalidOperationException($"Json property is not a vector2!\nValue: {o}");
 
             return new Vector2(float.Parse(sanitized[0]), float.Parse(sanitized[1]));
         }
@@ -45,7 +45,7 @@ namespace UnityGLTF.Interactivity
             var sanitized = SanitizeObjectString(o).Split(',');
 
             if (sanitized.Length != 3)
-                throw new InvalidOperationException($"Json property is not a vector3!\nValue: {o.ToString()}");
+                throw new InvalidOperationException($"Json property is not a vector3!\nValue: {o}");
 
             return new Vector3(float.Parse(sanitized[0]), float.Parse(sanitized[1]), float.Parse(sanitized[2]));
         }
@@ -55,9 +55,30 @@ namespace UnityGLTF.Interactivity
             var sanitized = SanitizeObjectString(o).Split(',');
 
             if (sanitized.Length != 4)
-                throw new InvalidOperationException($"Json property is not a vector4!\nValue: {o.ToString()}");
+                throw new InvalidOperationException($"Json property is not a vector4!\nValue: {o}");
 
             return new Vector4(float.Parse(sanitized[0]), float.Parse(sanitized[1]), float.Parse(sanitized[2]), float.Parse(sanitized[3]));
+        }
+
+        public static Matrix4x4 ToMatrix4x4(object o)
+        {
+            const int MATRIX_4X4_LENGTH = 16;
+
+            var sanitized = SanitizeObjectString(o).Split(',');
+
+            if (sanitized.Length != MATRIX_4X4_LENGTH)
+                throw new InvalidOperationException($"Json property is not a Matrix4x4!\nValue: {o}");
+
+            var matrix = new Matrix4x4();
+
+            // Unity matrices are column-major just like the GLTF Interactivity Spec float4x4.
+            // This means we can just iterate through the matrix and parse floats without any index conversion.
+            for (int i = 0; i < MATRIX_4X4_LENGTH; i++)
+            {
+                matrix[i] = float.Parse(sanitized[i]);
+            }
+
+            return matrix;
         }
 
         public static string ToString(object o)
@@ -73,14 +94,7 @@ namespace UnityGLTF.Interactivity
 
             for (int i = 0; i < sanitized.Length; i++)
             {
-                try
-                {
-                    array[i] = int.Parse(sanitized[i]);
-                }
-                catch
-                {
-                    Debug.LogError($"Element {i} in int array with value {sanitized[i]} could not be parsed!");
-                }
+                array[i] = int.Parse(sanitized[i]);
             }
             
             return array;

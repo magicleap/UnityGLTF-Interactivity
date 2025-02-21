@@ -29,7 +29,7 @@ namespace UnityGLTF.Interactivity.Extensions
             return new Vector4(q.x, q.y, q.z, q.w);
         }
 
-        public static Quaternion ToQuaternion(this Quaternion v)
+        public static Quaternion ToQuaternion(this Vector4 v)
         {
             return new Quaternion(v.x, v.y, v.z, v.w);
         }

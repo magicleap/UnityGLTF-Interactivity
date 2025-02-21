@@ -5,33 +5,24 @@ namespace UnityGLTF.Interactivity
 {
     public static partial class Helpers
     {
-        public static System.Type GetSystemType(InteractivityType type)
+        public static Type GetSystemType(InteractivityType type)
         {
             return GetSystemTypeBySignature(type.signature);
         }
 
-        public static System.Type GetSystemTypeBySignature(string signature)
+        public static Type GetSystemTypeBySignature(string signature)
         {
             switch (signature)
             {
-                case "bool":
-                    return typeof(bool);
-                case "int":
-                    return typeof(int);
-                case "float":
-                    return typeof(float);
-                case "float2":
-                    return typeof(Vector2);
-                case "float3":
-                    return typeof(Vector3);
-                case "float4":
-                    return typeof(Vector4);
-                case "float4x4":
-                    return typeof(Matrix4x4);
-                case "int[]":
-                    return typeof(int[]);
-                default:
-                    return typeof(string);
+                case "bool": return typeof(bool);
+                case "int": return typeof(int);
+                case "float": return typeof(float);
+                case "float2": return typeof(Vector2);
+                case "float3": return typeof(Vector3);
+                case "float4": return typeof(Vector4);
+                case "float4x4": return typeof(Matrix4x4);
+                case "int[]": return typeof(int[]);
+                default: return typeof(string);
             }
         }
 
@@ -48,7 +39,22 @@ namespace UnityGLTF.Interactivity
             throw new InvalidOperationException($"Invalid type {type} used!");
         }
 
-        public static IProperty CreateProperty(System.Type type, object value)
+        public static bool TryCreateProperty(Type type, object value, out IProperty property)
+        {
+            try
+            {
+                property = CreateProperty(type, value);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                property = default;
+                return false;
+            }
+        }
+
+        public static IProperty CreateProperty(Type type, object value)
         {
             if (type == typeof(int))
             {
@@ -76,7 +82,7 @@ namespace UnityGLTF.Interactivity
             }
             else if (type == typeof(Matrix4x4))
             {
-                throw new NotImplementedException();
+                return new Property<Matrix4x4>(Parser.ToMatrix4x4(value));
             }
             else if (type == typeof(int[]))
             {
@@ -87,7 +93,7 @@ namespace UnityGLTF.Interactivity
                 return new Property<string>(value.ToString());
             }
 
-            throw new InvalidOperationException();
+            throw new InvalidOperationException($"Type {type} is unsupported in this spec.");
         }
 
         public static T GetPropertyValue<T>(IProperty property)

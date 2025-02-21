@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace UnityGLTF.Interactivity
 {
@@ -58,11 +59,7 @@ namespace UnityGLTF.Interactivity
 
         public void ExecuteFlow(Flow flow)
         {
-            if (!Application.isPlaying)
-                return;
-
-            if (flow.toNode == null)
-                return;
+            Assert.IsNotNull(flow.toNode);
 
             var node = engineNodes[flow.toNode];
 
@@ -79,13 +76,11 @@ namespace UnityGLTF.Interactivity
 
         public IProperty ParseValue(Value v)
         {
-            if (v.node != null)
-            {
-                var node = engineNodes[v.node];
-                return node.GetOutputValue(v.socket);
-            }
+            if (v.node == null)
+                return v.property;
 
-            return v.property;
+            var node = engineNodes[v.node];
+            return node.GetOutputValue(v.socket);
         }
 
         public T ParseValueProperty<T>(Value v)
