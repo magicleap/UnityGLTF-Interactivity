@@ -17,7 +17,7 @@ namespace UnityGLTF.Interactivity
 
         private static string SanitizeObjectString(object o)
         {
-            return String.Join("", o.ToString().Split('[', ']', '\n', '\r', ' '));
+            return String.Join("", o.ToString().Split('[', ']', '\n', '\r', ' ', '\"'));
         }
 
         public static int ToInt(object o)
@@ -58,6 +58,32 @@ namespace UnityGLTF.Interactivity
                 throw new InvalidOperationException($"Json property is not a vector4!\nValue: {o.ToString()}");
 
             return new Vector4(float.Parse(sanitized[0]), float.Parse(sanitized[1]), float.Parse(sanitized[2]), float.Parse(sanitized[3]));
+        }
+
+        public static string ToString(object o)
+        {
+            return SanitizeObjectString(o);
+        }
+
+        public static int[] ToIntArray(object o)
+        {
+            var sanitized = SanitizeObjectString(o).Split(',');
+
+            var array = new int[sanitized.Length];
+
+            for (int i = 0; i < sanitized.Length; i++)
+            {
+                try
+                {
+                    array[i] = int.Parse(sanitized[i]);
+                }
+                catch
+                {
+                    Debug.LogError($"Element {i} in int array with value {sanitized[i]} could not be parsed!");
+                }
+            }
+            
+            return array;
         }
 
         public static bool ToBool(object o)

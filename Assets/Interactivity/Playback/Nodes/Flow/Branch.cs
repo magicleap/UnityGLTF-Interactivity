@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -11,7 +12,7 @@ namespace UnityGLTF.Interactivity
         {
         }
 
-        protected override void Execute(string socket, ValidationResult validationResult)
+        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
             if (socket != ConstStrings.IN)
                 throw new ArgumentException($"Only valid input socket for this node is \"{ConstStrings.IN}\"");

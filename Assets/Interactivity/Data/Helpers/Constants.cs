@@ -17,6 +17,14 @@ namespace UnityGLTF.Interactivity
 
     public static class ConstStrings
     {
+        public const string GRAPHS = "graphs";
+        public const string GRAPH = "graph";
+        public const string EXTENSION = "extension";
+        public const string OP = "op";
+        public const string INPUT_VALUE_SOCKETS = "inputValueSockets";
+        public const string OUTPUT_VALUE_SOCKETS = "outputValueSockets";
+        public const string DECLARATIONS = "declarations";
+        public const string DECLARATION = "declaration";
         public const string EVENTS = "events";
         public const string EVENT = "event";
         public const string NODES = "nodes";

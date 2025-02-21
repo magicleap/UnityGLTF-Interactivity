@@ -1,3 +1,4 @@
+using System.Threading;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -13,7 +14,7 @@ namespace UnityGLTF.Interactivity
         {
         }
 
-        protected override async void Execute(string socket, ValidationResult validationResult)
+        protected override async void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
             if (validationResult != ValidationResult.Valid)
             {
@@ -25,7 +26,7 @@ namespace UnityGLTF.Interactivity
 
             TryExecuteFlow(ConstStrings.OUT);
 
-            await engine.PlayAnimationAsync(_animationIndex, _startTime, _endTime, _speed);
+            await engine.PlayAnimationAsync(_animationIndex, _startTime, _endTime, _speed, cancellationToken);
 
             TryExecuteFlow(ConstStrings.DONE);
         }

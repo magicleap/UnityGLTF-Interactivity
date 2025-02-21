@@ -28,6 +28,8 @@ namespace UnityGLTF.Interactivity
                     return typeof(Vector4);
                 case "float4x4":
                     return typeof(Matrix4x4);
+                case "int[]":
+                    return typeof(int[]);
                 default:
                     return typeof(string);
             }
@@ -42,6 +44,7 @@ namespace UnityGLTF.Interactivity
             if (type == typeof(Vector3)) return "float3";
             if (type == typeof(Vector4)) return "float4";
             if (type == typeof(Matrix4x4)) return "float4x4";
+            if (type == typeof(int[])) return "int[]";
             throw new InvalidOperationException($"Invalid type {type} used!");
         }
 
@@ -74,6 +77,10 @@ namespace UnityGLTF.Interactivity
             else if (type == typeof(Matrix4x4))
             {
                 throw new NotImplementedException();
+            }
+            else if (type == typeof(int[]))
+            {
+                return new Property<int[]>(Parser.ToIntArray(value));
             }
             else if (type == typeof(string))
             {

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using UnityEngine;
 using UnityGLTF.Interactivity.Extensions;
 
@@ -13,7 +14,7 @@ namespace UnityGLTF.Interactivity
         {
         }
 
-        protected override void Execute(string socket, ValidationResult validationResult)
+        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
             if (validationResult != ValidationResult.Valid)
             {
@@ -44,8 +45,11 @@ namespace UnityGLTF.Interactivity
                 case Property<Vector4> prop when _pointer is Pointer<Color> p:
                     p.setter(prop.value.ToColor());
                     break;
+                case Property<bool> prop when _pointer is Pointer<bool> p:
+                    p.setter(prop.value);
+                    break;
                 default:
-                    throw new InvalidOperationException("No supported type found for interpolation.");
+                    throw new InvalidOperationException("Either the property type you're attempting to set is unsupported or the pointer type does not match it.");
             }
 
             TryExecuteFlow(ConstStrings.OUT);

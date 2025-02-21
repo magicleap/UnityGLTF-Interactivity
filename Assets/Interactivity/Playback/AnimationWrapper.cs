@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -35,7 +36,7 @@ namespace UnityGLTF.Interactivity
             animationComponent.Sample();
         }
 
-        public async Task PlayAnimationAsync(int animationIndex, float startTime, float endTime, float speed)
+        public async Task<bool> PlayAnimationAsync(int animationIndex, float startTime, float endTime, float speed, CancellationToken cancellationToken)
         {
             if (animationComponent == null)
                 throw new InvalidOperationException("No animations present in this glb!");
@@ -56,6 +57,12 @@ namespace UnityGLTF.Interactivity
 
             for (float t = startTime; t < endTime; t += Time.deltaTime / clipTime * speed)
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    _isPlaying = false;
+                    return false;
+                }
+
                 SampleAnimationAtTime(t * clipTime);
                 await Task.Yield();
             }
@@ -63,6 +70,8 @@ namespace UnityGLTF.Interactivity
             SampleAnimationAtTime(endTime * clipTime);
 
             _isPlaying = false;
+
+            return true;
         }
     }
 }

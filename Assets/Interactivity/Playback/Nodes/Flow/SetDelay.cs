@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -23,12 +24,12 @@ namespace UnityGLTF.Interactivity
             throw new ArgumentException($"Socket {socket} is not valid on this node!");
         }
 
-        protected override async void Execute(string socket, ValidationResult validationResult)
+        protected override async void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
             switch (socket)
             {
                 case "in":
-                    await HandleInSocket(validationResult);
+                    await HandleInSocket(validationResult, cancellationToken);
                     break;
 
                 case "cancel":
@@ -45,7 +46,7 @@ namespace UnityGLTF.Interactivity
             _cancel = true;
         }
 
-        private async Task HandleInSocket(ValidationResult validationResult)
+        private async Task HandleInSocket(ValidationResult validationResult, CancellationToken cancellationToken)
         {
             if (validationResult != ValidationResult.Valid)
             {
@@ -61,6 +62,9 @@ namespace UnityGLTF.Interactivity
 
             while (duration > 0)
             {
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
                 if (_cancel)
                 {
                     _cancel = false;

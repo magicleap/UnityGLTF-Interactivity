@@ -16,7 +16,7 @@ namespace UnityGLTF.Interactivity
             public JToken jToken;
         }
 
-        public static List<Node> GetNodes(JObject jObj, List<Type> types)
+        public static List<Node> GetNodes(JObject jObj, List<Type> types, List<Declaration> declarations)
         {
             var jNodes = jObj[ConstStrings.NODES].Children();
 
@@ -32,9 +32,11 @@ namespace UnityGLTF.Interactivity
             {
                 foreach (var jToken in jNodes)
                 {
+                    var declarationIndex = jToken[ConstStrings.DECLARATION].Value<int>();
+
                     node = new Node()
                     {
-                        type = jToken[ConstStrings.TYPE].Value<string>(),
+                        type = declarations[declarationIndex].op,
                         metadata = GetMetadata(jToken[ConstStrings.METADATA]),
                         configuration = GetConfiguration(jToken[ConstStrings.CONFIGURATION])
                     };
@@ -65,15 +67,26 @@ namespace UnityGLTF.Interactivity
         {
             var count = jToken.Count();
             var flows = new List<Flow>(count);
+            var jFlows = jToken as JObject;
 
-            foreach (var v in jToken)
+            foreach (var v in jFlows)
             {
+                var jToNode = v.Value[ConstStrings.NODE];
+                var jToSocket = v.Value[ConstStrings.SOCKET];
+
+                // Ignore this flow if it's empty/not connected.
+                if (jToNode == null || jToSocket == null)
+                    continue;
+
+                var fromSocket = v.Key;
+                var toNode = nodes[v.Value[ConstStrings.NODE].Value<int>()];
+                var toSocket = v.Value[ConstStrings.SOCKET].Value<string>();
 
                 flows.Add(new Flow(
                     fromNode,
-                    v[ConstStrings.ID].Value<string>(),
-                    nodes[v[ConstStrings.NODE].Value<int>()],
-                    v[ConstStrings.SOCKET].Value<string>()));
+                    fromSocket,
+                    toNode,
+                    toSocket));
             }
 
             return flows;
@@ -83,14 +96,14 @@ namespace UnityGLTF.Interactivity
         {
             var count = jToken.Count();
             var values = new List<Value>(count);
+            var jValues = jToken as JObject;
 
-            foreach (var v in jToken)
+            foreach (var kvp in jValues)
             {
-                Debug.Log(v);
-                var jType = v[ConstStrings.TYPE];
-                var jNode = v[ConstStrings.NODE];
-                var jSocket = v[ConstStrings.SOCKET];
-                var jValue = v[ConstStrings.VALUE];
+                var jType = kvp.Value[ConstStrings.TYPE];
+                var jNode = kvp.Value[ConstStrings.NODE];
+                var jSocket = kvp.Value[ConstStrings.SOCKET];
+                var jValue = kvp.Value[ConstStrings.VALUE];
 
                 int type = Constants.INVALID_TYPE_INDEX;
                 Node node = null;
@@ -112,17 +125,15 @@ namespace UnityGLTF.Interactivity
                 if (jSocket != null)
                     socket = jSocket.Value<string>();
 
-                var id = v[ConstStrings.ID].Value<string>();
-
                 values.Add(new Value()
                 {
-                    id = id,
+                    id = kvp.Key,
                     property = value,
                     node = node,
                     socket = socket
                 });
 
-                Debug.Log($"Created property {id} connected to node {node} and socket {socket} with type {type}");
+                Debug.Log($"Created property {kvp.Key} connected to node {node?.type} and socket {socket} with type {type}");
             }
 
             return values;
@@ -130,15 +141,17 @@ namespace UnityGLTF.Interactivity
 
         private static List<Configuration> GetConfiguration(JToken jToken)
         {
-            var count = jToken.Count();
+            var jConfiguration = jToken as JObject;
+
+            var count = jConfiguration.Count;
             var configuration = new List<Configuration>(count);
 
-            foreach (var v in jToken)
+            foreach (var v in jConfiguration)
             {
                 configuration.Add(new Configuration()
                 {
-                    id = v[ConstStrings.ID].Value<string>(),
-                    value = v[ConstStrings.VALUE].ToObject<object>()
+                    id = v.Key,
+                    value = v.Value[ConstStrings.VALUE].ToObject<object>()
                 });
             }
 
@@ -147,6 +160,9 @@ namespace UnityGLTF.Interactivity
 
         private static Metadata GetMetadata(JToken jToken)
         {
+            if (jToken == null)
+                return new Metadata();
+
             return new Metadata()
             {
                 positionX = double.Parse(jToken["positionX"].Value<string>()),

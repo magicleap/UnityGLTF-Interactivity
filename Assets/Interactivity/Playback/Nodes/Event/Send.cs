@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -13,7 +14,7 @@ namespace UnityGLTF.Interactivity
         {
         }
 
-        protected override void Execute(string socket, ValidationResult validationResult)
+        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
             engine.FireCustomEvent(_eventNum, _outValues);
 

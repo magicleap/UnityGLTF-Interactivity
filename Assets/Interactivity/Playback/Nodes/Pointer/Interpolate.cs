@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityGLTF.Interactivity.Extensions;
@@ -15,7 +16,7 @@ namespace UnityGLTF.Interactivity
         {
         }
 
-        protected override async void Execute(string socket, ValidationResult validationResult)
+        protected override async void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
             if(validationResult != ValidationResult.Valid)
             {
@@ -25,9 +26,9 @@ namespace UnityGLTF.Interactivity
 
             TryExecuteFlow(ConstStrings.OUT);
 
-            await InterpolateAsync();
-
-            TryExecuteFlow(ConstStrings.DONE);
+            // Only execute DONE flow if the interpolation was not cancelled.
+            if(await InterpolateAsync(cancellationToken))
+                TryExecuteFlow(ConstStrings.DONE);
         }
 
         public override bool ValidateConfiguration(string socket)
@@ -42,61 +43,64 @@ namespace UnityGLTF.Interactivity
                 TryEvaluateValue(ConstStrings.DURATION, out _duration);
         }
 
-        private async Task InterpolateAsync()
+        private async Task<bool> InterpolateAsync(CancellationToken cancellationToken)
         {
             // TODO: Replace these with the proper interpolate methods to match spec. Currently all linear interp.
             switch (_interpGoal)
             {
                 case Property<int> intProp: // Cast to float so we can interp with int arguments.
-                    await Helpers.InterpolateAsync(intProp.value, (Pointer<float>)_pointer, _duration);
-                    break;
+                    return await Helpers.InterpolateAsync(intProp.value, (Pointer<float>)_pointer, _duration, cancellationToken);
+
                 case Property<float> floatProp:
-                    await Helpers.InterpolateAsync(floatProp.value, (Pointer<float>)_pointer, _duration);
-                    break;
+                    return await Helpers.InterpolateAsync(floatProp.value, (Pointer<float>)_pointer, _duration, cancellationToken);
+
                 case Property<Vector2> vec2Prop:
-                    await Helpers.InterpolateAsync(vec2Prop.value, (Pointer<Vector2>)_pointer, _duration);
-                    break;
+                    return await Helpers.InterpolateAsync(vec2Prop.value, (Pointer<Vector2>)_pointer, _duration, cancellationToken);
+
                 case Property<Vector3> vec3Prop:
-                    await ProcessVector3(_pointer, vec3Prop.value, _duration);
-                    break;
+                    return await ProcessVector3(_pointer, vec3Prop.value, _duration, cancellationToken);
+
                 case Property<Vector4> vec4Prop:
-                    await ProcessVector4(_pointer, vec4Prop.value, _duration);
-                    break;
+                    return await ProcessVector4(_pointer, vec4Prop.value, _duration, cancellationToken);
+
                 case Property<Matrix4x4> matrixProp:
-                    await Helpers.InterpolateAsync(matrixProp.value, (Pointer<Matrix4x4>)_pointer, _duration);
-                    break;
+                    return await Helpers.InterpolateAsync(matrixProp.value, (Pointer<Matrix4x4>)_pointer, _duration, cancellationToken);
+
                 default:
                     throw new InvalidOperationException("No supported type found for interpolation.");
             }
         }
 
-        private async Task ProcessVector4(IPointer pointer, Vector4 value, float duration)
+        private async Task<bool> ProcessVector4(IPointer pointer, Vector4 value, float duration, CancellationToken cancellationToken)
         {
             switch (pointer)
             {
                 case Pointer<Vector4>:
-                    await Helpers.InterpolateAsync(value, (Pointer<Vector4>)pointer, duration);
-                    break;
+                    return await Helpers.InterpolateAsync(value, (Pointer<Vector4>)pointer, duration, cancellationToken);
 
                 case Pointer<Color>:
-                    await Helpers.InterpolateAsync(value, (Pointer<Color>)pointer, duration);
-                    break;
+                    return await Helpers.InterpolateAsync(value, (Pointer<Color>)pointer, duration, cancellationToken);
+
+                default:
+                    throw new InvalidOperationException("No supported Pointer type for this Vector4 property.");
             }
         }
 
-        private async Task ProcessVector3(IPointer pointer, Vector3 value, float duration)
+        private async Task<bool> ProcessVector3(IPointer pointer, Vector3 value, float duration, CancellationToken cancellationToken)
         {
             switch (pointer)
             {
                 case Pointer<Vector3>:
-                    await Helpers.InterpolateAsync(value, (Pointer<Vector3>)pointer, duration);
-                    break;
+                    return await Helpers.InterpolateAsync(value, (Pointer<Vector3>)pointer, duration, cancellationToken);
+
                 case Pointer<Color>:
-                    await Helpers.InterpolateAsync(value.ToColor(), (Pointer<Color>)pointer, duration);
-                    break;
+                    return await Helpers.InterpolateAsync(value.ToColor(), (Pointer<Color>)pointer, duration, cancellationToken);
+
                 case Pointer<Quaternion>:
-                    await Helpers.InterpolateAsync(Quaternion.Euler(value), (Pointer<Quaternion>)pointer, duration);
-                    break;
+                    return await Helpers.InterpolateAsync(Quaternion.Euler(value), (Pointer<Quaternion>)pointer, duration, cancellationToken);
+
+                default:
+                    throw new InvalidOperationException("No supported Pointer type for this Vector3 property.");
             }
         }
     }

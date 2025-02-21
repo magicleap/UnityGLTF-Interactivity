@@ -13,12 +13,12 @@ namespace UnityGLTF.Interactivity
         {
             var serializer = new GraphSerializer();
 
-            var graph = serializer.Deserialize(_json.text);
+            var extensionData = serializer.Deserialize(_json.text);
             //var graph = CreateGraph();
 
-            SaveGraph(serializer, graph);
+            SaveGraph(serializer, extensionData);
 
-            Debug.Log($"Nodes: {graph.nodes.Count}, Variables: {graph.variables.Count}, Types: {graph.types.Count}, Events: {graph.customEvents.Count}");
+            //Debug.Log($"Nodes: {graph.nodes.Count}, Variables: {graph.variables.Count}, Types: {graph.types.Count}, Events: {graph.customEvents.Count}");
 
             //engine = new BehaviourEngine(graph, go);
 
@@ -44,9 +44,9 @@ namespace UnityGLTF.Interactivity
             return graph;
         }
 
-        public void SaveGraph(GraphSerializer serializer, Graph graph)
+        public void SaveGraph(GraphSerializer serializer, KHR_interactivity extensionData)
         {
-            var json = serializer.Serialize(graph);
+            var json = serializer.Serialize(extensionData);
 
             File.WriteAllText($"{Application.persistentDataPath}/graph.json", json);
         }

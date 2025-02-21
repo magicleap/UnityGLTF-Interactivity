@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -49,12 +50,12 @@ namespace UnityGLTF.Interactivity
             Debug.Log($"Finished creating BehaviourGraphNode {node.type}");
         }
 
-        public void ValidateAndExecute(string socket) 
+        public void ValidateAndExecute(string socket, CancellationToken cancellationToken)
         {
-            Execute(socket, Validate(socket));
+            Execute(socket, Validate(socket), cancellationToken);
         }
 
-        protected virtual void Execute(string socket, ValidationResult validationResult) { }
+        protected virtual void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken) { }
         public virtual IProperty GetOutputValue(string socket) => null;
         public virtual bool ValidateConfiguration(string socket) => true;
         public virtual bool ValidateFlows(string socket) => true;

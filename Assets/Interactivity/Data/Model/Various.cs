@@ -1,8 +1,29 @@
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace UnityGLTF.Interactivity
 {
+    public class KHR_interactivity
+    {
+        public List<Graph> graphs { get; set; } = new();
+        public int defaultGraphIndex { get; set; }
+    }
+
+    public class Declaration
+    {
+        public string op { get; set; }
+        public string extension { get; set; }
+        public List<ValueSocket> inputValueSockets { get; set; }
+        public List<ValueSocket> outputValueSockets { get; set; }
+    }
+
+    public class ValueSocket
+    {
+        public string name { get; set; }
+        public int type { get; set; }
+    }
+
     public class Metadata
     {
         public double positionX { get; set; }

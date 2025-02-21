@@ -1,3 +1,5 @@
+using System.Threading;
+
 namespace UnityGLTF.Interactivity
 {
     public class FlowSequence : BehaviourEngineNode
@@ -6,7 +8,7 @@ namespace UnityGLTF.Interactivity
         {
         }
 
-        protected override void Execute(string socket, ValidationResult validationResult)
+        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
             for (int i = 0; i < node.flows.Count; i++)
             {

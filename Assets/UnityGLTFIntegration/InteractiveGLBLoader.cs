@@ -59,12 +59,12 @@ namespace UnityGLTF.Interactivity
             }
         }
 
-        public void SaveModel(string fileName, GLTFSceneImporter importer, Graph graph)
+        public void SaveModel(string fileName, GLTFSceneImporter importer, KHR_interactivity extensionData)
         {
             Transform glbTransform = importer.SceneParent.GetChild(0);
 
             GLTFSettings settings = new GLTFSettings();
-            settings.ExportPlugins.Add(new InteractivityExportPlugin(graph));
+            settings.ExportPlugins.Add(new InteractivityExportPlugin(extensionData));
 
             var sceneExporter = new GLTFSceneExporter(glbTransform, new ExportContext(settings));
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -12,11 +13,13 @@ namespace UnityGLTF.Interactivity
         public readonly AnimationWrapper animationWrapper;
 
         public event Action onStart;
-        public event Action<int> onSelect;
+        public event Action<GameObject, int> onSelect;
         public event Action onTick;
         public event Action<int, Dictionary<string, IProperty>> onCustomEventFired;
 
         public readonly PointerResolver pointerResolver;
+
+        private CancellationTokenSource _cancellationToken = new();
 
         public BehaviourEngine(Graph graph, PointerResolver pointerResolver, AnimationWrapper animationWrapper)
         {
@@ -43,7 +46,7 @@ namespace UnityGLTF.Interactivity
         public void Select(GameObject go)
         {
             var nodeIndex = pointerResolver.IndexOf(go);
-            onSelect?.Invoke(nodeIndex);
+            onSelect?.Invoke(go, nodeIndex);
         }
 
         private BehaviourEngineNode CreateBehaviourEngineNode(Node node)
@@ -62,7 +65,8 @@ namespace UnityGLTF.Interactivity
                 return;
 
             var node = engineNodes[flow.toNode];
-            node.ValidateAndExecute(flow.toSocket);
+
+            node.ValidateAndExecute(flow.toSocket, _cancellationToken.Token);
         }
 
         public void FireCustomEvent(int eventIndex, Dictionary<string, IProperty> outValues = null)
@@ -112,7 +116,7 @@ namespace UnityGLTF.Interactivity
             return false;
         }
 
-        public async Task PlayAnimationAsync(int animationIndex, float startTime, float endTime, float speed)
+        public async Task PlayAnimationAsync(int animationIndex, float startTime, float endTime, float speed, CancellationToken cancellationToken)
         {
             if (animationWrapper == null)
             {
@@ -120,7 +124,13 @@ namespace UnityGLTF.Interactivity
                 return;
             }
 
-            await animationWrapper.PlayAnimationAsync(animationIndex, startTime, endTime, speed);
+            await animationWrapper.PlayAnimationAsync(animationIndex, startTime, endTime, speed, cancellationToken);
+        }
+
+        public void CancelExecution()
+        {
+            _cancellationToken.Cancel();
+            _cancellationToken = new();
         }
     }
 }

@@ -27,12 +27,12 @@ namespace UnityGLTF.Interactivity
             throw new InvalidOperationException($"Socket {id} is not valid for this node!");
         }
 
-        private void OnSelect(int nodeIndex)
+        private void OnSelect(GameObject go, int nodeIndex)
         {
             _nodeIndex = nodeIndex;
             _selectionPerformed = true;
 
-            Debug.Log($"OnSelect");
+            Debug.Log($"OnSelect node {nodeIndex} corresponding to GO {go.name}", go);
 
             TryExecuteFlow(ConstStrings.OUT);
         }

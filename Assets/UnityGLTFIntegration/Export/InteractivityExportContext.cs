@@ -51,7 +51,7 @@ namespace UnityGLTF.Interactivity
         {
             Debug.Log($"InteractivityExportContext::BeforeSceneExport ");
             exporter.DeclareExtensionUsage(ConstStrings.EXTENSION_NAME, true);
-            gltfRoot.AddExtension(ConstStrings.EXTENSION_NAME, new InteractivityGraphExtension(settings.graph));
+            gltfRoot.AddExtension(ConstStrings.EXTENSION_NAME, new InteractivityGraphExtension(settings.extensionData));
         }
         public override void BeforeTextureExport(GLTFSceneExporter exporter, ref GLTFSceneExporter.UniqueTexture texture, string textureSlot)
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -22,7 +23,7 @@ namespace UnityGLTF.Interactivity
             throw new ArgumentException($"Socket {socket} is not valid on this node!");
         }
 
-        protected override void Execute(string socket, ValidationResult validationResult)
+        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
             Debug.Log($"Starting a loop with start index {_startIndex} and end index {_endIndex}");
 

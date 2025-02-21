@@ -35,12 +35,13 @@ namespace UnityGLTF.Interactivity.Frontend
             flowsManager.SetData(this);
             createNodeMenuUI.SetData(this);
             variablesMenu.SetData(this);
-            loader.onGraphLoadComplete += OnGraphLoaded;
+            loader.onExtensionLoadComplete += OnGraphLoaded;
         }
 
-        private void OnGraphLoaded(Graph graph)
+        private void OnGraphLoaded(KHR_interactivity extensionData)
         {
-            this.graph = graph;
+            // TODO: Support multiple graphs
+            this.graph = extensionData.graphs[0];
 
             DestroyExistingNodes();
 

@@ -25,7 +25,8 @@ namespace UnityGLTF.Interactivity.Frontend
 
             if (setActive)
             {
-                _json.text = _serializer.Serialize(_graphUI.graph);
+                // TODO: Support new spec for multiple graphs
+                //_json.text = _serializer.Serialize(_graphUI.graph);
             }
 
             _menu.SetActive(setActive);

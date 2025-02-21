@@ -11,7 +11,7 @@ namespace UnityGLTF.Interactivity
         private struct LoadPacket
         {
             public GLTFSceneImporter importer;
-            public Graph graph;
+            public KHR_interactivity extensionData;
         }
 
         [SerializeField] private string _modelName = "interactive.glb";
@@ -21,9 +21,10 @@ namespace UnityGLTF.Interactivity
         private InteractiveGLBLoader _loader;
 
         private LoadPacket _lastLoadPacket;
+        private BehaviourEngine _behaviourEngine;
 
         public event Action onModelLoadComplete;
-        public event Action<Graph> onGraphLoadComplete;
+        public event Action<KHR_interactivity> onExtensionLoadComplete;
 
         private void Start()
         {
@@ -77,21 +78,30 @@ namespace UnityGLTF.Interactivity
                 animationWrapper.SetData(importer.LastLoadedScene.GetComponents<Animation>()[0]);
             }
 
+            var defaultGraphIndex = interactivityGraph.extensionData.defaultGraphIndex;
+            var defaultGraph = interactivityGraph.extensionData.graphs[defaultGraphIndex];
             var eventWrapper = importer.SceneParent.gameObject.AddComponent<EventWrapper>();
-            eventWrapper.SetData(new BehaviourEngine(interactivityGraph.graph, new PointerResolver(importer), animationWrapper));
+
+            _behaviourEngine = new BehaviourEngine(defaultGraph, new PointerResolver(importer), animationWrapper);
+            eventWrapper.SetData(_behaviourEngine);
 
             _lastLoadPacket = new LoadPacket()
             {
                 importer = importer,
-                graph = interactivityGraph.graph
+                extensionData = interactivityGraph.extensionData
             };
 
-            onGraphLoadComplete?.Invoke(interactivityGraph.graph);
+            onExtensionLoadComplete?.Invoke(interactivityGraph.extensionData);
         }
 
         public void SaveModel()
         {
-            _loader.SaveModel(_saveToFile, _lastLoadPacket.importer, _lastLoadPacket.graph);
+            _loader.SaveModel(_saveToFile, _lastLoadPacket.importer, _lastLoadPacket.extensionData);
+        }
+
+        public void OnDestroy()
+        {
+            _behaviourEngine.CancelExecution();
         }
     }
 }

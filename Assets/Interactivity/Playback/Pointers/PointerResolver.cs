@@ -111,9 +111,27 @@ namespace UnityGLTF.Interactivity
                 case "scale":
                     return nodePointer.scale;
 
+                case "extensions":
+                    return ProcessExtensionPointer(path, nodePointer);
             }
 
-            throw new InvalidOperationException("No valid property found for node.");
+            throw new InvalidOperationException($"Property {property} is unsupported at this time!");
+        }
+
+        private IPointer ProcessExtensionPointer(string[] path, NodePointers nodePointer)
+        {
+            var subProperty = path[4];
+
+            switch(subProperty)
+            {
+                // TODO: Handle these properly via extensions in UnityGLTF?
+                case "KHR_node_selectability":
+                    return nodePointer.visibility;
+                case "KHR_node_visibility":
+                    return nodePointer.visibility;
+            }
+
+            throw new InvalidOperationException($"Extension {subProperty} is unsupported at this time!");
         }
 
         private IPointer ProcessMaterialPointer(string[] path)

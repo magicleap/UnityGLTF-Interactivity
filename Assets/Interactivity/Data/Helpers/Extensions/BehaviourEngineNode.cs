@@ -28,19 +28,19 @@ namespace UnityGLTF.Interactivity
         {
             pointer = default;
 
-            if (!this.configuration.TryGetValue(ConstStrings.POINTER, out Configuration config))
+            if (!configuration.TryGetValue(ConstStrings.POINTER, out Configuration config))
                 return false;
 
-            var pointerPath = config.value.ToString();
+            var pointerPath = Parser.ToString(config.value);
 
-            return this.TryGetPointer(pointerPath, out pointer);
+            return TryGetPointer(pointerPath, out pointer);
         }
 
         public bool TryGetPointerFromConfiguration<T>(out Pointer<T> pointer)
         {
             pointer = default;
 
-            if (!this.TryGetPointerFromConfiguration(out IPointer p))
+            if (!TryGetPointerFromConfiguration(out IPointer p))
                 return false;
 
             pointer = (Pointer<T>)p;
@@ -51,7 +51,7 @@ namespace UnityGLTF.Interactivity
         {
             readOnlyPointer = default;
 
-            if (!this.TryGetPointerFromConfiguration(out IPointer p))
+            if (!TryGetPointerFromConfiguration(out IPointer p))
                 return false;
 
             readOnlyPointer = (IReadOnlyPointer)p;
@@ -62,7 +62,7 @@ namespace UnityGLTF.Interactivity
         {
             readOnlyPointer = default;
 
-            if (!this.TryGetPointerFromConfiguration(out IPointer p))
+            if (!TryGetPointerFromConfiguration(out IPointer p))
                 return false;
 
             readOnlyPointer = (ReadOnlyPointer<T>)p;

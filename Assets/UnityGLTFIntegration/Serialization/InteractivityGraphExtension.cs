@@ -7,13 +7,13 @@ namespace UnityGLTF.Interactivity
 {
     public class InteractivityGraphExtension : IExtension
     {
-        public Graph graph { get; private set; }
+        public KHR_interactivity extensionData { get; private set; }
 
         private readonly GraphSerializer _serializer = new();
 
-        public InteractivityGraphExtension(Graph graph = null)
+        public InteractivityGraphExtension(KHR_interactivity extensionData = null)
         {
-            this.graph = graph;
+            this.extensionData = extensionData;
         }
 
         public IExtension Clone(GLTFRoot root)
@@ -26,14 +26,14 @@ namespace UnityGLTF.Interactivity
             if (!extensionToken.Name.Equals(ConstStrings.EXTENSION_NAME))
                 return;
 
-            graph = _serializer.Deserialize(extensionToken.Value.ToString());
+            extensionData = _serializer.Deserialize(extensionToken.Value.ToString());
         }
 
         public JProperty Serialize()
         {
             try
             {
-                var json = _serializer.Serialize(graph);
+                var json = _serializer.Serialize(extensionData);
 
                 JObject jobject = JObject.Parse(json);
 
