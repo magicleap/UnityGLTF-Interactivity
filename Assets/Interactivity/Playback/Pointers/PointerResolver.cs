@@ -11,6 +11,10 @@ namespace UnityGLTF.Interactivity
         private readonly List<MaterialPointers> _materialPointers = new();
         private readonly ScenePointers _scenePointers;
 
+        private readonly Dictionary<string, IPointer> _pointerCache = new();
+
+        private static readonly Regex _variableRegex = new("{(.*?)}");
+
         public PointerResolver(GLTFSceneImporter importer)
         {
             RegisterNodes(importer);
@@ -23,6 +27,7 @@ namespace UnityGLTF.Interactivity
             var nodes = importer.NodeCache;
             for (int i = 0; i < nodes.Length; i++)
             {
+                Util.Log($"Registered Node Pointer {i}", nodes[i]);
                 _nodePointers.Add(new NodePointers(nodes[i]));
             }
         }
@@ -40,8 +45,7 @@ namespace UnityGLTF.Interactivity
         {
             var str = pointerString;
 
-            var regex = new Regex("{(.*?)}");
-            var matches = regex.Matches(str);
+            var matches = _variableRegex.Matches(str);
 
             var values = engineNode.values;
 
@@ -50,7 +54,14 @@ namespace UnityGLTF.Interactivity
                 str = str.Replace(match.Value, engine.ParseValue(values[match.Groups[1].Value]).ToString());
             }
 
-            return GetPointer(str);
+            if (_pointerCache.TryGetValue(str, out IPointer pointer))
+                return pointer;
+
+            pointer = GetPointer(str);
+
+            _pointerCache.Add(str, pointer);
+
+            return pointer;
         }
 
         public int IndexOf(GameObject go)
