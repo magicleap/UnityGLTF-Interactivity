@@ -13,7 +13,11 @@ namespace UnityGLTF.Interactivity
             if (!TryGetConfig(ConstStrings.VARIABLE, out int variableIndex))
                 throw new InvalidOperationException();
 
-            return engine.GetVariableProperty(variableIndex);
+            var property = engine.GetVariableProperty(variableIndex); ;
+
+            //Util.Log($"Grabbing variable index {variableIndex} with value {property.ToString()}");
+
+            return property;
         }
     }
 }

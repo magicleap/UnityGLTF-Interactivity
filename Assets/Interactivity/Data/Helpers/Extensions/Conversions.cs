@@ -33,5 +33,20 @@ namespace UnityGLTF.Interactivity.Extensions
         {
             return new Quaternion(v.x, v.y, v.z, v.w);
         }
+
+        public static Vector3 SwapHandedness(this Vector3 v)
+        {
+            return new Vector3(-v.x, v.y, v.z);
+        }
+
+        public static Quaternion SwapHandedness(this Quaternion q)
+        {
+            // TODO: Figure out if there's a way to do this without converting to euler angles and back as it's pretty slow.
+            var euler = q.eulerAngles;
+
+            euler.z *= -1;
+
+            return Quaternion.Euler(euler);
+        }
     }
 }

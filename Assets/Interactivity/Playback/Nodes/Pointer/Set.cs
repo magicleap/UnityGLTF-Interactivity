@@ -36,9 +36,9 @@ namespace UnityGLTF.Interactivity
                 case Property<Vector3> prop when _pointer is Pointer<Color> p:
                     p.setter(prop.value.ToColor());
                     break;
-                case Property<Vector3> prop when _pointer is Pointer<Quaternion> p:
-                    p.setter(Quaternion.Euler(prop.value));
-                    break;
+                //case Property<Vector3> prop when _pointer is Pointer<Quaternion> p:
+                //    p.setter(Quaternion.Euler(prop.value));
+                //    break;
                 case Property<Vector4> prop when _pointer is Pointer<Vector4> p:
                     p.setter(prop.value);
                     break;

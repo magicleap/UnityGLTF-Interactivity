@@ -23,6 +23,8 @@ namespace UnityGLTF.Interactivity
         {
             _lastTickTime = Time.time;
 
+            //Util.Log($"Time Since Start: {Time.time - _startTime}");
+
             TryExecuteFlow(ConstStrings.OUT);
         }
 
