@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 using UnityGLTF.Interactivity;
 
 public class ParserTests
@@ -11,9 +9,10 @@ public class ParserTests
     public void ParserTestInt()
     {
         var expected = 5;
-        var str = $"[\n                                        {expected}\n                                    ]";
+        var array = new JArray();
+        array.Add(expected);
 
-        var parsed = Parser.ToInt(str);
+        var parsed = Parser.ToInt(array);
 
         Assert.AreEqual(expected, parsed);
     }
@@ -22,9 +21,10 @@ public class ParserTests
     public void ParserTestFloat()
     {
         var expected = 5.345f;
-        var str = $"[\n                                        {expected}\n                                    ]";
+        var array = new JArray();
+        array.Add(expected);
 
-        var parsed = Parser.ToFloat(str);
+        var parsed = Parser.ToFloat(array);
 
         Assert.AreEqual(expected, parsed);
     }
@@ -33,10 +33,11 @@ public class ParserTests
     public void ParserTestVector2()
     {
         var expected = new Vector2(1f, 2f);
+        var array = new JArray();
+        array.Add(expected.x);
+        array.Add(expected.y);
 
-        var str = $"[\n                                        1.0,\n                                        2.0\n                                    ]";
-
-        var parsed = Parser.ToVector2(str);
+        var parsed = Parser.ToVector2(array);
 
         Assert.AreEqual(expected, parsed);
     }
@@ -45,10 +46,12 @@ public class ParserTests
     public void ParserTestVector3()
     {
         var expected = new Vector3(1f, 2f, 3f);
+        var array = new JArray();
+        array.Add(expected.x);
+        array.Add(expected.y);
+        array.Add(expected.z);
 
-        var str = $"[\n                                        1.0,\n                                        2.0,\n                                        3.0\n                                    ]";
-
-        var parsed = Parser.ToVector3(str);
+        var parsed = Parser.ToVector3(array);
 
         Assert.AreEqual(expected, parsed);
     }
@@ -57,10 +60,13 @@ public class ParserTests
     public void ParserTestVector4()
     {
         var expected = new Vector4(1f, 2f, 3f, 4f);
+        var array = new JArray();
+        array.Add(expected.x);
+        array.Add(expected.y);
+        array.Add(expected.z);
+        array.Add(expected.w);
 
-        var str = $"[\n                                        1.0,\n                                        2.0,\n                                        3.0,\n                                        4.0\n                                    ]";
-
-        var parsed = Parser.ToVector4(str);
+        var parsed = Parser.ToVector4(array);
 
         Assert.AreEqual(expected, parsed);
     }
@@ -70,9 +76,14 @@ public class ParserTests
     {
         var expected = new int[] { 1, 3, 2, 5, 4 };
 
-        var str = $"[\n                                        1,\n  3,\n  2,\n 5,\n 4\n                                   ]";
+        var array = new JArray();
+        array.Add(expected[0]);
+        array.Add(expected[1]);
+        array.Add(expected[2]);
+        array.Add(expected[3]);
+        array.Add(expected[4]);
 
-        var parsed = Parser.ToIntArray(str);
+        var parsed = Parser.ToIntArray(array);
 
         Assert.AreEqual(expected, parsed);
     }
@@ -81,9 +92,10 @@ public class ParserTests
     public void ParserTestBool()
     {
         var expected = true;
-        var str = $"[\n                                        true\n                                    ]";
+        var array = new JArray();
+        array.Add(expected);
 
-        var parsed = Parser.ToBool(str);
+        var parsed = Parser.ToBool(array);
 
         Assert.AreEqual(expected, parsed);
     }
@@ -92,9 +104,10 @@ public class ParserTests
     public void ParserTestString()
     {
         var expected = "/nodes/{nodeIndex}/extensions/KHR_node_selectability/selectable";
-        var str = $"[\n                                        \"{expected}\"\n                                    ]";
+        var array = new JArray();
+        array.Add(expected);
 
-        var parsed = Parser.ToString(str);
+        var parsed = Parser.ToString(array);
 
         Assert.AreEqual(expected, parsed);
     }

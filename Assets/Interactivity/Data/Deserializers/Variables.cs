@@ -25,13 +25,13 @@ namespace UnityGLTF.Interactivity
         {
             var id = token[ConstStrings.ID].Value<string>();
             var typeIndex = token[ConstStrings.TYPE].Value<int>();
-            var valueObj = token[ConstStrings.VALUE].Value<object>();
+            var valueArray = token[ConstStrings.VALUE] as JArray;
 
             return new Variable()
             {
                 id = id,
-                property = Helpers.CreateProperty(types[typeIndex], valueObj),
-                initialValue = Helpers.CreateProperty(types[typeIndex], valueObj),
+                property = Helpers.CreateProperty(types[typeIndex], valueArray),
+                initialValue = Helpers.CreateProperty(types[typeIndex], valueArray),
             };
         }
     }

@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using System;
 using UnityEngine;
 
@@ -5,134 +6,66 @@ namespace UnityGLTF.Interactivity
 {
     public static class Parser
     {
-        private static readonly char[] _avoidCharacters = new[] { '[', ']', '\n', '\r', ' ', '\"', ',' };
-
-        private static StringSpanReader GetSpanReader(object o)
+        public static float ToFloat(JArray jArray)
         {
-            return new StringSpanReader(o.ToString(), _avoidCharacters);
+            return jArray[0].Value<float>();
         }
 
-        public static int ToInt(object o)
+        public static int ToInt(JArray jArray)
         {
-            var reader = GetSpanReader(o);
-
-            reader.Slice();
-
-            return int.Parse(reader.AsReadOnlySpan());
+            return jArray[0].Value<int>();
         }
 
-        public static float ToFloat(object o)
+        public static bool ToBool(JArray jArray)
         {
-            var reader = GetSpanReader(o);
-
-            reader.Slice();
-
-            return float.Parse(reader.AsReadOnlySpan());
+            return jArray[0].Value<bool>();
         }
 
-        public static Vector2 ToVector2(object o)
+        public static string ToString(JArray jArray)
         {
-            const int VEC_SIZE = 2;
-            Span<float> vec = stackalloc float[VEC_SIZE];
-
-            ParseFloatArray(o, vec);
-
-            return new Vector2(vec[0], vec[1]);
+            return jArray[0].Value<string>();
         }
 
-        public static Vector3 ToVector3(object o)
+        public static Vector2 ToVector2(JArray jArray)
         {
-            const int VEC_SIZE = 3;
-            Span<float> vec = stackalloc float[VEC_SIZE];
-
-            ParseFloatArray(o, vec);
-
-            return new Vector3(vec[0], vec[1], vec[2]);
+            return new Vector2(jArray[0].Value<float>(), jArray[1].Value<float>());
         }
 
-        public static Vector4 ToVector4(object o)
+        public static Vector3 ToVector3(JArray jArray)
         {
-            const int VEC_SIZE = 4;
-            Span<float> vec = stackalloc float[VEC_SIZE];
-
-            ParseFloatArray(o, vec);
-
-            return new Vector4(vec[0], vec[1], vec[2], vec[3]);
+            return new Vector3(jArray[0].Value<float>(), jArray[1].Value<float>(), jArray[2].Value<float>());
         }
 
-        public static Matrix4x4 ToMatrix4x4(object o)
+        public static Vector4 ToVector4(JArray jArray)
         {
-            const int MATRIX_4X4_LENGTH = 16;
-            Span<float> vec = stackalloc float[MATRIX_4X4_LENGTH];
+            return new Vector4(jArray[0].Value<float>(), jArray[1].Value<float>(), jArray[2].Value<float>(), jArray[3].Value<float>());
+        }
 
-            ParseFloatArray(o, vec);
+        public static int[] ToIntArray(JArray jArray)
+        {
+            var arr = new int[jArray.Count];
 
-            var matrix = new Matrix4x4();
-
-            // Unity matrices are column-major just like the GLTF Interactivity Spec float4x4.
-            // This means we can just iterate through the matrix and parse floats without any index conversion.
-            for (int i = 0; i < MATRIX_4X4_LENGTH; i++)
+            for (int i = 0; i < arr.Length; i++)
             {
-                matrix[i] = vec[i];
+                arr[i] = jArray[i].Value<int>();
             }
 
-            return matrix;
+            return arr;
         }
 
-        public static int[] ToIntArray(object o)
+        public static Matrix4x4 ToMatrix4x4(JArray jArray)
         {
-            var reader = GetSpanReader(o);
-            var length = reader.CountCharacter(',') + 1;
-            var array = new int[length];
+            const int MATRIX_SIZE = 16;
 
-            for (int i = 0; i < length; i++)
+            var m = new Matrix4x4();
+
+            // Unity and GLTF both use Column-Major matrices so we can do a 1:1 transfer.
+            for (int i = 0; i < MATRIX_SIZE; i++)
             {
-                reader.FindFirstValidCharacter();
-                reader.SetEndIndexByCharacters();
-
-                array[i] = int.Parse(reader.AsReadOnlySpan());
-
-                reader.SetStartIndexToEndIndex();
+                m[i] = jArray[i].Value<int>();
             }
 
-            return array;
-        }
-
-        public static string ToString(object o)
-        {
-            var reader = GetSpanReader(o);
-            reader.GetFirstQuotedSubstring();
-
-            return reader.ToString();
-        }
-
-        public static bool ToBool(object o)
-        {
-            var reader = GetSpanReader(o);
-
-            reader.Slice();
-
-            return bool.Parse(reader.AsReadOnlySpan());
-        }
-
-        private static void ParseFloatArray(object o, Span<float> array)
-        {
-            var reader = GetSpanReader(o);
-
-            var length = reader.CountCharacter(',') + 1;
-
-            if (length != array.Length)
-                throw new InvalidOperationException($"There are {length} floats from the json but only {array.Length} were requested!");
-
-            for (int i = 0; i < length; i++)
-            {
-                reader.FindFirstValidCharacter();
-                reader.SetEndIndexByCharacters();
-
-                array[i] = float.Parse(reader.AsReadOnlySpan());
-
-                reader.SetStartIndexToEndIndex();
-            }
+            return m;
         }
     }
 }

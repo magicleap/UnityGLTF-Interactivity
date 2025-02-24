@@ -101,7 +101,8 @@ namespace UnityGLTF.Interactivity
 
         public void OnDestroy()
         {
-            _behaviourEngine.CancelExecution();
+            // Can be null if an exception is thrown or load does not complete before it's assigned.
+            _behaviourEngine?.CancelExecution();
         }
     }
 }

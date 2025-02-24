@@ -116,7 +116,7 @@ namespace UnityGLTF.Interactivity
 
                     Assert.IsNotNull(jValue);
 
-                    value = Helpers.CreateProperty(types[type], jValue);
+                    value = Helpers.CreateProperty(types[type], jValue as JArray);
                 }
 
                 if (jNode != null)
@@ -151,7 +151,7 @@ namespace UnityGLTF.Interactivity
                 configuration.Add(new Configuration()
                 {
                     id = v.Key,
-                    value = v.Value[ConstStrings.VALUE].ToObject<object>()
+                    value = v.Value[ConstStrings.VALUE] as JArray
                 });
             }
 

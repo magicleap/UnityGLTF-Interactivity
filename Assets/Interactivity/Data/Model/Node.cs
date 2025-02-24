@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -114,7 +115,7 @@ namespace UnityGLTF.Interactivity
             return flows.Remove(flow);
         }
 
-        public Configuration AddConfiguration(string id, object value)
+        public Configuration AddConfiguration(string id, JArray value)
         {
             var config = new Configuration()
             {
@@ -162,7 +163,7 @@ namespace UnityGLTF.Interactivity
             {
                 for (int i = 0; i < config.Length; i++)
                 {
-                    AddConfiguration(config[i].id, "");
+                    AddConfiguration(config[i].id, new JArray());
                 }
             }
         }

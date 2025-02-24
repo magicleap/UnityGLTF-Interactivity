@@ -42,7 +42,8 @@ namespace UnityGLTF.Interactivity.Frontend
                 else
                     value = text;
 
-                _configuration.value = value;
+                // TODO: Fix this after change to config data model
+                //_configuration.value = value;
                 _valueInvalid = false;
             }
             catch

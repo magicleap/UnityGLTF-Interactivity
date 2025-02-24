@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using System;
 using UnityEngine;
 
@@ -39,22 +40,7 @@ namespace UnityGLTF.Interactivity
             throw new InvalidOperationException($"Invalid type {type} used!");
         }
 
-        public static bool TryCreateProperty(Type type, object value, out IProperty property)
-        {
-            try
-            {
-                property = CreateProperty(type, value);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                property = default;
-                return false;
-            }
-        }
-
-        public static IProperty CreateProperty(Type type, object value)
+        public static IProperty CreateProperty(Type type, JArray value)
         {
             if (type == typeof(int))
             {
@@ -90,7 +76,7 @@ namespace UnityGLTF.Interactivity
             }
             else if (type == typeof(string))
             {
-                return new Property<string>(value.ToString());
+                return new Property<string>(Parser.ToString(value));
             }
 
             throw new InvalidOperationException($"Type {type} is unsupported in this spec.");

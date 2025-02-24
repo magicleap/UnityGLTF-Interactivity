@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 
@@ -40,7 +41,7 @@ namespace UnityGLTF.Interactivity
     public class Configuration
     {
         public string id { get; set; }
-        public object value { get; set; }
+        public JArray value { get; set; }
     }
 
     public class InteractivityType

@@ -35,7 +35,8 @@ namespace UnityGLTF.Interactivity.Frontend
 
         private void OnInputValueChanged(string text)
         {
-            value.property = Helpers.CreateProperty(typeof(float), text);
+            // TODO: Fix this after spec change
+            //value.property = Helpers.CreateProperty(typeof(float), text);
         }
 
         private void OnConnectionChanged(Value v)
