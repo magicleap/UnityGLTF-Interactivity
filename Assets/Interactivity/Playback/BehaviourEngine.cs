@@ -11,22 +11,22 @@ namespace UnityGLTF.Interactivity
     {
         public readonly Graph graph;
         public readonly Dictionary<Node, BehaviourEngineNode> engineNodes = new();
-        public readonly AnimationWrapper animationWrapper;
+        public AnimationWrapper animationWrapper { get; set; }
 
         public event Action onStart;
         public event Action<GameObject, int> onSelect;
         public event Action onTick;
         public event Action<int, Dictionary<string, IProperty>> onCustomEventFired;
+        public event Action<Flow> onFlowTriggered;
 
         public readonly PointerResolver pointerResolver;
 
         private CancellationTokenSource _cancellationToken = new();
 
-        public BehaviourEngine(Graph graph, PointerResolver pointerResolver, AnimationWrapper animationWrapper)
+        public BehaviourEngine(Graph graph, PointerResolver pointerResolver)
         {
             this.graph = graph;
             this.pointerResolver = pointerResolver;
-            this.animationWrapper = animationWrapper;
 
             for (int i = 0; i < graph.nodes.Count; i++)
             {
@@ -62,6 +62,8 @@ namespace UnityGLTF.Interactivity
             Assert.IsNotNull(flow.toNode);
 
             var node = engineNodes[flow.toNode];
+
+            onFlowTriggered?.Invoke(flow);
 
             node.ValidateAndExecute(flow.toSocket, _cancellationToken.Token);
         }

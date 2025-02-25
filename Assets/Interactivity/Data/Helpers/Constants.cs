@@ -17,6 +17,10 @@ namespace UnityGLTF.Interactivity
 
     public static class ConstStrings
     {
+        public const string NODE_INDEX = "nodeIndex";
+        public const string DEFAULT = "default";
+        public const string SELECTION = "selection";
+        public const string CASES = "cases";
         public const string GRAPHS = "graphs";
         public const string GRAPH = "graph";
         public const string EXTENSION = "extension";

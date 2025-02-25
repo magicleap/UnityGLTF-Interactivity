@@ -42,15 +42,21 @@ namespace UnityGLTF.Interactivity
             if (!Input.GetMouseButtonDown(0))
                 return;
 
+            Util.Log("Mouse down");
+
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             if (!Physics.Raycast(ray, out RaycastHit hit))
                 return;
 
+            Util.Log("Ray hit");
+
             var root = hit.collider.transform.root.gameObject;
 
             if (!root.TryGetComponent(out EventWrapper wrapper))
                 return;
+
+            Util.Log("Found wrapper");
 
             wrapper.Select(hit.transform.gameObject);
         }
@@ -70,19 +76,29 @@ namespace UnityGLTF.Interactivity
             if (extensionValue is not InteractivityGraphExtension interactivityGraph)
                 return;
 
+            try
+            {
+                var defaultGraphIndex = interactivityGraph.extensionData.defaultGraphIndex;
+                var defaultGraph = interactivityGraph.extensionData.graphs[defaultGraphIndex];
+                _behaviourEngine = new BehaviourEngine(defaultGraph, new PointerResolver(importer));
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return;
+            }
+
             AnimationWrapper animationWrapper = null;
 
             if (!importer.AnimationCache.IsNullOrEmpty())
             {
                 animationWrapper = importer.SceneParent.gameObject.AddComponent<AnimationWrapper>();
                 animationWrapper.SetData(importer.LastLoadedScene.GetComponents<Animation>()[0]);
+                _behaviourEngine.animationWrapper = animationWrapper;
             }
 
-            var defaultGraphIndex = interactivityGraph.extensionData.defaultGraphIndex;
-            var defaultGraph = interactivityGraph.extensionData.graphs[defaultGraphIndex];
             var eventWrapper = importer.SceneParent.gameObject.AddComponent<EventWrapper>();
 
-            _behaviourEngine = new BehaviourEngine(defaultGraph, new PointerResolver(importer), animationWrapper);
             eventWrapper.SetData(_behaviourEngine);
 
             _lastLoadPacket = new LoadPacket()

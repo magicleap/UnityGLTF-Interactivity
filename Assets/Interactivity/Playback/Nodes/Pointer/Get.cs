@@ -47,7 +47,7 @@ namespace UnityGLTF.Interactivity
                 Pointer<int> pInt => new Property<int>(pInt.GetValue()),
                 Pointer<float> pFloat => new Property<float>(pFloat.GetValue()),
                 Pointer<Color> pColor => new Property<Vector3>(pColor.GetValue().ToVector3()),
-                Pointer<Quaternion> pQuat => new Property<Vector3>(pQuat.GetValue().ToVector4()),
+                Pointer<Quaternion> pQuat => new Property<Vector4>(pQuat.GetValue().ToVector4()),
                 Pointer<Vector2> pVec2 => new Property<Vector2>(pVec2.GetValue()),
                 Pointer<Vector3> pVec3 => new Property<Vector3>(pVec3.GetValue()),
                 Pointer<Vector4> pVec4 => new Property<Vector4>(pVec4.GetValue()),

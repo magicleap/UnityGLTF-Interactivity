@@ -30,6 +30,9 @@ namespace UnityGLTF.Interactivity
                 case Property<float> prop when _pointer is Pointer<float> p:
                     p.setter(prop.value);
                     break;
+                case Property<Vector2> prop when _pointer is Pointer<Vector2> p:
+                    p.setter(prop.value);
+                    break;
                 case Property<Vector3> prop when _pointer is Pointer<Vector3> p:
                     p.setter(prop.value);
                     break;

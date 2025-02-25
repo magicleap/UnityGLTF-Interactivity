@@ -10,6 +10,7 @@ namespace UnityGLTF.Interactivity
         private readonly List<NodePointers> _nodePointers = new();
         private readonly List<MaterialPointers> _materialPointers = new();
         private readonly ScenePointers _scenePointers;
+        private readonly ActiveCameraPointers _activeCameraPointers = ActiveCameraPointers.CreatePointers();
 
         private readonly Dictionary<string, IPointer> _pointerCache = new();
 
@@ -89,6 +90,9 @@ namespace UnityGLTF.Interactivity
                 case "materials":
                     return ProcessMaterialPointer(path);
 
+                case "activeCamera":
+                    return ProcessCameraPointer(path);
+
                 case Pointers.ANIMATIONS_LENGTH:
                     return _scenePointers.animationsLength;
 
@@ -103,6 +107,22 @@ namespace UnityGLTF.Interactivity
             }
 
             throw new InvalidOperationException("No valid pointer found.");
+        }
+
+        private IPointer ProcessCameraPointer(string[] path)
+        {
+            var property = path[2];
+
+            switch (property)
+            {
+                case "translation":
+                    return _activeCameraPointers.translation;
+
+                case "rotation":
+                    return _activeCameraPointers.rotation;
+            }
+
+            throw new InvalidOperationException($"Active Camera Property {property} is unsupported at this time!");
         }
 
         private IPointer ProcessNodePointer(string[] path)
@@ -137,7 +157,7 @@ namespace UnityGLTF.Interactivity
             {
                 // TODO: Handle these properly via extensions in UnityGLTF?
                 case "KHR_node_selectability":
-                    return nodePointer.visibility;
+                    return nodePointer.selectability;
                 case "KHR_node_visibility":
                     return nodePointer.visibility;
             }
@@ -181,6 +201,12 @@ namespace UnityGLTF.Interactivity
                 case "baseColorFactor":
                     return matPointer.baseColorFactor;
 
+                case "baseColorTexture":
+                    return ProcessBaseColorTexturePointer(path, matPointer);
+
+                case "metallicRoughnessTexture":
+                    return ProcessMetallRoughnessTexturePointer(path, matPointer);
+
                 case "metallicFactor":
                     return matPointer.metallicFactor;
 
@@ -188,7 +214,49 @@ namespace UnityGLTF.Interactivity
                     return matPointer.roughnessFactor;
             }
 
-            throw new InvalidOperationException("No valid subproperty found for material.");
+            throw new InvalidOperationException($"No valid subproperty {subProperty} found for PBR material.");
+        }
+
+        private IPointer ProcessBaseColorTexturePointer(string[] path, MaterialPointers matPointer)
+        {
+            // TODO: These come in the form of baseColorTexture/extensions/KHR_texture_transform/{PROPERTY}
+            // Don't skip the extensions/KHR_texture_transform bit.
+            var subProperty = path[7];
+
+            switch (subProperty)
+            {
+                case "offset":
+                    return matPointer.baseOffset;
+
+                case "rotation":
+                    throw new NotImplementedException();
+
+                case "scale":
+                    return matPointer.baseScale;
+            }
+
+            throw new InvalidOperationException($"No valid subproperty {subProperty} found for texture transform.");
+        }
+
+        private IPointer ProcessMetallRoughnessTexturePointer(string[] path, MaterialPointers matPointer)
+        {
+            // TODO: These come in the form of metallicRoughnessTexture/extensions/KHR_texture_transform/{PROPERTY}
+            // Don't skip the extensions/KHR_texture_transform bit.
+            var subProperty = path[7];
+
+            switch (subProperty)
+            {
+                case "offset":
+                    return matPointer.metallicRoughnessOffset;
+
+                case "rotation":
+                    throw new NotImplementedException();
+
+                case "scale":
+                    return matPointer.metallicRoughnessScale;
+            }
+
+            throw new InvalidOperationException($"No valid subproperty {subProperty} found for texture transform.");
         }
 
         private IPointer ProcessOcclusionMapPointer(string[] path, MaterialPointers matPointer)
@@ -201,7 +269,7 @@ namespace UnityGLTF.Interactivity
                     return matPointer.occlusionTextureStrength;
             }
 
-            throw new InvalidOperationException("No valid subproperty found for material.");
+            throw new InvalidOperationException($"No valid subproperty {subProperty} found for occlusion material.");
         }
 
         private IPointer ProcessNormalMapPointer(string[] path, MaterialPointers matPointer)
@@ -214,7 +282,7 @@ namespace UnityGLTF.Interactivity
                     return matPointer.normalTextureScale;
             }
 
-            throw new InvalidOperationException("No valid subproperty found for material.");
+            throw new InvalidOperationException($"No valid subproperty {subProperty} found for normal material.");
         }
 
         private NodePointers GetNodePointer(int nodeIndex)

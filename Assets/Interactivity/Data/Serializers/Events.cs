@@ -53,9 +53,6 @@ namespace UnityGLTF.Interactivity
             writer.WritePropertyName(ConstStrings.TYPE);
             writer.WriteValue(eventValue.type);
 
-            writer.WritePropertyName(ConstStrings.DESCRIPTION);
-            writer.WriteValue(eventValue.description);
-
             writer.WriteEndObject();
         }
     }

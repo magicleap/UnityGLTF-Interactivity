@@ -9,6 +9,7 @@ namespace UnityGLTF.Interactivity
         public Pointer<Quaternion> rotation;
         public Pointer<Vector3> scale;
         public Pointer<bool> visibility;
+        public Pointer<bool> selectability;
         public GameObject gameObject;
 
         public NodePointers(GameObject go)
@@ -47,6 +48,13 @@ namespace UnityGLTF.Interactivity
             {
                 setter = (v) => go.SetActive(v),
                 getter = () => go.activeSelf,
+                evaluator = null
+            };
+
+            selectability = new Pointer<bool>()
+            {
+                setter = (v) => { },
+                getter = () => true,
                 evaluator = null
             };
         }

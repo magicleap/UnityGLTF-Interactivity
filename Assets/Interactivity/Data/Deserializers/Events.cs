@@ -16,25 +16,24 @@ namespace UnityGLTF.Interactivity
                 events.Add(new Customevent()
                 {
                     id = v[ConstStrings.ID].Value<string>(),
-                    values = GetEventValues(v[ConstStrings.VALUES])
+                    values = GetEventValues(v[ConstStrings.VALUES] as JObject)
                 });
             }
 
             return events;
         }
 
-        private static List<EventValue> GetEventValues(JToken jToken)
+        private static List<EventValue> GetEventValues(JObject jValues)
         {
-            var valueCount = jToken.Count();
+            var valueCount = jValues.Count;
             var values = new List<EventValue>(valueCount);
 
-            foreach (var value in jToken)
+            foreach (var kvp in jValues)
             {
                 values.Add(new EventValue()
                 {
-                    id = value[ConstStrings.ID].Value<string>(),
-                    type = value[ConstStrings.TYPE].Value<int>(),
-                    description = value[ConstStrings.DESCRIPTION].Value<string>(),
+                    id = kvp.Key,
+                    type = kvp.Value[ConstStrings.TYPE].Value<int>(),
                 });
             }
 

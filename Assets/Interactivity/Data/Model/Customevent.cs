@@ -7,7 +7,6 @@ namespace UnityGLTF.Interactivity
     {
         public string id { get; set; }
         public int type { get; set; }
-        public string description { get; set; } = "";
     }
 
     public class Customevent
