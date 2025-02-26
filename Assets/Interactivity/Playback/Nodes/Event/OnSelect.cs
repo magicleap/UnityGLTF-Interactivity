@@ -44,7 +44,7 @@ namespace UnityGLTF.Interactivity
 
             var shouldExecute = true;
 
-            if (_parentNode != null)
+            if (_parentNode != null && _parentNode != t)
             {
                 shouldExecute = false;
                 while (t.parent != null)
