@@ -10,9 +10,10 @@ namespace UnityGLTF.Interactivity
         public Pointer<Vector3> scale;
         public Pointer<bool> visibility;
         public Pointer<bool> selectability;
+        public Pointer<bool> hoverability;
         public GameObject gameObject;
 
-        public NodePointers(GameObject go)
+        public NodePointers(GameObject go, GLTF.Schema.Node schema)
         {
             gameObject = go;
 
@@ -42,8 +43,8 @@ namespace UnityGLTF.Interactivity
                 evaluator = (a, b, t) => Vector3.Lerp(a, b, t)
             };
 
-            // TODO: Handle visibility/selectability pointers using extensions?
-            // Need guidance on how we should handle these.
+            // TODO: Handle visibility pointers better? Do we report the value back to the extension?
+            // Should we make the extension handle the SetActive call so we just change the value of visibility?
             visibility = new Pointer<bool>()
             {
                 setter = (v) => go.SetActive(v),
@@ -51,12 +52,64 @@ namespace UnityGLTF.Interactivity
                 evaluator = null
             };
 
-            selectability = new Pointer<bool>()
+            selectability = GetSelectabilityPointers(schema);
+            hoverability = GetHoverabilityPointers(schema);
+        }
+
+        private static Pointer<bool> GetSelectabilityPointers(GLTF.Schema.Node schema)
+        {
+            Pointer<bool> selectability;
+
+            if (schema.Extensions != null && schema.Extensions.TryGetValue(GLTF.Schema.KHR_node_selectability_Factory.EXTENSION_NAME, out var extension))
             {
-                setter = (v) => { },
-                getter = () => true,
-                evaluator = null
-            };
+                var selectabilityExtension = extension as GLTF.Schema.KHR_node_selectability;
+
+                selectability = new Pointer<bool>()
+                {
+                    setter = (v) => selectabilityExtension.selectable = v,
+                    getter = () => selectabilityExtension.selectable,
+                    evaluator = null
+                };
+            }
+            else
+            {
+                selectability = new Pointer<bool>()
+                {
+                    setter = (v) => { },
+                    getter = () => true,
+                    evaluator = null
+                };
+            }
+
+            return selectability;
+        }
+
+        private static Pointer<bool> GetHoverabilityPointers(GLTF.Schema.Node schema)
+        {
+            Pointer<bool> hoverability;
+
+            if (schema.Extensions != null && schema.Extensions.TryGetValue(GLTF.Schema.KHR_node_hoverability_Factory.EXTENSION_NAME, out var extension))
+            {
+                var hoverabilityExtension = extension as GLTF.Schema.KHR_node_hoverability;
+
+                hoverability = new Pointer<bool>()
+                {
+                    setter = (v) => hoverabilityExtension.hoverable = v,
+                    getter = () => hoverabilityExtension.hoverable,
+                    evaluator = null
+                };
+            }
+            else
+            {
+                hoverability = new Pointer<bool>()
+                {
+                    setter = (v) => { },
+                    getter = () => false,
+                    evaluator = null
+                };
+            }
+
+            return hoverability;
         }
     }
 }

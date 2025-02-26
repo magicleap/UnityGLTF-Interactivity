@@ -8,9 +8,18 @@ namespace UnityGLTF.Interactivity
         private bool _selectionPerformed;
         private int _nodeIndex;
 
+        private Transform _parentNode = null;
+
         public EventOnSelect(BehaviourEngine engine, Node node) : base(engine, node)
         {
             engine.onSelect += OnSelect;
+
+            if (!configuration.TryGetValue(ConstStrings.NODE_INDEX, out Configuration config))
+                return;
+
+            var parentIndex = Parser.ToInt(config.value);
+
+            _parentNode = engine.pointerResolver.nodePointers[parentIndex].gameObject.transform;
         }
 
         public override IProperty GetOutputValue(string id)
@@ -27,8 +36,32 @@ namespace UnityGLTF.Interactivity
             throw new InvalidOperationException($"Socket {id} is not valid for this node!");
         }
 
-        private void OnSelect(GameObject go, int nodeIndex)
+        private void OnSelect(RaycastHit hit, RaycastHit[] otherHits)
         {
+            var t = hit.transform;
+            var go = t.gameObject;
+            var nodeIndex = engine.pointerResolver.IndexOf(go);
+
+            var shouldExecute = true;
+
+            if (_parentNode != null)
+            {
+                shouldExecute = false;
+                while (t.parent != null)
+                {
+                    if (t.parent == _parentNode)
+                    {
+                        shouldExecute = true;
+                        break;
+                    }
+
+                    t = t.parent;
+                }
+            }
+
+            if (!shouldExecute)
+                return;
+
             _nodeIndex = nodeIndex;
             _selectionPerformed = true;
 

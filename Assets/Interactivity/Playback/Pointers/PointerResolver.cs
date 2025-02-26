@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -11,6 +12,8 @@ namespace UnityGLTF.Interactivity
         private readonly List<MaterialPointers> _materialPointers = new();
         private readonly ScenePointers _scenePointers;
         private readonly ActiveCameraPointers _activeCameraPointers = ActiveCameraPointers.CreatePointers();
+
+        public ReadOnlyCollection<NodePointers> nodePointers { get; private set; }
 
         private readonly Dictionary<string, IPointer> _pointerCache = new();
 
@@ -25,12 +28,16 @@ namespace UnityGLTF.Interactivity
 
         private void RegisterNodes(GLTFSceneImporter importer)
         {
-            var nodes = importer.NodeCache;
-            for (int i = 0; i < nodes.Length; i++)
+            var nodeSchemas = importer.Root.Nodes;
+            var nodeGameObjects = importer.NodeCache;
+
+            for (int i = 0; i < nodeGameObjects.Length; i++)
             {
-                Util.Log($"Registered Node Pointer {i}", nodes[i]);
-                _nodePointers.Add(new NodePointers(nodes[i]));
+                Util.Log($"Registered Node Pointer {i}", nodeGameObjects[i]);
+                _nodePointers.Add(new NodePointers(nodeGameObjects[i], nodeSchemas[i]));
             }
+
+            nodePointers = new(_nodePointers);
         }
 
         private void RegisterMaterials(GLTFSceneImporter importer)
@@ -63,6 +70,17 @@ namespace UnityGLTF.Interactivity
             _pointerCache.Add(str, pointer);
 
             return pointer;
+        }
+
+        public NodePointers PointersOf(GameObject go)
+        {
+            for (int i = 0; i < _nodePointers.Count; i++)
+            {
+                if (_nodePointers[i].gameObject == go)
+                    return _nodePointers[i];
+            }
+
+            throw new InvalidOperationException($"No node pointers found for {go.name}!");
         }
 
         public int IndexOf(GameObject go)

@@ -177,7 +177,7 @@
       "url": "https://packages.unity.com"
     },
     "org.khronos.unitygltf": {
-      "version": "https://github.com/KhronosGroup/UnityGLTF.git",
+      "version": "https://github.com/KhronosGroup/UnityGLTF.git#extensions/visibility",
       "depth": 0,
       "source": "git",
       "dependencies": {
@@ -186,7 +186,7 @@
         "com.unity.shadergraph": "10.0.0",
         "com.unity.mathematics": "1.0.0"
       },
-      "hash": "b99d85f0b6d5a20ebc2d5a78158f92f938e8438a"
+      "hash": "d14377245ecc3a40609ad39824877d5b74331694"
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

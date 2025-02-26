@@ -14,7 +14,7 @@ namespace UnityGLTF.Interactivity
         public AnimationWrapper animationWrapper { get; set; }
 
         public event Action onStart;
-        public event Action<GameObject, int> onSelect;
+        public event Action<RaycastHit, RaycastHit[]> onSelect;
         public event Action onTick;
         public event Action<int, Dictionary<string, IProperty>> onCustomEventFired;
         public event Action<Flow> onFlowTriggered;
@@ -44,10 +44,9 @@ namespace UnityGLTF.Interactivity
             onTick?.Invoke();
         }
 
-        public void Select(GameObject go)
+        public void Select(RaycastHit hit, RaycastHit[] otherHits)
         {
-            var nodeIndex = pointerResolver.IndexOf(go);
-            onSelect?.Invoke(go, nodeIndex);
+            onSelect?.Invoke(hit, otherHits);
         }
 
         private BehaviourEngineNode CreateBehaviourEngineNode(Node node)

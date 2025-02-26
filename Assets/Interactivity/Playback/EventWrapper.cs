@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -21,9 +22,9 @@ namespace UnityGLTF.Interactivity
             engine.Tick();
         }
 
-        public void Select(GameObject go)
+        public void Select(RaycastHit hit, RaycastHit[] otherHits)
         {
-            engine.Select(go);
+            engine.Select(hit, otherHits);
         }
     }
 }

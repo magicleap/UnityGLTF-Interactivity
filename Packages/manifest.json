@@ -11,7 +11,7 @@
     "com.unity.timeline": "1.7.6",
     "com.unity.ugui": "1.0.0",
     "com.unity.vectorgraphics": "2.0.0-preview.25",
-    "org.khronos.unitygltf": "https://github.com/KhronosGroup/UnityGLTF.git",
+    "org.khronos.unitygltf": "https://github.com/KhronosGroup/UnityGLTF.git#extensions/visibility",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",

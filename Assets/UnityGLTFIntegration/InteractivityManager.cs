@@ -8,6 +8,8 @@ namespace UnityGLTF.Interactivity
 {
     public class InteractivityManager : MonoBehaviour
     {
+        private const int MAX_RAYCAST_HITS = 32;
+
         private struct LoadPacket
         {
             public GLTFSceneImporter importer;
@@ -26,6 +28,9 @@ namespace UnityGLTF.Interactivity
         public event Action onModelLoadComplete;
         public event Action<KHR_interactivity> onExtensionLoadComplete;
 
+        private static readonly RaycastHit[] _raycastHits = new RaycastHit[MAX_RAYCAST_HITS];
+        private static readonly RaycastHit[] _selectableHits = new RaycastHit[MAX_RAYCAST_HITS];
+
         private void Start()
         {
             _loader = new();
@@ -34,31 +39,54 @@ namespace UnityGLTF.Interactivity
 
         private void Update()
         {
-            CheckForObjectSelect();
+            CheckForObjectSelect(_behaviourEngine);
         }
 
-        private static void CheckForObjectSelect()
+        private static void CheckForObjectSelect(BehaviourEngine engine)
         {
             if (!Input.GetMouseButtonDown(0))
                 return;
 
-            Util.Log("Mouse down");
-
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-            if (!Physics.Raycast(ray, out RaycastHit hit))
+            var hitCount = Physics.RaycastNonAlloc(ray, _raycastHits);
+
+            if (hitCount <= 0)
                 return;
 
-            Util.Log("Ray hit");
+            NodePointers pointers;
+            GameObject go;
+            var selectableCount = 0;
+            RaycastHit closestHit = default;
+            float closestHitDistance = float.MaxValue;
 
-            var root = hit.collider.transform.root.gameObject;
+            for (int i = 0; i < hitCount; i++)
+            {
+                go = _raycastHits[i].transform.gameObject;
+                pointers = engine.pointerResolver.PointersOf(go);
+
+                if (pointers.selectability.getter())
+                {
+                    _selectableHits[selectableCount++] = _raycastHits[i];
+
+                    if(_raycastHits[i].distance < closestHitDistance)
+                    {
+                        closestHit = _raycastHits[i];
+                        closestHitDistance = _raycastHits[i].distance;
+                    }
+                }
+            }
+
+            if (selectableCount <= 0)
+                return;
+
+            var root = closestHit.transform.root.gameObject;
 
             if (!root.TryGetComponent(out EventWrapper wrapper))
                 return;
 
-            Util.Log("Found wrapper");
+            wrapper.Select(closestHit, _selectableHits);
 
-            wrapper.Select(hit.transform.gameObject);
         }
 
         private void OnLoadComplete(GameObject obj, ExceptionDispatchInfo exceptionDispatchInfo, GLTFSceneImporter importer)
