@@ -60,6 +60,19 @@ MonoBehaviour:
   m_Name: BakeParticleSystem
   m_EditorClassIdentifier: 
   enabled: 0
+--- !u!114 &-6593965159030080651
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06b516fa9f5941be92bd6cecf2dd5ca5, type: 3}
+  m_Name: VisibilityImport
+  m_EditorClassIdentifier: 
+  enabled: 1
 --- !u!114 &-5495946117609471453
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -148,6 +161,7 @@ MonoBehaviour:
   - {fileID: 502897803340713766}
   - {fileID: 3122544092073780371}
   - {fileID: 957924265715074157}
+  - {fileID: -6593965159030080651}
   ExportPlugins:
   - {fileID: -8985567922445209820}
   - {fileID: 1419762970772820027}
@@ -160,6 +174,7 @@ MonoBehaviour:
   - {fileID: -7050588635261407906}
   - {fileID: 4315091623925693236}
   - {fileID: -5495946117609471453}
+  - {fileID: 2424042695253192187}
   exportNames: 1
   exportFullPath: 0
   requireExtensions: 0
@@ -267,6 +282,19 @@ MonoBehaviour:
   m_Name: TextMeshGameObjectExport
   m_EditorClassIdentifier: 
   enabled: 1
+--- !u!114 &2424042695253192187
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2b6fa8618a247c3a77768773459dcd5, type: 3}
+  m_Name: VisibilityExport
+  m_EditorClassIdentifier: 
+  enabled: 0
 --- !u!114 &3027376517490801318
 MonoBehaviour:
   m_ObjectHideFlags: 3

@@ -16,7 +16,7 @@ namespace UnityGLTF.Interactivity
             public KHR_interactivity extensionData;
         }
 
-        [SerializeField] private string _modelName = "interactive.glb";
+        [SerializeField] private string _modelName = "interactive";
         [SerializeField] private string _saveToFile = "saveTest.glb";
         [SerializeField] private int _loadTimeout = 8;
 
@@ -34,7 +34,7 @@ namespace UnityGLTF.Interactivity
         private void Start()
         {
             _loader = new();
-            _ = _loader.LoadModelAsync(_modelName, OnLoadComplete, _loadTimeout);
+            _ = _loader.LoadModelAsync($"{_modelName}.glb", OnLoadComplete, _loadTimeout);
         }
 
         private void Update()

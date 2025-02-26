@@ -14,6 +14,7 @@ namespace UnityGLTF.Interactivity
         public AnimationWrapper animationWrapper { get; set; }
 
         public event Action onStart;
+
         public event Action<RaycastHit, RaycastHit[]> onSelect;
         public event Action onTick;
         public event Action<int, Dictionary<string, IProperty>> onCustomEventFired;
@@ -30,7 +31,7 @@ namespace UnityGLTF.Interactivity
 
             for (int i = 0; i < graph.nodes.Count; i++)
             {
-                engineNodes.Add(graph.nodes[i], CreateBehaviourEngineNode(graph.nodes[i]));
+                engineNodes.Add(graph.nodes[i], NodeRegistry.CreateBehaviourEngineNode(this, graph.nodes[i]));
             }
         }
 
@@ -49,12 +50,6 @@ namespace UnityGLTF.Interactivity
             onSelect?.Invoke(hit, otherHits);
         }
 
-        private BehaviourEngineNode CreateBehaviourEngineNode(Node node)
-        {
-            var instantiateFunc = NodeRegistry.nodeTypes[node.type];
-
-            return instantiateFunc(this, node);
-        }
 
         public void ExecuteFlow(Flow flow)
         {

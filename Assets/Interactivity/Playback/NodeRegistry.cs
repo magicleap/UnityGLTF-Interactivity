@@ -1,11 +1,24 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace UnityGLTF.Interactivity
 {
     public static class NodeRegistry
     {
-        public static readonly Dictionary<string, Func<BehaviourEngine, Node, BehaviourEngineNode>> nodeTypes = new()
+        public static BehaviourEngineNode CreateBehaviourEngineNode(BehaviourEngine engine, Node node)
+        {
+            if (!nodeTypes.TryGetValue(node.type, out var creationMethod))
+            {
+                // Using Debug.Log here instead of Util.Log since this should be a message that shows up in prod.
+                Debug.LogWarning($"No node found for operation {node.type}, creating a NoOp node.");
+                return new NoOp(engine, node);
+            }
+
+            return creationMethod(engine, node);
+        }
+
+        private static readonly Dictionary<string, Func<BehaviourEngine, Node, BehaviourEngineNode>> nodeTypes = new()
         {
             ["animation/start"] = (engine, node) => new AnimationStart(engine, node),
             ["debug/log"] = (engine, node) => new DebugLog(engine, node),
@@ -58,7 +71,11 @@ namespace UnityGLTF.Interactivity
             ["pointer/get"] = (engine, node) => new PointerGet(engine, node),
             ["pointer/interpolate"] = (engine, node) => new PointerInterpolate(engine, node),
             ["pointer/set"] = (engine, node) => new PointerSet(engine, node),
+            ["type/boolToInt"] = (engine, node) => new TypeBoolToInt(engine, node),
+            ["type/boolToFloat"] = (engine, node) => new TypeBoolToFloat(engine, node),
+            ["type/floatToBool"] = (engine, node) => new TypeFloatToBool(engine, node),
             ["type/floatToInt"] = (engine, node) => new TypeFloatToInt(engine, node),
+            ["type/intToBool"] = (engine, node) => new TypeIntToBool(engine, node),
             ["type/intToFloat"] = (engine, node) => new TypeIntToFloat(engine, node),
             ["variable/get"] = (engine, node) => new VariableGet(engine, node),
             ["variable/set"] = (engine, node) => new VariableSet(engine, node),

@@ -1,5 +1,6 @@
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -88,6 +89,49 @@ namespace UnityGLTF.Interactivity
                 throw new InvalidCastException($"Property is not of type {typeof(T)}");
 
             return typedProperty.value;
+        }
+
+        public static IProperty GetDefaultProperty(int typeIndex, List<Type> systemTypes)
+        {
+            var type = systemTypes[typeIndex];
+
+            if (type == typeof(int))
+            {
+                return new Property<int>(0);
+            }
+            else if (type == typeof(float))
+            {
+                return new Property<float>(float.NaN);
+            }
+            else if (type == typeof(bool))
+            {
+                return new Property<bool>(false);
+            }
+            else if (type == typeof(Vector2))
+            {
+                return new Property<Vector2>(new Vector2(float.NaN, float.NaN));
+            }
+            else if (type == typeof(Vector3))
+            {
+                return new Property<Vector3>(new Vector3(float.NaN, float.NaN, float.NaN));
+            }
+            else if (type == typeof(Vector4))
+            {
+                return new Property<Vector4>(new Vector4(float.NaN, float.NaN, float.NaN, float.NaN));
+            }
+            else if (type == typeof(Matrix4x4))
+            {
+                var m = new Matrix4x4();
+
+                for (int i = 0; i < 16; i++)
+                {
+                    m[i] = float.NaN;
+                }
+
+                return new Property<Matrix4x4>(m);
+            }
+
+            throw new InvalidOperationException($"No default value for {type} included in this spec.");
         }
     }
 }

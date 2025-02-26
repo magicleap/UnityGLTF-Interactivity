@@ -7,10 +7,12 @@ namespace UnityGLTF.Interactivity
 {
     public class Graph
     {
+        public List<Type> systemTypes { get; set; } = new();
         public List<Node> nodes { get; set; } = new();
         public List<Variable> variables { get; set; } = new();
         public List<Customevent> customEvents { get; set; } = new();
         public List<InteractivityType> types { get; set; } = new();
+        public List<Declaration> declarations { get; set; } = new();
 
         public event Action<Node> onNodeAdded;
         public event Action<Variable> onVariableAdded;
@@ -121,6 +123,11 @@ namespace UnityGLTF.Interactivity
                 new InteractivityType() { signature = "float4x4" },
                 new InteractivityType() { signature = "custom", extensions = new TypeExtensions() { AMZN_interactivity_string = new() } },
             };
+        }
+
+        public IProperty GetDefaultPropertyForType(int typeIndex)
+        {
+            return Helpers.GetDefaultProperty(typeIndex, systemTypes);
         }
     }
 }

@@ -807,8 +807,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.38667855, y: -0.47027472, z: 0.24053968, w: 0.7559511}
-  m_LocalPosition: {x: 11.050421, y: 0.7066002, z: 6.9862647}
+  m_LocalRotation: {x: 0.1390677, y: -0.21069947, z: 0.030280255, w: 0.9671345}
+  m_LocalPosition: {x: 19.454782, y: 3.3683255, z: -4.762097}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2221,7 +2221,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cac5c2aa5067b254f94b7007f2dd0fe9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _modelName: MoveAroundSundail.glb
+  _modelName: 20250109-MathTests
   _saveToFile: saveTesta.glb
   _loadTimeout: 8
 --- !u!1 &738271255

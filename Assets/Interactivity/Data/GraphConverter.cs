@@ -50,7 +50,9 @@ namespace UnityGLTF.Interactivity
                 types = types,
                 variables = variables,
                 customEvents = events,
-                nodes = nodes
+                nodes = nodes,
+                declarations = declarations,
+                systemTypes = systemTypes
             };
         }
     }
