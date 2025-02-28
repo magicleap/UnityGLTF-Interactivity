@@ -5,6 +5,15 @@ using UnityEngine;
 
 namespace UnityGLTF.Interactivity
 {
+    public struct BezierInterpolateData
+    {
+        public IPointer pointer;
+        public float duration;
+        public Vector2 cp0;
+        public Vector2 cp1;
+        public CancellationToken cancellationToken;
+    }
+
     public static partial class Helpers
     {
         public static async Task<bool> InterpolateAsync<T>(T from, T to, Action<T> setter, Func<T, T, float, T> evaluator, float duration, CancellationToken cancellationToken)
@@ -26,11 +35,19 @@ namespace UnityGLTF.Interactivity
             return await InterpolateAsync(pointer.getter(), to, pointer.setter, pointer.evaluator, duration, cancellationToken);
         }
 
-        public static async Task<bool> InterpolateBezierAsync<T>(T to, Pointer<T> pointer, float duration, Vector2 cp0, Vector2 cp1, CancellationToken cancellationToken)
+        public static async Task<bool> InterpolateBezierAsync<T>(Property<T> to, BezierInterpolateData d)
         {
-            var evaluator = new Func<T, T, float, T>((a, b, t) => pointer.evaluator(a, b, CubicBezier(t, cp0, cp1).y));
+            var v = to.value;
+            return await InterpolateBezierAsync(v, d);
+        }
 
-            return await InterpolateAsync(pointer.getter(), to, pointer.setter, evaluator, duration, cancellationToken);
+        public static async Task<bool> InterpolateBezierAsync<T>(T to, BezierInterpolateData d)
+        {
+            var p = (Pointer<T>)d.pointer;
+            
+            var evaluator = new Func<T, T, float, T>((a, b, t) => p.evaluator(a, b, CubicBezier(t, d.cp0, d.cp1).y));
+
+            return await InterpolateAsync(p.getter(), to, p.setter, evaluator, d.duration, d.cancellationToken);
         }
 
         public static Vector2 CubicBezier(float t, Vector2 cp0, Vector2 cp1)

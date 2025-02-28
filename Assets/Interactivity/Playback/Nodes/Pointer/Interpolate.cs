@@ -48,63 +48,47 @@ namespace UnityGLTF.Interactivity
 
         private async Task<bool> InterpolateAsync(CancellationToken cancellationToken)
         {
-            // TODO: Replace these with the proper interpolate methods to match spec. Currently all linear interp.
-            switch (_interpGoal)
+            var data = new BezierInterpolateData()
             {
-                case Property<int> intProp: // Cast to float so we can interp with int arguments.
-                    return await Helpers.InterpolateBezierAsync(intProp.value, (Pointer<float>)_pointer, _duration, _p1, _p2, cancellationToken);
+                pointer = _pointer,
+                duration = _duration,
+                cp0 = _p1,
+                cp1 = _p2,
+                cancellationToken = cancellationToken
+            };
 
-                case Property<float> floatProp:
-                    return await Helpers.InterpolateBezierAsync(floatProp.value, (Pointer<float>)_pointer, _duration, _p1, _p2, cancellationToken);
-
-                case Property<Vector2> vec2Prop:
-                    return await Helpers.InterpolateBezierAsync(vec2Prop.value, (Pointer<Vector2>)_pointer, _duration, _p1, _p2, cancellationToken);
-
-                case Property<Vector3> vec3Prop:
-                    return await ProcessVector3(_pointer, vec3Prop.value, _duration, cancellationToken);
-
-                case Property<Vector4> vec4Prop:
-                    return await ProcessVector4(_pointer, vec4Prop.value, _duration, cancellationToken);
-
-                case Property<Matrix4x4> matrixProp:
-                    return await Helpers.InterpolateBezierAsync(matrixProp.value, (Pointer<Matrix4x4>)_pointer, _duration, _p1, _p2, cancellationToken);
-
-                default:
-                    throw new InvalidOperationException("No supported type found for interpolation.");
-            }
+            return _interpGoal switch
+            {
+                // Cast to float so we can interp with int arguments.
+                Property<int>       property => await Helpers.InterpolateBezierAsync(property, data),
+                Property<float>     property => await Helpers.InterpolateBezierAsync(property, data),
+                Property<Vector2>   property => await Helpers.InterpolateBezierAsync(property, data),
+                Property<Vector3>   property => await ProcessVector3(property, data),
+                Property<Vector4>   property => await ProcessVector4(property, data),
+                Property<Matrix4x4> property => await Helpers.InterpolateBezierAsync(property, data),
+                _ => throw new InvalidOperationException($"Type {_interpGoal.GetTypeSignature()} is not supported for interpolation."),
+            };
         }
 
-        private async Task<bool> ProcessVector4(IPointer pointer, Vector4 value, float duration, CancellationToken cancellationToken)
+        private async Task<bool> ProcessVector4(Property<Vector4> property, BezierInterpolateData data)
         {
-            switch (pointer)
+            return data.pointer switch
             {
-                case Pointer<Vector4>:
-                    return await Helpers.InterpolateBezierAsync(value, (Pointer<Vector4>)pointer, duration, _p1, _p2, cancellationToken);
-
-                case Pointer<Color>:
-                    return await Helpers.InterpolateBezierAsync(value, (Pointer<Color>)pointer, duration, _p1, _p2, cancellationToken);
-
-                default:
-                    throw new InvalidOperationException("No supported Pointer type for this Vector4 property.");
-            }
+                Pointer<Vector4> => await Helpers.InterpolateBezierAsync(property, data),
+                Pointer<Color>   => await Helpers.InterpolateBezierAsync(property, data),
+                _ => throw new InvalidOperationException($"Pointer type {data.pointer.GetSystemType()} is not supported for this Vector4 property."),
+            };
         }
 
-        private async Task<bool> ProcessVector3(IPointer pointer, Vector3 value, float duration, CancellationToken cancellationToken)
+        private async Task<bool> ProcessVector3(Property<Vector3> property, BezierInterpolateData data)
         {
-            switch (pointer)
+            return data.pointer switch
             {
-                case Pointer<Vector3>:
-                    return await Helpers.InterpolateBezierAsync(value, (Pointer<Vector3>)pointer, duration, _p1, _p2, cancellationToken);
-
-                case Pointer<Color>:
-                    return await Helpers.InterpolateBezierAsync(value.ToColor(), (Pointer<Color>)pointer, duration, _p1, _p2, cancellationToken);
-
-                case Pointer<Quaternion>:
-                    return await Helpers.InterpolateBezierAsync(Quaternion.Euler(value), (Pointer<Quaternion>)pointer, duration, _p1, _p2, cancellationToken);
-
-                default:
-                    throw new InvalidOperationException("No supported Pointer type for this Vector3 property.");
-            }
+                Pointer<Vector3>    => await Helpers.InterpolateBezierAsync(property, data),
+                Pointer<Color>      => await Helpers.InterpolateBezierAsync(property.value.ToColor(), data),
+                Pointer<Quaternion> => await Helpers.InterpolateBezierAsync(Quaternion.Euler(property.value), data),
+                _ => throw new InvalidOperationException($"Pointer type {data.pointer.GetSystemType()} is not supported for this Vector3 property."),
+            };
         }
     }
 }
