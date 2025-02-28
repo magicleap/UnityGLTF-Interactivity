@@ -11,6 +11,7 @@ namespace UnityGLTF.Interactivity
         private IPointer _pointer;
         private IProperty _interpGoal;
         private float _duration;
+        private Vector2 _p1, _p2;
 
         public PointerInterpolate(BehaviourEngine engine, Node node) : base(engine, node)
         {
@@ -40,7 +41,9 @@ namespace UnityGLTF.Interactivity
         public override bool ValidateValues(string socket)
         {
             return TryEvaluateValue(ConstStrings.VALUE, out _interpGoal) && 
-                TryEvaluateValue(ConstStrings.DURATION, out _duration);
+                TryEvaluateValue(ConstStrings.DURATION, out _duration) &&
+                TryEvaluateValue(ConstStrings.P1, out _p1) &&
+                TryEvaluateValue(ConstStrings.P2, out _p2);
         }
 
         private async Task<bool> InterpolateAsync(CancellationToken cancellationToken)
@@ -49,13 +52,13 @@ namespace UnityGLTF.Interactivity
             switch (_interpGoal)
             {
                 case Property<int> intProp: // Cast to float so we can interp with int arguments.
-                    return await Helpers.InterpolateAsync(intProp.value, (Pointer<float>)_pointer, _duration, cancellationToken);
+                    return await Helpers.InterpolateBezierAsync(intProp.value, (Pointer<float>)_pointer, _duration, _p1, _p2, cancellationToken);
 
                 case Property<float> floatProp:
-                    return await Helpers.InterpolateAsync(floatProp.value, (Pointer<float>)_pointer, _duration, cancellationToken);
+                    return await Helpers.InterpolateBezierAsync(floatProp.value, (Pointer<float>)_pointer, _duration, _p1, _p2, cancellationToken);
 
                 case Property<Vector2> vec2Prop:
-                    return await Helpers.InterpolateAsync(vec2Prop.value, (Pointer<Vector2>)_pointer, _duration, cancellationToken);
+                    return await Helpers.InterpolateBezierAsync(vec2Prop.value, (Pointer<Vector2>)_pointer, _duration, _p1, _p2, cancellationToken);
 
                 case Property<Vector3> vec3Prop:
                     return await ProcessVector3(_pointer, vec3Prop.value, _duration, cancellationToken);
@@ -64,7 +67,7 @@ namespace UnityGLTF.Interactivity
                     return await ProcessVector4(_pointer, vec4Prop.value, _duration, cancellationToken);
 
                 case Property<Matrix4x4> matrixProp:
-                    return await Helpers.InterpolateAsync(matrixProp.value, (Pointer<Matrix4x4>)_pointer, _duration, cancellationToken);
+                    return await Helpers.InterpolateBezierAsync(matrixProp.value, (Pointer<Matrix4x4>)_pointer, _duration, _p1, _p2, cancellationToken);
 
                 default:
                     throw new InvalidOperationException("No supported type found for interpolation.");
@@ -76,10 +79,10 @@ namespace UnityGLTF.Interactivity
             switch (pointer)
             {
                 case Pointer<Vector4>:
-                    return await Helpers.InterpolateAsync(value, (Pointer<Vector4>)pointer, duration, cancellationToken);
+                    return await Helpers.InterpolateBezierAsync(value, (Pointer<Vector4>)pointer, duration, _p1, _p2, cancellationToken);
 
                 case Pointer<Color>:
-                    return await Helpers.InterpolateAsync(value, (Pointer<Color>)pointer, duration, cancellationToken);
+                    return await Helpers.InterpolateBezierAsync(value, (Pointer<Color>)pointer, duration, _p1, _p2, cancellationToken);
 
                 default:
                     throw new InvalidOperationException("No supported Pointer type for this Vector4 property.");
@@ -91,13 +94,13 @@ namespace UnityGLTF.Interactivity
             switch (pointer)
             {
                 case Pointer<Vector3>:
-                    return await Helpers.InterpolateAsync(value, (Pointer<Vector3>)pointer, duration, cancellationToken);
+                    return await Helpers.InterpolateBezierAsync(value, (Pointer<Vector3>)pointer, duration, _p1, _p2, cancellationToken);
 
                 case Pointer<Color>:
-                    return await Helpers.InterpolateAsync(value.ToColor(), (Pointer<Color>)pointer, duration, cancellationToken);
+                    return await Helpers.InterpolateBezierAsync(value.ToColor(), (Pointer<Color>)pointer, duration, _p1, _p2, cancellationToken);
 
                 case Pointer<Quaternion>:
-                    return await Helpers.InterpolateAsync(Quaternion.Euler(value), (Pointer<Quaternion>)pointer, duration, cancellationToken);
+                    return await Helpers.InterpolateBezierAsync(Quaternion.Euler(value), (Pointer<Quaternion>)pointer, duration, _p1, _p2, cancellationToken);
 
                 default:
                     throw new InvalidOperationException("No supported Pointer type for this Vector3 property.");
