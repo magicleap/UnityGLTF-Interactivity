@@ -23,6 +23,11 @@ namespace UnityGLTF.Interactivity
     {
         public Func<T> getter;
 
+        public ReadOnlyPointer(Func<T> getter)
+        {
+            this.getter = getter;
+        }
+
         public T GetValue()
         {
             return getter();
