@@ -12,6 +12,7 @@ namespace UnityGLTF.Interactivity
         public AnimationWrapper animationWrapper { get; private set; }
         public readonly PointerInterpolationManager pointerInterpolationManager = new();
         public readonly VariableInterpolationManager variableInterpolationManager = new();
+        public readonly NodeDelayManager nodeDelayManager = new();
 
         public event Action onStart;
 
@@ -44,6 +45,8 @@ namespace UnityGLTF.Interactivity
         {
             pointerInterpolationManager.OnTick();
             variableInterpolationManager.OnTick();
+            nodeDelayManager.OnTick();
+
             onTick?.Invoke();
         }
 
