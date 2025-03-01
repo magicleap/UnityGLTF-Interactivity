@@ -5,8 +5,13 @@ namespace UnityGLTF.Interactivity
 {
     public class EventOnSelect : BehaviourEngineNode
     {
-        private bool _selectionPerformed;
-        private int _nodeIndex;
+        // TODO: Add this limitation from spec:
+        // A behavior graph MUST NOT contain two or more event/onSelect nodes with the same nodeIndex configuration value.
+
+        // Default values grabbed from spec
+        private int _selectedNodeIndex = -1;
+        private Vector3 _selectionPoint = new Vector3(float.NaN, float.NaN, float.NaN);
+        private Vector3 _selectionRayOrigin = new Vector3(float.NaN, float.NaN, float.NaN);
 
         private Transform _parentNode = null;
 
@@ -24,29 +29,30 @@ namespace UnityGLTF.Interactivity
 
         public override IProperty GetOutputValue(string id)
         {
-            if (!_selectionPerformed)
-                throw new InvalidOperationException("Nothing has been selected but there is a request for an output value of the select node!");
-
-            switch (id)
+            return id switch
             {
-                case ConstStrings.SELECTED_NODE_INDEX:
-                    return new Property<int>(_nodeIndex);
-            }
-
-            throw new InvalidOperationException($"Socket {id} is not valid for this node!");
+                ConstStrings.SELECTED_NODE_INDEX =>  new Property<int>(_selectedNodeIndex),
+                ConstStrings.SELECTION_POINT =>      new Property<Vector3>(_selectionPoint),
+                ConstStrings.SELECTION_RAY_ORIGIN => new Property<Vector3>(_selectionRayOrigin),
+                _ => throw new InvalidOperationException($"Socket {id} is not valid for this node!"),
+            };
         }
 
-        private void OnSelect(RaycastHit hit, RaycastHit[] otherHits)
+        private void OnSelect(Ray ray, RaycastHit hit, RaycastHit[] otherHits)
         {
+            // TODO: Add support for stopPropagation once we understand what it actually does.
+            // I've read that part of the spec a handful of times and still am not sure.
             var t = hit.transform;
             var go = t.gameObject;
             var nodeIndex = engine.pointerResolver.IndexOf(go);
 
             var shouldExecute = true;
 
+            // If there's a parent node provided in the config and it's not the node we clicked on
             if (_parentNode != null && _parentNode != t)
             {
                 shouldExecute = false;
+                // Go up the hierarchy and figure out if the selected node is a child of the nodeIndex provided in the config.
                 while (t.parent != null)
                 {
                     if (t.parent == _parentNode)
@@ -59,11 +65,13 @@ namespace UnityGLTF.Interactivity
                 }
             }
 
+            // Node was not a child of the nodeIndex from the config, so we shouldn't execute our flow or set any values.
             if (!shouldExecute)
                 return;
 
-            _nodeIndex = nodeIndex;
-            _selectionPerformed = true;
+            _selectedNodeIndex = nodeIndex;
+            _selectionPoint = hit.point;
+            _selectionRayOrigin = ray.origin;
 
             Util.Log($"OnSelect node {nodeIndex} corresponding to GO {go.name}", go);
 

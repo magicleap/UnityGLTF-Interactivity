@@ -22,9 +22,9 @@ namespace UnityGLTF.Interactivity
             engine.Tick();
         }
 
-        public void Select(RaycastHit hit, RaycastHit[] otherHits)
+        public void Select(in Ray ray, in RaycastHit hit, RaycastHit[] otherHits)
         {
-            engine.Select(hit, otherHits);
+            engine.Select(ray, hit, otherHits);
         }
     }
 }

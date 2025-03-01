@@ -85,8 +85,7 @@ namespace UnityGLTF.Interactivity
             if (!root.TryGetComponent(out EventWrapper wrapper))
                 return;
 
-            wrapper.Select(closestHit, _selectableHits);
-
+            wrapper.Select(ray, closestHit, _selectableHits);
         }
 
         private void OnLoadComplete(GameObject obj, ExceptionDispatchInfo exceptionDispatchInfo, GLTFSceneImporter importer)

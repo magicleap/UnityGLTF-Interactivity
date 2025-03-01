@@ -15,7 +15,7 @@ namespace UnityGLTF.Interactivity
 
         public event Action onStart;
 
-        public event Action<RaycastHit, RaycastHit[]> onSelect;
+        public event Action<Ray, RaycastHit, RaycastHit[]> onSelect;
         public event Action onTick;
         public event Action<int, Dictionary<string, IProperty>> onCustomEventFired;
         public event Action<Flow> onFlowTriggered;
@@ -45,9 +45,9 @@ namespace UnityGLTF.Interactivity
             onTick?.Invoke();
         }
 
-        public void Select(RaycastHit hit, RaycastHit[] otherHits)
+        public void Select(in Ray ray, in RaycastHit hit, RaycastHit[] otherHits)
         {
-            onSelect?.Invoke(hit, otherHits);
+            onSelect?.Invoke(ray, hit, otherHits);
         }
 
 
