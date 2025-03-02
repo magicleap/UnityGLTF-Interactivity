@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityGLTF.Interactivity.Extensions;
 
@@ -110,6 +112,46 @@ namespace UnityGLTF.Interactivity
             }
 
             return hoverability;
+        }
+
+        public static IPointer ProcessNodePointer(string[] path, List<NodePointers> pointers)
+        {
+            var nodeIndex = int.Parse(path[2]);
+            var nodePointer = pointers[nodeIndex];
+            var property = path[3];
+
+            switch (property)
+            {
+                case "translation":
+                    return nodePointer.translation;
+
+                case "rotation":
+                    return nodePointer.rotation;
+
+                case "scale":
+                    return nodePointer.scale;
+
+                case "extensions":
+                    return ProcessExtensionPointer(path, nodePointer);
+            }
+
+            throw new InvalidOperationException($"Property {property} is unsupported at this time!");
+        }
+
+        private static IPointer ProcessExtensionPointer(string[] path, NodePointers nodePointer)
+        {
+            var subProperty = path[4];
+
+            switch (subProperty)
+            {
+                // TODO: Handle these properly via extensions in UnityGLTF?
+                case "KHR_node_selectability":
+                    return nodePointer.selectability;
+                case "KHR_node_visibility":
+                    return nodePointer.visibility;
+            }
+
+            throw new InvalidOperationException($"Extension {subProperty} is unsupported at this time!");
         }
     }
 }

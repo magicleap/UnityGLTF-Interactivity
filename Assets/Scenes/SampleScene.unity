@@ -739,7 +739,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!81 &330585544
 AudioListener:
   m_ObjectHideFlags: 0
@@ -2221,7 +2221,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cac5c2aa5067b254f94b7007f2dd0fe9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _modelName: interactive
+  _modelName: CameraPointerTests
   _saveToFile: saveTesta.glb
   _loadTimeout: 8
 --- !u!1 &738271255

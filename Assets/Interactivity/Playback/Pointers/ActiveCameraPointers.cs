@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityGLTF.Interactivity.Extensions;
 
@@ -31,6 +32,20 @@ namespace UnityGLTF.Interactivity
             };
 
             return pointers;
+        }
+
+        public IPointer ProcessActiveCameraPointer(string property)
+        {
+            switch (property)
+            {
+                case "translation":
+                    return translation;
+
+                case "rotation":
+                    return rotation;
+            }
+
+            throw new InvalidOperationException($"Active Camera Property {property} is unsupported at this time!");
         }
     }
 }

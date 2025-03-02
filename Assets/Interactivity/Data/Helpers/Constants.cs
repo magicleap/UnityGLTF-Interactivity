@@ -60,6 +60,7 @@ namespace UnityGLTF.Interactivity
         public const string VALUE = "value";
         public const string VALUES = "values";
         public const string ID = "id";
+        public const string NAME = "name";
         public const string TYPE = "type";
         public const string DESCRIPTION = "description";
         public const string METADATA = "metadata";

@@ -23,7 +23,19 @@ namespace UnityGLTF.Interactivity
 
         private static Variable CreateVariable(JToken token, List<Type> types)
         {
-            var id = token[ConstStrings.ID].Value<string>();
+
+            // ID is not part of the spec but it's a nice to have.
+            // Needle exporter uses id for this field.
+            var id = "";
+            JToken jId = token[ConstStrings.ID];
+
+            // React app uses name for this field.
+            if (jId == null)
+                jId = token[ConstStrings.NAME];
+
+            if(jId != null)
+                id = jId.Value<string>();
+
             var typeIndex = token[ConstStrings.TYPE].Value<int>();
             var valueArray = token[ConstStrings.VALUE] as JArray;
 

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -87,6 +89,126 @@ namespace UnityGLTF.Interactivity
                     evaluator = (a, b, t) => Vector2.Lerp(a, b, t)
                 };
             }
+        }
+
+        public static IPointer ProcessMaterialPointer(string[] path, List<MaterialPointers> pointers)
+        {
+            var matIndex = int.Parse(path[2]);
+            var matPointer = pointers[matIndex];
+            var property = path[3];
+
+            switch (property)
+            {
+                case "alphaCutoff":
+                    return matPointer.alphaCutoff;
+
+                case "emissiveFactor":
+                    return matPointer.emissiveFactor;
+
+                case "normalTexture":
+                    return ProcessNormalMapPointer(path, matPointer);
+
+                case "occlusionTexture":
+                    return ProcessOcclusionMapPointer(path, matPointer);
+
+                case "pbrMetallicRoughness":
+                    return ProcessPBRMetallicRoughnessPointer(path, matPointer);
+            }
+
+            throw new InvalidOperationException("No valid property found for material.");
+        }
+
+        private static IPointer ProcessPBRMetallicRoughnessPointer(string[] path, MaterialPointers matPointer)
+        {
+            var subProperty = path[4];
+
+            switch (subProperty)
+            {
+                case "baseColorFactor":
+                    return matPointer.baseColorFactor;
+
+                case "baseColorTexture":
+                    return ProcessBaseColorTexturePointer(path, matPointer);
+
+                case "metallicRoughnessTexture":
+                    return ProcessMetallRoughnessTexturePointer(path, matPointer);
+
+                case "metallicFactor":
+                    return matPointer.metallicFactor;
+
+                case "roughnessFactor":
+                    return matPointer.roughnessFactor;
+            }
+
+            throw new InvalidOperationException($"No valid subproperty {subProperty} found for PBR material.");
+        }
+
+        private static IPointer ProcessBaseColorTexturePointer(string[] path, MaterialPointers matPointer)
+        {
+            // TODO: These come in the form of baseColorTexture/extensions/KHR_texture_transform/{PROPERTY}
+            // Don't skip the extensions/KHR_texture_transform bit.
+            var subProperty = path[7];
+
+            switch (subProperty)
+            {
+                case "offset":
+                    return matPointer.baseOffset;
+
+                case "rotation":
+                    throw new NotImplementedException();
+
+                case "scale":
+                    return matPointer.baseScale;
+            }
+
+            throw new InvalidOperationException($"No valid subproperty {subProperty} found for texture transform.");
+        }
+
+        private static IPointer ProcessMetallRoughnessTexturePointer(string[] path, MaterialPointers matPointer)
+        {
+            // TODO: These come in the form of metallicRoughnessTexture/extensions/KHR_texture_transform/{PROPERTY}
+            // Don't skip the extensions/KHR_texture_transform bit.
+            var subProperty = path[7];
+
+            switch (subProperty)
+            {
+                case "offset":
+                    return matPointer.metallicRoughnessOffset;
+
+                case "rotation":
+                    throw new NotImplementedException();
+
+                case "scale":
+                    return matPointer.metallicRoughnessScale;
+            }
+
+            throw new InvalidOperationException($"No valid subproperty {subProperty} found for texture transform.");
+        }
+
+        private static IPointer ProcessOcclusionMapPointer(string[] path, MaterialPointers matPointer)
+        {
+            var subProperty = path[4];
+
+            switch (subProperty)
+            {
+                case "strength":
+                    return matPointer.occlusionTextureStrength;
+            }
+
+            throw new InvalidOperationException($"No valid subproperty {subProperty} found for occlusion material.");
+        }
+
+        private static IPointer ProcessNormalMapPointer(string[] path, MaterialPointers matPointer)
+        {
+            var subProperty = path[4];
+
+            switch (subProperty)
+            {
+                case "scale":
+                    return matPointer.normalTextureScale;
+            }
+
+            throw new InvalidOperationException($"No valid subproperty {subProperty} found for normal material.");
         }
     }
 }
