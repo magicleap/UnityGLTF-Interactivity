@@ -13,6 +13,8 @@ namespace UnityGLTF.Interactivity
         public Pointer<bool> visibility;
         public Pointer<bool> selectability;
         public Pointer<bool> hoverability;
+        public Pointer<Matrix4x4> matrix;
+        public Pointer<Matrix4x4> globalMatrix;
         public GameObject gameObject;
 
         public NodePointers(GameObject go, GLTF.Schema.Node schema)
@@ -23,7 +25,6 @@ namespace UnityGLTF.Interactivity
             // Unity is left-handed with y-up and z-forward.
             // GLTF is right-handed with y-up and z-forward.
             // Handedness is easiest to swap here though we could do it during deserialization for performance.
-
             translation = new Pointer<Vector3>()
             {
                 setter = (v) => go.transform.localPosition = v.SwapHandedness(),
@@ -43,6 +44,20 @@ namespace UnityGLTF.Interactivity
                 setter = (v) => go.transform.localScale = v.SwapHandedness(),
                 getter = () => go.transform.localScale.SwapHandedness(),
                 evaluator = (a, b, t) => Vector3.Lerp(a, b, t)
+            };
+
+            matrix = new Pointer<Matrix4x4>()
+            {
+                setter = (v) => go.transform.SetFromLocalMatrix(v, isRightHanded: true),
+                getter = () => go.transform.GetLocalMatrix(isRightHanded: true),
+                evaluator = null // Interpolation between two matrices is undefined.
+            };
+
+            globalMatrix = new Pointer<Matrix4x4>()
+            {
+                setter = (v) => go.transform.SetFromWorldMatrix(v, isRightHanded: true),
+                getter = () => go.transform.GetWorldMatrix(isRightHanded: true),
+                evaluator = null // Interpolation between two matrices is undefined.
             };
 
             // TODO: Handle visibility pointers better? Do we report the value back to the extension?
