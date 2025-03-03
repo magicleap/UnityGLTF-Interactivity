@@ -62,66 +62,50 @@ namespace UnityGLTF.Interactivity
             };
         }
 
-        public static IPointer ProcessCameraPointer(string[] path, List<CameraPointers> pointers)
+        public static IPointer ProcessCameraPointer(StringSpanReader reader, BehaviourEngineNode engineNode, List<CameraPointers> pointers)
         {
-            var index = int.Parse(path[2]);
-            var pointer = pointers[index];
-            var property = path[3];
+            reader.AdvanceToNextToken('/');
 
-            switch (property)
+            var nodeIndex = PointerResolver.GetNodeIndexFromArgument(reader, engineNode);
+
+            var pointer = pointers[nodeIndex];
+
+            reader.AdvanceToNextToken('/');
+
+            return reader.AsReadOnlySpan() switch
             {
-                case "orthographic":
-                    return ProcessOrthographicPointer(path, pointer);
-
-                case "perspective":
-                    return ProcessPerspectivePointer(path, pointer);
-            }
-
-            throw new InvalidOperationException($"Property {property} is unsupported at this time!");
+                var a when a.SequenceEqual("orthographic".AsSpan()) => ProcessOrthographicPointer(reader, pointer),
+                var a when a.SequenceEqual("perspective".AsSpan()) => ProcessPerspectivePointer(reader, pointer),
+                _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
+            };
         }
 
-        private static IPointer ProcessPerspectivePointer(string[] path, CameraPointers pointer)
+        private static IPointer ProcessPerspectivePointer(StringSpanReader reader, CameraPointers pointer)
         {
-            var subProperty = path[4];
+            reader.AdvanceToNextToken('/');
 
-            switch (subProperty)
+            return reader.AsReadOnlySpan() switch
             {
-                case "aspectRatio":
-                    return pointer.perspectiveAspectRatio;
-
-                case "yfov":
-                    return pointer.perspectiveYFov;
-
-                case "zfar":
-                    return pointer.zFar;
-
-                case "znear":
-                    return pointer.zNear;
-            }
-
-            throw new InvalidOperationException($"No valid subproperty {subProperty} found for perspective camera.");
+                var a when a.SequenceEqual("aspectRatio".AsSpan()) => pointer.perspectiveAspectRatio,
+                var a when a.SequenceEqual("yfov".AsSpan()) => pointer.perspectiveYFov,
+                var a when a.SequenceEqual("zfar".AsSpan()) => pointer.zFar,
+                var a when a.SequenceEqual("znear".AsSpan()) => pointer.zNear,
+                _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
+            };
         }
 
-        private static IPointer ProcessOrthographicPointer(string[] path, CameraPointers pointer)
+        private static IPointer ProcessOrthographicPointer(StringSpanReader reader, CameraPointers pointer)
         {
-            var subProperty = path[4];
+            reader.AdvanceToNextToken('/');
 
-            switch (subProperty)
+            return reader.AsReadOnlySpan() switch
             {
-                case "xmag":
-                    return pointer.orthographicXMag;
-
-                case "ymag":
-                    return pointer.orthographicYMag;
-
-                case "zfar":
-                    return pointer.zFar;
-
-                case "znear":
-                    return pointer.zNear;
-            }
-
-            throw new InvalidOperationException($"No valid subproperty {subProperty} found for orthographic camera.");
+                var a when a.SequenceEqual("xmag".AsSpan()) => pointer.orthographicXMag,
+                var a when a.SequenceEqual("ymag".AsSpan()) => pointer.orthographicYMag,
+                var a when a.SequenceEqual("zfar".AsSpan()) => pointer.zFar,
+                var a when a.SequenceEqual("znear".AsSpan()) => pointer.zNear,
+                _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
+            };
         }
     }
 }

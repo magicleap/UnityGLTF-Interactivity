@@ -129,44 +129,37 @@ namespace UnityGLTF.Interactivity
             return hoverability;
         }
 
-        public static IPointer ProcessNodePointer(string[] path, List<NodePointers> pointers)
+        public static IPointer ProcessNodePointer(StringSpanReader reader, BehaviourEngineNode engineNode, List<NodePointers> pointers)
         {
-            var nodeIndex = int.Parse(path[2]);
+            reader.AdvanceToNextToken('/');
+
+            var nodeIndex = PointerResolver.GetNodeIndexFromArgument(reader, engineNode);
+
             var nodePointer = pointers[nodeIndex];
-            var property = path[3];
 
-            switch (property)
+            reader.AdvanceToNextToken('/');
+
+            return reader.AsReadOnlySpan() switch
             {
-                case "translation":
-                    return nodePointer.translation;
-
-                case "rotation":
-                    return nodePointer.rotation;
-
-                case "scale":
-                    return nodePointer.scale;
-
-                case "extensions":
-                    return ProcessExtensionPointer(path, nodePointer);
-            }
-
-            throw new InvalidOperationException($"Property {property} is unsupported at this time!");
+                var a when a.SequenceEqual("translation".AsSpan()) => nodePointer.translation,
+                var a when a.SequenceEqual("rotation".AsSpan()) => nodePointer.rotation,
+                var a when a.SequenceEqual("scale".AsSpan()) => nodePointer.scale,
+                var a when a.SequenceEqual("extensions".AsSpan()) => ProcessExtensionPointer(reader, nodePointer),
+                _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
+            };
         }
 
-        private static IPointer ProcessExtensionPointer(string[] path, NodePointers nodePointer)
+        private static IPointer ProcessExtensionPointer(StringSpanReader reader, NodePointers nodePointer)
         {
-            var subProperty = path[4];
+            reader.AdvanceToNextToken('/');
 
-            switch (subProperty)
+            return reader.AsReadOnlySpan() switch
             {
                 // TODO: Handle these properly via extensions in UnityGLTF?
-                case "KHR_node_selectability":
-                    return nodePointer.selectability;
-                case "KHR_node_visibility":
-                    return nodePointer.visibility;
-            }
-
-            throw new InvalidOperationException($"Extension {subProperty} is unsupported at this time!");
+                var a when a.SequenceEqual("KHR_node_selectability".AsSpan()) => nodePointer.selectability,
+                var a when a.SequenceEqual("KHR_node_visibility".AsSpan()) => nodePointer.visibility,
+                _ => throw new InvalidOperationException($"Extension {reader.ToString()} is unsupported at this time!"),
+            };
         }
     }
 }

@@ -88,7 +88,7 @@ namespace UnityGLTF.Interactivity
         {
             try
             {
-                pointer = pointerResolver.GetPointer(pointerString, engineNode, this);
+                pointer = pointerResolver.GetPointer(pointerString, engineNode);
                 return true;
             }
             catch (Exception ex)

@@ -91,124 +91,96 @@ namespace UnityGLTF.Interactivity
             }
         }
 
-        public static IPointer ProcessMaterialPointer(string[] path, List<MaterialPointers> pointers)
+        public static IPointer ProcessMaterialPointer(StringSpanReader reader, BehaviourEngineNode engineNode, List<MaterialPointers> pointers)
         {
-            var matIndex = int.Parse(path[2]);
-            var matPointer = pointers[matIndex];
-            var property = path[3];
+            reader.AdvanceToNextToken('/');
 
-            switch (property)
+            var nodeIndex = PointerResolver.GetNodeIndexFromArgument(reader, engineNode);
+
+            var pointer = pointers[nodeIndex];
+
+            reader.AdvanceToNextToken('/');
+
+            return reader.AsReadOnlySpan() switch
             {
-                case "alphaCutoff":
-                    return matPointer.alphaCutoff;
-
-                case "emissiveFactor":
-                    return matPointer.emissiveFactor;
-
-                case "normalTexture":
-                    return ProcessNormalMapPointer(path, matPointer);
-
-                case "occlusionTexture":
-                    return ProcessOcclusionMapPointer(path, matPointer);
-
-                case "pbrMetallicRoughness":
-                    return ProcessPBRMetallicRoughnessPointer(path, matPointer);
-            }
-
-            throw new InvalidOperationException("No valid property found for material.");
+                var a when a.SequenceEqual("alphaCutoff".AsSpan()) => pointer.alphaCutoff,
+                var a when a.SequenceEqual("emissiveFactor".AsSpan()) => pointer.emissiveFactor,
+                var a when a.SequenceEqual("normalTexture".AsSpan()) => ProcessNormalMapPointer(reader, pointer),
+                var a when a.SequenceEqual("occlusionTexture".AsSpan()) => ProcessOcclusionMapPointer(reader, pointer),
+                var a when a.SequenceEqual("pbrMetallicRoughness".AsSpan()) => ProcessPBRMetallicRoughnessPointer(reader, pointer),
+                _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
+            };
         }
 
-        private static IPointer ProcessPBRMetallicRoughnessPointer(string[] path, MaterialPointers matPointer)
+        private static IPointer ProcessPBRMetallicRoughnessPointer(StringSpanReader reader, MaterialPointers matPointer)
         {
-            var subProperty = path[4];
+            reader.AdvanceToNextToken('/');
 
-            switch (subProperty)
+            return reader.AsReadOnlySpan() switch
             {
-                case "baseColorFactor":
-                    return matPointer.baseColorFactor;
-
-                case "baseColorTexture":
-                    return ProcessBaseColorTexturePointer(path, matPointer);
-
-                case "metallicRoughnessTexture":
-                    return ProcessMetallRoughnessTexturePointer(path, matPointer);
-
-                case "metallicFactor":
-                    return matPointer.metallicFactor;
-
-                case "roughnessFactor":
-                    return matPointer.roughnessFactor;
-            }
-
-            throw new InvalidOperationException($"No valid subproperty {subProperty} found for PBR material.");
+                var a when a.SequenceEqual("baseColorFactor".AsSpan()) => matPointer.baseColorFactor,
+                var a when a.SequenceEqual("baseColorTexture".AsSpan()) => ProcessBaseColorTexturePointer(reader, matPointer),
+                var a when a.SequenceEqual("metallicRoughnessTexture".AsSpan()) => ProcessMetallRoughnessTexturePointer(reader, matPointer),
+                var a when a.SequenceEqual("metallicFactor".AsSpan()) => matPointer.metallicFactor,
+                var a when a.SequenceEqual("roughnessFactor".AsSpan()) => matPointer.roughnessFactor,
+                _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
+            };
         }
 
-        private static IPointer ProcessBaseColorTexturePointer(string[] path, MaterialPointers matPointer)
+        private static IPointer ProcessBaseColorTexturePointer(StringSpanReader reader, MaterialPointers matPointer)
         {
             // TODO: These come in the form of baseColorTexture/extensions/KHR_texture_transform/{PROPERTY}
-            // Don't skip the extensions/KHR_texture_transform bit.
-            var subProperty = path[7];
+            // We're skipping ahead to get there with this triple-call.
+            reader.AdvanceToNextToken('/');
+            reader.AdvanceToNextToken('/');
+            reader.AdvanceToNextToken('/');
 
-            switch (subProperty)
+            return reader.AsReadOnlySpan() switch
             {
-                case "offset":
-                    return matPointer.baseOffset;
-
-                case "rotation":
-                    throw new NotImplementedException();
-
-                case "scale":
-                    return matPointer.baseScale;
-            }
-
-            throw new InvalidOperationException($"No valid subproperty {subProperty} found for texture transform.");
+                var a when a.SequenceEqual("offset".AsSpan()) => matPointer.baseOffset,
+                var a when a.SequenceEqual("rotation".AsSpan()) => throw new NotImplementedException(),
+                var a when a.SequenceEqual("scale".AsSpan()) => matPointer.baseScale,
+                _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
+            };
         }
 
-        private static IPointer ProcessMetallRoughnessTexturePointer(string[] path, MaterialPointers matPointer)
+        private static IPointer ProcessMetallRoughnessTexturePointer(StringSpanReader reader, MaterialPointers matPointer)
         {
-            // TODO: These come in the form of metallicRoughnessTexture/extensions/KHR_texture_transform/{PROPERTY}
-            // Don't skip the extensions/KHR_texture_transform bit.
-            var subProperty = path[7];
+            // TODO: These come in the form of baseColorTexture/extensions/KHR_texture_transform/{PROPERTY}
+            // We're skipping ahead to get there with this triple-call.
+            reader.AdvanceToNextToken('/');
+            reader.AdvanceToNextToken('/');
+            reader.AdvanceToNextToken('/');
 
-            switch (subProperty)
+            return reader.AsReadOnlySpan() switch
             {
-                case "offset":
-                    return matPointer.metallicRoughnessOffset;
-
-                case "rotation":
-                    throw new NotImplementedException();
-
-                case "scale":
-                    return matPointer.metallicRoughnessScale;
-            }
-
-            throw new InvalidOperationException($"No valid subproperty {subProperty} found for texture transform.");
+                var a when a.SequenceEqual("offset".AsSpan()) => matPointer.metallicRoughnessOffset,
+                var a when a.SequenceEqual("rotation".AsSpan()) => throw new NotImplementedException(),
+                var a when a.SequenceEqual("scale".AsSpan()) => matPointer.metallicRoughnessScale,
+                _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
+            };
         }
 
-        private static IPointer ProcessOcclusionMapPointer(string[] path, MaterialPointers matPointer)
+        private static IPointer ProcessOcclusionMapPointer(StringSpanReader reader, MaterialPointers matPointer)
         {
-            var subProperty = path[4];
+            reader.AdvanceToNextToken('/');
 
-            switch (subProperty)
+            return reader.AsReadOnlySpan() switch
             {
-                case "strength":
-                    return matPointer.occlusionTextureStrength;
-            }
-
-            throw new InvalidOperationException($"No valid subproperty {subProperty} found for occlusion material.");
+                var a when a.SequenceEqual("strength".AsSpan()) => matPointer.occlusionTextureStrength,
+                _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
+            };
         }
 
-        private static IPointer ProcessNormalMapPointer(string[] path, MaterialPointers matPointer)
+        private static IPointer ProcessNormalMapPointer(StringSpanReader reader, MaterialPointers matPointer)
         {
-            var subProperty = path[4];
+            reader.AdvanceToNextToken('/');
 
-            switch (subProperty)
+            return reader.AsReadOnlySpan() switch
             {
-                case "scale":
-                    return matPointer.normalTextureScale;
-            }
-
-            throw new InvalidOperationException($"No valid subproperty {subProperty} found for normal material.");
+                var a when a.SequenceEqual("scale".AsSpan()) => matPointer.normalTextureScale,
+                _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
+            };
         }
     }
 }

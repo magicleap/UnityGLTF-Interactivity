@@ -16,10 +16,6 @@ namespace UnityGLTF.Interactivity
 
         public ReadOnlyCollection<NodePointers> nodePointers { get; private set; }
 
-        private readonly Dictionary<string, IPointer> _pointerCache = new();
-
-        private static readonly Regex _variableRegex = new("{(.*?)}");
-
         public PointerResolver(GLTFSceneImporter importer)
         {
             RegisterNodes(importer);
@@ -39,7 +35,6 @@ namespace UnityGLTF.Interactivity
 
                 if (nodeGameObjects[i].TryGetComponent(out Camera cam))
                 {
-                    cam.enabled = true;
                     Util.Log($"Registered Camera", nodeGameObjects[i]);
                     _cameraPointers.Add(new CameraPointers(cam));
                 }
@@ -55,29 +50,6 @@ namespace UnityGLTF.Interactivity
             {
                 _materialPointers.Add(new MaterialPointers(materials[i].UnityMaterialWithVertexColor));
             }
-        }
-
-        public IPointer GetPointer(string pointerString, BehaviourEngineNode engineNode, BehaviourEngine engine)
-        {
-            var str = pointerString;
-
-            var matches = _variableRegex.Matches(str);
-
-            var values = engineNode.values;
-
-            foreach (Match match in matches)
-            {
-                str = str.Replace(match.Value, engine.ParseValue(values[match.Groups[1].Value]).ToString());
-            }
-
-            if (_pointerCache.TryGetValue(str, out IPointer pointer))
-                return pointer;
-
-            pointer = GetPointer(str);
-
-            _pointerCache.Add(str, pointer);
-
-            return pointer;
         }
 
         public NodePointers PointersOf(GameObject go)
@@ -102,40 +74,45 @@ namespace UnityGLTF.Interactivity
             return -1;
         }
 
-        private IPointer GetPointer(string pointerString)
+        public IPointer GetPointer(string pointerString, BehaviourEngineNode engineNode)
         {
             Util.Log($"Getting pointer: {pointerString}");
 
-            var path = pointerString.Split("/");
+            var reader = new StringSpanReader(pointerString);
 
-            switch (path[1])
+            reader.Slice('/', '/');
+
+            return reader.AsReadOnlySpan() switch
             {
-                case "nodes":
-                    return NodePointers.ProcessNodePointer(path, _nodePointers);
+                var a when a.SequenceEqual("nodes".AsSpan()) => NodePointers.ProcessNodePointer(reader, engineNode, _nodePointers),
+                var a when a.SequenceEqual("materials".AsSpan()) => MaterialPointers.ProcessMaterialPointer(reader, engineNode, _materialPointers),
+                var a when a.SequenceEqual("activeCamera".AsSpan()) => _activeCameraPointers.ProcessActiveCameraPointer(reader),
+                var a when a.SequenceEqual("cameras".AsSpan()) => CameraPointers.ProcessCameraPointer(reader, engineNode, _cameraPointers),
+                var a when a.SequenceEqual(Pointers.ANIMATIONS_LENGTH.AsSpan()) => _scenePointers.animationsLength,
+                var a when a.SequenceEqual(Pointers.MATERIALS_LENGTH.AsSpan()) => _scenePointers.materialsLength,
+                var a when a.SequenceEqual(Pointers.MESHES_LENGTH.AsSpan()) => _scenePointers.meshesLength,
+                var a when a.SequenceEqual(Pointers.NODES_LENGTH.AsSpan()) => _scenePointers.nodesLength,
+                _ => throw new InvalidOperationException($"No valid pointer found with name {reader.ToString()}"),
+            };
+        }
 
-                case "materials":
-                    return MaterialPointers.ProcessMaterialPointer(path, _materialPointers);
+        public static int GetNodeIndexFromArgument(StringSpanReader reader, BehaviourEngineNode engineNode)
+        {
+            int nodeIndex;
 
-                case "activeCamera":
-                    return _activeCameraPointers.ProcessActiveCameraPointer(path[2]);
-
-                case "cameras":
-                    return CameraPointers.ProcessCameraPointer(path, _cameraPointers);
-
-                case Pointers.ANIMATIONS_LENGTH:
-                    return _scenePointers.animationsLength;
-
-                case Pointers.MATERIALS_LENGTH:
-                    return _scenePointers.materialsLength;
-
-                case Pointers.MESHES_LENGTH:
-                    return _scenePointers.meshesLength;
-
-                case Pointers.NODES_LENGTH:
-                    return _scenePointers.nodesLength;
+            if (reader[0] == '{')
+            {
+                reader.Slice('{', '}');
+                // Can't access the values dictionary with a Span, prevents this from being 0 allocation.
+                var property = (Property<int>)engineNode.engine.ParseValue(engineNode.values[reader.ToString()]);
+                nodeIndex = property.value;
+            }
+            else
+            {
+                nodeIndex = int.Parse(reader.AsReadOnlySpan());
             }
 
-            throw new InvalidOperationException("No valid pointer found.");
+            return nodeIndex;
         }
     }
 }

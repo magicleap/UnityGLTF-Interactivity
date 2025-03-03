@@ -6,6 +6,7 @@ namespace UnityGLTF.Interactivity
 {
     public struct ActiveCameraPointers
     {
+        // These are readonly in the spec but I'm a rebel
         public Pointer<Vector3> translation;
         public Pointer<Quaternion> rotation;
 
@@ -34,18 +35,16 @@ namespace UnityGLTF.Interactivity
             return pointers;
         }
 
-        public IPointer ProcessActiveCameraPointer(string property)
+        public IPointer ProcessActiveCameraPointer(StringSpanReader reader)
         {
-            switch (property)
+            reader.AdvanceToNextToken('/');
+
+            return reader.AsReadOnlySpan() switch
             {
-                case "translation":
-                    return translation;
-
-                case "rotation":
-                    return rotation;
-            }
-
-            throw new InvalidOperationException($"Active Camera Property {property} is unsupported at this time!");
+                var a when a.SequenceEqual("translation".AsSpan()) => translation,
+                var a when a.SequenceEqual("rotation".AsSpan()) => rotation,
+                _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
+            };
         }
     }
 }
