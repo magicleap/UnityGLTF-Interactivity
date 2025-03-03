@@ -50,14 +50,14 @@ namespace UnityGLTF.Interactivity
             {
                 setter = (v) => go.transform.SetFromLocalMatrix(v, isRightHanded: true),
                 getter = () => go.transform.GetLocalMatrix(isRightHanded: true),
-                evaluator = null // Interpolation between two matrices is undefined.
+                evaluator = (a, b, t) => a.LerpToComponentwise(b, t) // Spec has floatNxN lerp componentwise.
             };
 
             globalMatrix = new Pointer<Matrix4x4>()
             {
                 setter = (v) => go.transform.SetFromWorldMatrix(v, isRightHanded: true),
                 getter = () => go.transform.GetWorldMatrix(isRightHanded: true),
-                evaluator = null // Interpolation between two matrices is undefined.
+                evaluator = (a, b, t) => a.LerpToComponentwise(b, t) // Spec has floatNxN lerp componentwise.
             };
 
             // TODO: Handle visibility pointers better? Do we report the value back to the extension?
