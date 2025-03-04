@@ -11,16 +11,16 @@ namespace UnityGLTF.Interactivity
         public float duration;
         public Vector2 cp0;
         public Vector2 cp1;
-        public CancellationToken cancellationToken;
+        public InterpolateCancelToken cancellationToken;
     }
 
     public static partial class Helpers
     {
-        public static async Task<bool> InterpolateAsync<T>(T from, T to, Action<T> setter, Func<T, T, float, T> evaluator, float duration, CancellationToken cancellationToken)
+        public static async Task<bool> InterpolateAsync<T,V>(T from, T to, Action<T> setter, Func<T, T, float, T> evaluator, float duration, V cancellationToken) where V : struct, ICancelToken
         {
             for (float t = 0f; t < 1f; t += Time.deltaTime / duration)
             {
-                if (cancellationToken.IsCancellationRequested)
+                if (cancellationToken.isCancelled)
                     return false;
 
                 setter(evaluator(from, to, t));
@@ -30,7 +30,7 @@ namespace UnityGLTF.Interactivity
             return true;
         }
 
-        public static async Task<bool> LinearInterpolateAsync<T>(T to, Pointer<T> pointer, float duration, CancellationToken cancellationToken)
+        public static async Task<bool> LinearInterpolateAsync<T,V>(T to, Pointer<T> pointer, float duration, V cancellationToken) where V : struct, ICancelToken
         {
             return await InterpolateAsync(pointer.getter(), to, pointer.setter, pointer.evaluator, duration, cancellationToken);
         }

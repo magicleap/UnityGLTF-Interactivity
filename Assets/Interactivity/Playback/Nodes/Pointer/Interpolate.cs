@@ -13,6 +13,8 @@ namespace UnityGLTF.Interactivity
         private float _duration;
         private Vector2 _p1, _p2;
 
+        private CancellationTokenSource _localCancellationToken = new();
+
         public PointerInterpolate(BehaviourEngine engine, Node node) : base(engine, node)
         {
         }
@@ -48,23 +50,25 @@ namespace UnityGLTF.Interactivity
 
         private async Task<bool> InterpolateAsync(CancellationToken cancellationToken)
         {
+            CancelPreviousInterpolationIfApplicable();
+
             var data = new BezierInterpolateData()
             {
                 pointer = _pointer,
                 duration = _duration,
                 cp0 = _p1,
                 cp1 = _p2,
-                cancellationToken = cancellationToken
+                cancellationToken = new InterpolateCancelToken(cancellationToken, _localCancellationToken.Token)
             };
 
             return _interpGoal switch
             {
                 // Cast to float so we can interp with int arguments.
-                Property<int>       property => await Helpers.InterpolateBezierAsync(property, data),
-                Property<float>     property => await Helpers.InterpolateBezierAsync(property, data),
-                Property<Vector2>   property => await Helpers.InterpolateBezierAsync(property, data),
-                Property<Vector3>   property => await ProcessVector3(property, data),
-                Property<Vector4>   property => await ProcessVector4(property, data),
+                Property<int> property => await Helpers.InterpolateBezierAsync(property, data),
+                Property<float> property => await Helpers.InterpolateBezierAsync(property, data),
+                Property<Vector2> property => await Helpers.InterpolateBezierAsync(property, data),
+                Property<Vector3> property => await ProcessVector3(property, data),
+                Property<Vector4> property => await ProcessVector4(property, data),
                 Property<Matrix4x4> property => await Helpers.InterpolateBezierAsync(property, data),
                 _ => throw new InvalidOperationException($"Type {_interpGoal.GetTypeSignature()} is not supported for interpolation."),
             };
@@ -89,6 +93,13 @@ namespace UnityGLTF.Interactivity
                 Pointer<Quaternion> => await Helpers.InterpolateBezierAsync(Quaternion.Euler(property.value), data),
                 _ => throw new InvalidOperationException($"Pointer type {data.pointer.GetSystemType()} is not supported for this Vector3 property."),
             };
+        }
+
+        private void CancelPreviousInterpolationIfApplicable()
+        {
+            _localCancellationToken.Cancel();
+            _localCancellationToken.Dispose();
+            _localCancellationToken = new();
         }
     }
 }

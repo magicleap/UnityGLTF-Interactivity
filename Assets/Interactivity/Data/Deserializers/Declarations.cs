@@ -42,7 +42,7 @@ namespace UnityGLTF.Interactivity
 
         private static List<ValueSocket> GetValueSockets(JObject jList)
         {
-            if (jList.Count <= 0)
+            if (jList == null || jList.Count <= 0)
                 return null;
 
             var valueSockets = new List<ValueSocket>();

@@ -114,6 +114,7 @@ namespace UnityGLTF.Interactivity
         public void CancelExecution()
         {
             _cancellationToken.Cancel();
+            _cancellationToken.Dispose();
             _cancellationToken = new();
         }
     }
