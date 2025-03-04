@@ -58,7 +58,7 @@ namespace UnityGLTF.Interactivity
                 duration = _duration,
                 cp0 = _p1,
                 cp1 = _p2,
-                cancellationToken = new InterpolateCancelToken(cancellationToken, _localCancellationToken.Token)
+                cancellationToken = new NodeEngineCancelToken(cancellationToken, _localCancellationToken.Token)
             };
 
             return _interpGoal switch

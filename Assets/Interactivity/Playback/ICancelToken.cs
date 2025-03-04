@@ -1,6 +1,4 @@
-using System;
 using System.Threading;
-using UnityEngine;
 
 namespace UnityGLTF.Interactivity
 {
@@ -9,32 +7,32 @@ namespace UnityGLTF.Interactivity
         public bool isCancelled { get; }
     }
 
-    public struct InterpolateCancelToken : ICancelToken
+    public struct NodeEngineCancelToken : ICancelToken
     {
-        public CancellationToken globalToken;
-        public CancellationToken localToken;
+        public CancellationToken engineToken;
+        public CancellationToken nodeToken;
 
-        public InterpolateCancelToken(CancellationToken globalToken, CancellationToken localToken)
+        public NodeEngineCancelToken(CancellationToken engineToken, CancellationToken nodeToken)
         {
-            this.globalToken = globalToken;
-            this.localToken = localToken;
+            this.engineToken = engineToken;
+            this.nodeToken = nodeToken;
         }
 
-        public bool isCancelled => globalToken.IsCancellationRequested || localToken.IsCancellationRequested;
+        public bool isCancelled => engineToken.IsCancellationRequested || nodeToken.IsCancellationRequested;
     }
 
-    public struct CancelToken : ICancelToken
+    public struct EngineCancelToken : ICancelToken
     {
-        public CancellationToken globalToken;
+        public CancellationToken engineToken;
 
-        public CancelToken(CancellationToken globalToken)
+        public EngineCancelToken(CancellationToken engineToken)
         {
-            this.globalToken = globalToken;
+            this.engineToken = engineToken;
         }
 
-        public bool isCancelled => globalToken.IsCancellationRequested;
+        public bool isCancelled => engineToken.IsCancellationRequested;
 
-        public static implicit operator CancellationToken(CancelToken d) => d.globalToken;
-        public static implicit operator CancelToken(CancellationToken d) => new CancelToken(d);
+        public static implicit operator CancellationToken(EngineCancelToken d) => d.engineToken;
+        public static implicit operator EngineCancelToken(CancellationToken d) => new EngineCancelToken(d);
     }
 }

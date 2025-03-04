@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -11,8 +10,6 @@ namespace UnityGLTF.Interactivity
 
         private AnimationState _currentAnimation;
         private AnimationState[] _animations;
-
-        private bool _isPlaying;
 
         public void SetData(Animation animationComponent)
         {
@@ -36,15 +33,10 @@ namespace UnityGLTF.Interactivity
             animationComponent.Sample();
         }
 
-        public async Task<bool> PlayAnimationAsync(int animationIndex, float startTime, float endTime, float speed, CancellationToken cancellationToken)
+        public async Task<bool> PlayAnimationAsync<T>(int animationIndex, float startTime, float endTime, float speed, T cancellationToken) where T : struct, ICancelToken
         {
             if (animationComponent == null)
                 throw new InvalidOperationException("No animations present in this glb!");
-
-            if (_isPlaying) // TODO: Figure out how Khronos intends for us to handle this edge case.
-                throw new InvalidOperationException("Tried to play an animation while another is already playing!");
-
-            _isPlaying = true;
 
             if (_currentAnimation != null)
                 SampleAnimationAtTime(0);
@@ -57,19 +49,14 @@ namespace UnityGLTF.Interactivity
 
             for (float t = startTime; t < endTime; t += Time.deltaTime / clipTime * speed)
             {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    _isPlaying = false;
+                if (cancellationToken.isCancelled)
                     return false;
-                }
 
                 SampleAnimationAtTime(t * clipTime);
                 await Task.Yield();
             }
 
             SampleAnimationAtTime(endTime * clipTime);
-
-            _isPlaying = false;
 
             return true;
         }

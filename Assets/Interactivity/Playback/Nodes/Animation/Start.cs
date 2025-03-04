@@ -10,6 +10,8 @@ namespace UnityGLTF.Interactivity
         private float _startTime;
         private float _endTime;
 
+        private CancellationTokenSource _localCancellationToken = new();
+
         public AnimationStart(BehaviourEngine engine, Node node) : base(engine, node)
         {
         }
@@ -26,7 +28,9 @@ namespace UnityGLTF.Interactivity
 
             TryExecuteFlow(ConstStrings.OUT);
 
-            await engine.PlayAnimationAsync(_animationIndex, _startTime, _endTime, _speed, cancellationToken);
+            CancelAnimationIfApplicable();
+
+            await engine.PlayAnimationAsync(_animationIndex, _startTime, _endTime, _speed, new NodeEngineCancelToken(cancellationToken, _localCancellationToken.Token));
 
             TryExecuteFlow(ConstStrings.DONE);
         }
@@ -72,6 +76,13 @@ namespace UnityGLTF.Interactivity
                 return false;
 
             return true;
+        }
+
+        private void CancelAnimationIfApplicable()
+        {
+            _localCancellationToken.Cancel();
+            _localCancellationToken.Dispose();
+            _localCancellationToken = new();
         }
     }
 }

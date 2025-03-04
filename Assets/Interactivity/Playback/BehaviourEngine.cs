@@ -100,7 +100,7 @@ namespace UnityGLTF.Interactivity
             return false;
         }
 
-        public async Task PlayAnimationAsync(int animationIndex, float startTime, float endTime, float speed, CancellationToken cancellationToken)
+        public async Task PlayAnimationAsync<T>(int animationIndex, float startTime, float endTime, float speed, T cancellationToken) where T : struct, ICancelToken
         {
             if (animationWrapper == null)
             {

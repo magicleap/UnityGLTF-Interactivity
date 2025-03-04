@@ -11,7 +11,7 @@ namespace UnityGLTF.Interactivity
         public float duration;
         public Vector2 cp0;
         public Vector2 cp1;
-        public InterpolateCancelToken cancellationToken;
+        public NodeEngineCancelToken cancellationToken;
     }
 
     public static partial class Helpers
