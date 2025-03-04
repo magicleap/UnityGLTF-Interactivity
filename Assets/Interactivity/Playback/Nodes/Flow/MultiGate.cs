@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using UnityEngine;
 
 namespace UnityGLTF.Interactivity
 {
+    //TODO test
     public class FlowMultiGate : BehaviourEngineNode
     {
         private bool isRandom;
         private bool isLoop;
+        private int rand;
+        //Maximum reps before the do-while loop automatically exits
+        private int maxReps = 99;
 
         public FlowMultiGate(BehaviourEngine engine, Node node) : base(engine, node)
         {
@@ -17,27 +20,26 @@ namespace UnityGLTF.Interactivity
 
         protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
-            //if is random, execute the random flow
-            //otherwise operate like a sequence?
-            if (isRandom)
+            List<Flow> executionSequence = node.flows;
+            do
             {
-                System.Random rand = new System.Random();
-                //GetItems is bugged?
-                //int[] randomizedSequence = rand.GetItems<int>(node.flows, node.flows.Count);
-
-                // foreach (int randomOutput in randomizedSequence)
-                // {
-                //     engine.ExecuteFlow(node.flows[randomOutput]);
-                // }
-            }
-            else
-            {
-                for (int i = 0; i < node.flows.Count; i++)
+                if (isRandom)
                 {
-                    engine.ExecuteFlow(node.flows[i]);
+                    Random r = new Random();
+                    for (int i = node.flows.Count; i > 0; --i)
+                    {
+                        rand = r.Next(i + 1);
+                        //swap values using tuple
+                        (executionSequence[rand], executionSequence[i]) = (executionSequence[i], executionSequence[rand]);
+                    }
                 }
-            }
 
+                foreach (Flow output in executionSequence)
+                {
+                    engine.ExecuteFlow(output);
+                }
+                maxReps--;
+            } while (isLoop && maxReps > 0);
         }
 
         public override bool ValidateValues(string socket)
