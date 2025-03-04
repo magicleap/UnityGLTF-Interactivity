@@ -39,10 +39,11 @@ namespace UnityGLTF.Interactivity
         {
             reader.AdvanceToNextToken('/');
 
+            // Path so far: /activeCamera/
             return reader.AsReadOnlySpan() switch
             {
-                var a when a.SequenceEqual("translation".AsSpan()) => translation,
-                var a when a.SequenceEqual("rotation".AsSpan()) => rotation,
+                var a when a.Is("translation") => translation,
+                var a when a.Is("rotation") => rotation,
                 _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
             };
         }

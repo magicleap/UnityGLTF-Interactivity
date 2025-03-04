@@ -139,12 +139,13 @@ namespace UnityGLTF.Interactivity
 
             reader.AdvanceToNextToken('/');
 
+            // Path so far: /nodes/{}/
             return reader.AsReadOnlySpan() switch
             {
-                var a when a.SequenceEqual("translation".AsSpan()) => nodePointer.translation,
-                var a when a.SequenceEqual("rotation".AsSpan()) => nodePointer.rotation,
-                var a when a.SequenceEqual("scale".AsSpan()) => nodePointer.scale,
-                var a when a.SequenceEqual("extensions".AsSpan()) => ProcessExtensionPointer(reader, nodePointer),
+                var a when a.Is("translation") => nodePointer.translation,
+                var a when a.Is("rotation") => nodePointer.rotation,
+                var a when a.Is("scale") => nodePointer.scale,
+                var a when a.Is("extensions") => ProcessExtensionPointer(reader, nodePointer),
                 _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
             };
         }
@@ -153,11 +154,12 @@ namespace UnityGLTF.Interactivity
         {
             reader.AdvanceToNextToken('/');
 
+            // Path so far: /nodes/{}/extensions
             return reader.AsReadOnlySpan() switch
             {
                 // TODO: Handle these properly via extensions in UnityGLTF?
-                var a when a.SequenceEqual("KHR_node_selectability".AsSpan()) => nodePointer.selectability,
-                var a when a.SequenceEqual("KHR_node_visibility".AsSpan()) => nodePointer.visibility,
+                var a when a.Is("KHR_node_selectability") => nodePointer.selectability,
+                var a when a.Is("KHR_node_visibility") => nodePointer.visibility,
                 _ => throw new InvalidOperationException($"Extension {reader.ToString()} is unsupported at this time!"),
             };
         }

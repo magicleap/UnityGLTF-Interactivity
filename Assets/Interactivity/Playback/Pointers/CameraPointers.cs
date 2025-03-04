@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityGLTF.Interactivity.Extensions;
 
 namespace UnityGLTF.Interactivity
 {
@@ -72,10 +73,11 @@ namespace UnityGLTF.Interactivity
 
             reader.AdvanceToNextToken('/');
 
+            // Path so far: /cameras/{}/
             return reader.AsReadOnlySpan() switch
             {
-                var a when a.SequenceEqual("orthographic".AsSpan()) => ProcessOrthographicPointer(reader, pointer),
-                var a when a.SequenceEqual("perspective".AsSpan()) => ProcessPerspectivePointer(reader, pointer),
+                var a when a.Is("orthographic") => ProcessOrthographicPointer(reader, pointer),
+                var a when a.Is("perspective") => ProcessPerspectivePointer(reader, pointer),
                 _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
             };
         }
@@ -84,12 +86,13 @@ namespace UnityGLTF.Interactivity
         {
             reader.AdvanceToNextToken('/');
 
+            // Path so far: /cameras/{}/perspective
             return reader.AsReadOnlySpan() switch
             {
-                var a when a.SequenceEqual("aspectRatio".AsSpan()) => pointer.perspectiveAspectRatio,
-                var a when a.SequenceEqual("yfov".AsSpan()) => pointer.perspectiveYFov,
-                var a when a.SequenceEqual("zfar".AsSpan()) => pointer.zFar,
-                var a when a.SequenceEqual("znear".AsSpan()) => pointer.zNear,
+                var a when a.Is("aspectRatio") => pointer.perspectiveAspectRatio,
+                var a when a.Is("yfov") => pointer.perspectiveYFov,
+                var a when a.Is("zfar") => pointer.zFar,
+                var a when a.Is("znear") => pointer.zNear,
                 _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
             };
         }
@@ -98,12 +101,13 @@ namespace UnityGLTF.Interactivity
         {
             reader.AdvanceToNextToken('/');
 
+            // Path so far: /cameras/{}/orthographic
             return reader.AsReadOnlySpan() switch
             {
-                var a when a.SequenceEqual("xmag".AsSpan()) => pointer.orthographicXMag,
-                var a when a.SequenceEqual("ymag".AsSpan()) => pointer.orthographicYMag,
-                var a when a.SequenceEqual("zfar".AsSpan()) => pointer.zFar,
-                var a when a.SequenceEqual("znear".AsSpan()) => pointer.zNear,
+                var a when a.Is("xmag") => pointer.orthographicXMag,
+                var a when a.Is("ymag") => pointer.orthographicYMag,
+                var a when a.Is("zfar") => pointer.zFar,
+                var a when a.Is("znear") => pointer.zNear,
                 _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
             };
         }

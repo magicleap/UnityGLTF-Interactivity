@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityGLTF.Interactivity.Materials;
 
 namespace UnityGLTF.Interactivity
 {

@@ -1,3 +1,5 @@
+using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity.Extensions
@@ -13,6 +15,12 @@ namespace UnityGLTF.Interactivity.Extensions
                 return true;
 
             return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Is(this ReadOnlySpan<char> span, string str)
+        {
+            return span.SequenceEqual(str.AsSpan());
         }
     }
 }
