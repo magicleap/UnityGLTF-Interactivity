@@ -6,21 +6,25 @@ namespace UnityGLTF.Interactivity
 {
     public class FlowCancelDelay : BehaviourEngineNode
     {
+        private int delayIndex;
         public FlowCancelDelay(BehaviourEngine engine, Node node) : base(engine, node)
         {
 
         }
 
+        public override IProperty GetOutputValue(string socket)
+        {
+            if (socket == ConstStrings.LAST_DELAY_INDEX)
+                throw new NotImplementedException("No idea what this should do so it never got implemented."); // TODO
+
+            throw new ArgumentException($"Socket {socket} is not valid on this node!");
+        }
+
         protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
-            Util.Log($"Canceling a delay");
+            Util.Log($"Canceling the delayed output flow");
 
-            // for (_index = _startIndex; _index < _endIndex; _index++)
-            // {
-            //     TryExecuteFlow(ConstStrings.LOOP_BODY);
-            // }
-
-            TryExecuteFlow(ConstStrings.COMPLETED);
+            TryExecuteFlow(ConstStrings.OUT);
         }
 
         public override bool ValidateValues(string socket)
