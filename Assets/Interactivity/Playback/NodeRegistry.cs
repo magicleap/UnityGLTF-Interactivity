@@ -86,6 +86,7 @@ namespace UnityGLTF.Interactivity
             ["event/onStart"] = new EventOnStartSpecs(),
             ["math/abs"] = new MathAbsSpec(),
             ["pointer/interpolate"] = new PointerInterpolateSpecs(),
+            ["pointer/set"] = new PointerSetSpecs(),
         };
     }
 }

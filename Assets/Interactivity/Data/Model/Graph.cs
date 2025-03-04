@@ -125,6 +125,17 @@ namespace UnityGLTF.Interactivity
             };
         }
 
+        public int IndexOfType(string signature)
+        {
+            for (int i = 0; i < types.Count; i++)
+            {
+                if (types[i].signature.Equals(signature))
+                    return i;
+            }
+
+            return -1;
+        }
+
         public IProperty GetDefaultPropertyForType(int typeIndex)
         {
             return Helpers.GetDefaultProperty(typeIndex, systemTypes);

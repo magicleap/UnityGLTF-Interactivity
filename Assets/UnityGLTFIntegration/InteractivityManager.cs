@@ -106,6 +106,8 @@ namespace UnityGLTF.Interactivity
             try
             {
                 var defaultGraphIndex = interactivityGraph.extensionData.defaultGraphIndex;
+                // Can be used to inject a graph created from code in a hacky way for testing.
+                //interactivityGraph.extensionData.graphs[defaultGraphIndex] = TestGraph.CreateTestGraph();
                 var defaultGraph = interactivityGraph.extensionData.graphs[defaultGraphIndex];
                 _behaviourEngine = new BehaviourEngine(defaultGraph, new PointerResolver(importer));
             }

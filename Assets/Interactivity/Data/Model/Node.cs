@@ -20,6 +20,15 @@ namespace UnityGLTF.Interactivity
 
         public Value AddValue<T>(string id, T value)
         {
+            for (int i = 0; i < values.Count; i++)
+            {
+                if (!values[i].id.Equals(id))
+                    continue;
+
+                values[i].property = new Property<T>(value);
+                return values[i];
+            }
+
             var v = new Value()
             {
                 id = id,
@@ -117,6 +126,15 @@ namespace UnityGLTF.Interactivity
 
         public Configuration AddConfiguration(string id, JArray value)
         {
+            for (int i = 0; i < configuration.Count; i++)
+            {
+                if (!configuration[i].id.Equals(id))
+                    continue;
+
+                configuration[i].value = value;
+                return configuration[i];
+            }
+
             var config = new Configuration()
             {
                 id = id,

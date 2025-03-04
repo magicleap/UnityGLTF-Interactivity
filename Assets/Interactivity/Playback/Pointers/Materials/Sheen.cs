@@ -6,9 +6,9 @@ namespace UnityGLTF.Interactivity.Materials
 {
     public struct SheenPointers
     {
-        private static readonly int rotationHash = Shader.PropertyToID("sheenTextureRotation");
-        private static readonly int textureHash = Shader.PropertyToID("sheenTexture");
-        private static readonly int texCoordHash = Shader.PropertyToID("sheenTextureTexCoord");
+        private static readonly int rotationHash = Shader.PropertyToID("sheenColorTextureRotation");
+        private static readonly int textureHash = Shader.PropertyToID("sheenColorTexture");
+        private static readonly int texCoordHash = Shader.PropertyToID("sheenColorTextureTexCoord");
         private static readonly int colorFactorHash = Shader.PropertyToID("sheenColorFactor");
 
         public TransformPointers transformPointers;
