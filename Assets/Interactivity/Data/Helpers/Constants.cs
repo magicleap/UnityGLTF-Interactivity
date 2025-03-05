@@ -49,6 +49,7 @@ namespace UnityGLTF.Interactivity
         public const string ANIMATION = "animation";
         public const string SPEED = "speed";
         public const string START_TIME = "startTime";
+        public const string STOP_TIME = "stopTime";
         public const string END_TIME = "endTime";
         public const string CANCEL = "cancel";
 

@@ -11,7 +11,7 @@ namespace UnityGLTF.Interactivity
     {
         public readonly Graph graph;
         public readonly Dictionary<Node, BehaviourEngineNode> engineNodes = new();
-        public AnimationWrapper animationWrapper { get; set; }
+        public AnimationWrapper animationWrapper { get; private set; }
 
         public event Action onStart;
 
@@ -100,15 +100,34 @@ namespace UnityGLTF.Interactivity
             return false;
         }
 
-        public async Task PlayAnimationAsync<T>(int animationIndex, float startTime, float endTime, float speed, T cancellationToken) where T : struct, ICancelToken
+        public void SetAnimationWrapper(AnimationWrapper wrapper, Animation animation)
         {
-            if (animationWrapper == null)
-            {
-                Util.LogWarning("Tried to play an animation on a glb that has no animations.");
-                return;
-            }
+            animationWrapper = wrapper;
+            wrapper.SetData(this, animation);
+        }
 
-            await animationWrapper.PlayAnimationAsync(animationIndex, startTime, endTime, speed, cancellationToken);
+        public void PlayAnimation(in AnimationData data)
+        {
+            if (!HasAnimationWrapper())
+                return;
+
+            animationWrapper.PlayAnimation(data);
+        }
+
+        public void StopAnimation(int index)
+        {
+            if (!HasAnimationWrapper())
+                return;
+
+            animationWrapper.StopAnimation(index);
+        }
+
+        public void StopAnimationAt(int index, float stopTime, Action callback)
+        {
+            if (!HasAnimationWrapper())
+                return;
+
+            animationWrapper.StopAnimationAt(index, stopTime, callback);
         }
 
         public void CancelExecution()
@@ -116,6 +135,17 @@ namespace UnityGLTF.Interactivity
             _cancellationToken.Cancel();
             _cancellationToken.Dispose();
             _cancellationToken = new();
+        }
+
+        public bool HasAnimationWrapper()
+        {
+            if (animationWrapper == null)
+            {
+                Util.LogWarning("Tried to play an animation on a glb that has no animations.");
+                return false;
+            }
+
+            return true;
         }
     }
 }

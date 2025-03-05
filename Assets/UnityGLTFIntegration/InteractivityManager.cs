@@ -122,8 +122,7 @@ namespace UnityGLTF.Interactivity
             if (!importer.AnimationCache.IsNullOrEmpty())
             {
                 animationWrapper = importer.SceneParent.gameObject.AddComponent<AnimationWrapper>();
-                animationWrapper.SetData(importer.LastLoadedScene.GetComponents<Animation>()[0]);
-                _behaviourEngine.animationWrapper = animationWrapper;
+                _behaviourEngine.SetAnimationWrapper(animationWrapper, importer.LastLoadedScene.GetComponents<Animation>()[0]);
             }
 
             var eventWrapper = importer.SceneParent.gameObject.AddComponent<EventWrapper>();

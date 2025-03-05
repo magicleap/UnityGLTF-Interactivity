@@ -21,6 +21,8 @@ namespace UnityGLTF.Interactivity
         private static readonly Dictionary<string, Func<BehaviourEngine, Node, BehaviourEngineNode>> nodeTypes = new()
         {
             ["animation/start"] = (engine, node) => new AnimationStart(engine, node),
+            ["animation/stop"] = (engine, node) => new AnimationStop(engine, node),
+            ["animation/stopAt"] = (engine, node) => new AnimationStopAt(engine, node),
             ["debug/log"] = (engine, node) => new DebugLog(engine, node),
             ["event/onStart"] = (engine, node) => new EventOnStart(engine, node),
             ["event/onSelect"] = (engine, node) => new EventOnSelect(engine, node),

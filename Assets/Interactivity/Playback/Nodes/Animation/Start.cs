@@ -10,13 +10,11 @@ namespace UnityGLTF.Interactivity
         private float _startTime;
         private float _endTime;
 
-        private CancellationTokenSource _localCancellationToken = new();
-
         public AnimationStart(BehaviourEngine engine, Node node) : base(engine, node)
         {
         }
 
-        protected override async void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
+        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
             if (validationResult != ValidationResult.Valid)
             {
@@ -28,11 +26,18 @@ namespace UnityGLTF.Interactivity
 
             TryExecuteFlow(ConstStrings.OUT);
 
-            CancelAnimationIfApplicable();
+            var data = new AnimationData()
+            {
+                index = _animationIndex,
+                startTime = _startTime,
+                endTime = _endTime,
+                stopTime = _endTime,
+                speed = _speed,
+                unityStartTime = Time.time,
+                endDone = () => TryExecuteFlow(ConstStrings.DONE)
+            };
 
-            await engine.PlayAnimationAsync(_animationIndex, _startTime, _endTime, _speed, new NodeEngineCancelToken(cancellationToken, _localCancellationToken.Token));
-
-            TryExecuteFlow(ConstStrings.DONE);
+            engine.PlayAnimation(data);
         }
 
         public override bool ValidateValues(string socket)
@@ -76,13 +81,6 @@ namespace UnityGLTF.Interactivity
                 return false;
 
             return true;
-        }
-
-        private void CancelAnimationIfApplicable()
-        {
-            _localCancellationToken.Cancel();
-            _localCancellationToken.Dispose();
-            _localCancellationToken = new();
         }
     }
 }

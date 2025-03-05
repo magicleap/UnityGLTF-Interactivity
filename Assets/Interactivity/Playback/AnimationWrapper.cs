@@ -1,9 +1,23 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace UnityGLTF.Interactivity
 {
+    public struct AnimationData
+    {
+        public int index;
+        public float startTime;
+        public float endTime;
+        public float stopTime;
+        public float speed;
+        public float unityStartTime;
+        public Action endDone;
+        public Action stopDone;
+    }
+
     public class AnimationWrapper : MonoBehaviour
     {
         public Animation animationComponent { get; private set; }
@@ -11,8 +25,17 @@ namespace UnityGLTF.Interactivity
         private AnimationState _currentAnimation;
         private AnimationState[] _animations;
 
-        public void SetData(Animation animationComponent)
+        private Dictionary<int, AnimationData> _animationsInProgress = new();
+
+        private BehaviourEngine _engine;
+
+        public void SetData(BehaviourEngine behaviourEngine, Animation animationComponent)
         {
+            if (_engine != null)
+                _engine.onTick -= OnTick;
+
+            _engine = behaviourEngine;
+            _engine.onTick += OnTick;
             this.animationComponent = animationComponent;
 
             var clipCount = animationComponent.GetClipCount();
@@ -27,38 +50,111 @@ namespace UnityGLTF.Interactivity
             }
         }
 
-        private void SampleAnimationAtTime(float t)
+        private void OnTick()
         {
-            _currentAnimation.time = t;
-            animationComponent.Sample();
+            var temp = DictionaryPool<int, AnimationData>.Get();
+            try
+            {
+                foreach (var anim in _animationsInProgress)
+                {
+                    temp.Add(anim.Key, anim.Value);
+                }
+
+                foreach (var anim in temp)
+                {
+                    SampleAnimation(anim.Value);
+                }
+            }
+            finally
+            {
+                DictionaryPool<int, AnimationData>.Release(temp);
+            }
         }
 
-        public async Task<bool> PlayAnimationAsync<T>(int animationIndex, float startTime, float endTime, float speed, T cancellationToken) where T : struct, ICancelToken
+        // This logic path hurts my soul but it's taken directly from the spec.
+        // A lot harder to follow than what we had before.
+        private bool SampleAnimation(AnimationData a)
         {
-            if (animationComponent == null)
-                throw new InvalidOperationException("No animations present in this glb!");
+            float r;
 
-            if (_currentAnimation != null)
-                SampleAnimationAtTime(0);
-
-            _currentAnimation = _animations[animationIndex];
-            animationComponent.clip = _currentAnimation.clip;
-            animationComponent.Play();
-
-            var clipTime = _currentAnimation.clip.length;
-
-            for (float t = startTime; t < endTime; t += Time.deltaTime / clipTime * speed)
+            if (a.startTime == a.endTime)
             {
-                if (cancellationToken.isCancelled)
-                    return false;
-
-                SampleAnimationAtTime(t * clipTime);
-                await Task.Yield();
+                r = a.startTime;
+                CompleteAnimation(r, a.endDone);
+                return false;
             }
 
-            SampleAnimationAtTime(endTime * clipTime);
+            var scaledElapsedTime = (Time.time - a.unityStartTime) * a.speed;
+
+            if (a.startTime > a.endTime)
+                scaledElapsedTime *= -1;
+
+            r = scaledElapsedTime + a.startTime;
+
+            var c1 = a.startTime < a.endTime && r >= a.stopTime && a.stopTime >= a.startTime && a.stopTime < a.endTime;
+            var c2 = a.startTime > a.endTime && r <= a.stopTime && a.stopTime <= a.startTime && a.stopTime > a.endTime;
+
+            if (c1 || c2)
+            {
+                r = a.stopTime;
+                Util.Log($"Stopping Animation {a.index}.");
+                CompleteAnimation(r, a.stopDone);
+                return false;
+            }
+
+            var c3 = a.startTime < a.endTime && r >= a.endTime;
+            var c4 = a.startTime > a.endTime && r <= a.endTime;
+
+            if (c3 || c4)
+            {
+                r = a.endTime;
+                Util.Log($"Done Animation {a.index}.");
+                CompleteAnimation(r, a.endDone);
+                return false;
+            }
+
+            SampleAnimationAtTime(r);
 
             return true;
+
+            void SampleAnimationAtTime(float r)
+            {
+                _animations[a.index].time = r;
+                animationComponent.Sample();
+            }
+
+            void CompleteAnimation(float t, Action callback)
+            {
+                SampleAnimationAtTime(t);
+                StopAnimation(a.index);
+                callback();
+            }
+        }
+
+        public void PlayAnimation(in AnimationData data)
+        {
+            StopAnimation(data.index);
+
+            _animationsInProgress.Add(data.index, data);
+
+            _currentAnimation = _animations[data.index];
+            animationComponent.clip = _currentAnimation.clip;
+            animationComponent.Play();
+        }
+
+        internal void StopAnimationAt(int animationIndex, float stopTime, Action callback)
+        {
+            var anim = _animationsInProgress[animationIndex];
+
+            anim.stopTime = stopTime;
+            anim.stopDone = callback;
+
+            _animationsInProgress[animationIndex] = anim;
+        }
+
+        internal void StopAnimation(int index)
+        {
+            _animationsInProgress.Remove(index);
         }
     }
 }
