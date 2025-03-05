@@ -4,7 +4,7 @@ namespace UnityGLTF.Interactivity.Extensions
 {
     public static class TransformExtensions
     {
-        private static void GetTRS(this Matrix4x4 matrix, out Vector3 translation, out Quaternion rotation, out Vector3 scale)
+        public static void GetTRS(this Matrix4x4 matrix, out Vector3 translation, out Quaternion rotation, out Vector3 scale)
         {
             float det = matrix.GetDeterminant();
 

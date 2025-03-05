@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace UnityGLTF.Interactivity
 {
-    public class MathLength : BehaviourEngineNode
+    public class MathDeterminant : BehaviourEngineNode
     {
-        public MathLength(BehaviourEngine engine, Node node) : base(engine, node)
+        public MathDeterminant(BehaviourEngine engine, Node node) : base(engine, node)
         {
         }
 
@@ -16,9 +16,8 @@ namespace UnityGLTF.Interactivity
 
             return a switch
             {
-                Property<Vector2> aProp => new Property<float>(math.length(aProp.value)),
-                Property<Vector3> aProp => new Property<float>(math.length(aProp.value)),
-                Property<Vector4> aProp => new Property<float>(math.length(aProp.value)),
+                // TODO: float2x2/3x3 support
+                Property<Matrix4x4> aProp => new Property<float>(math.determinant(aProp.value)),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
         }

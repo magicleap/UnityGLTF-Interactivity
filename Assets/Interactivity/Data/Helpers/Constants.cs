@@ -57,6 +57,7 @@ namespace UnityGLTF.Interactivity
         public const string VARIABLE = "variable";
 
         public const string TYPES = "types";
+        public const string IS_VALID = "isValid";
 
         public const string VALUE = "value";
         public const string VALUES = "values";
@@ -79,6 +80,10 @@ namespace UnityGLTF.Interactivity
         public const string P1 = "p1";
         public const string P2 = "p2";
         public const string DURATION = "duration";
+
+        public const string TRANSLATION = "translation";
+        public const string ROTATION = "rotation";
+        public const string SCALE = "scale";
 
         public const string SELECTED_NODE_INDEX = "selectedNodeIndex";
         public const string SELECTION_POINT = "selectionPoint";

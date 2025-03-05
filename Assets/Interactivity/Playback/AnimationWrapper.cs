@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -25,7 +24,7 @@ namespace UnityGLTF.Interactivity
         private AnimationState _currentAnimation;
         private AnimationState[] _animations;
 
-        private Dictionary<int, AnimationData> _animationsInProgress = new();
+        private readonly Dictionary<int, AnimationData> _animationsInProgress = new();
 
         private BehaviourEngine _engine;
 

@@ -4,21 +4,21 @@ using UnityEngine;
 
 namespace UnityGLTF.Interactivity
 {
-    public class MathLength : BehaviourEngineNode
+    public class MathMatMul : BehaviourEngineNode
     {
-        public MathLength(BehaviourEngine engine, Node node) : base(engine, node)
+        public MathMatMul(BehaviourEngine engine, Node node) : base(engine, node)
         {
         }
 
         public override IProperty GetOutputValue(string id)
         {
             TryEvaluateValue(ConstStrings.A, out IProperty a);
+            TryEvaluateValue(ConstStrings.B, out IProperty b);
 
             return a switch
             {
-                Property<Vector2> aProp => new Property<float>(math.length(aProp.value)),
-                Property<Vector3> aProp => new Property<float>(math.length(aProp.value)),
-                Property<Vector4> aProp => new Property<float>(math.length(aProp.value)),
+                // TODO: float2x2/3x3 support
+                Property<Matrix4x4> aProp when b is Property<Matrix4x4> bProp => new Property<Matrix4x4>(math.mul(aProp.value, bProp.value)),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
         }
