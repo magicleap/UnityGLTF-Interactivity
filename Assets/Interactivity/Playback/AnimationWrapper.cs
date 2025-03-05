@@ -52,6 +52,7 @@ namespace UnityGLTF.Interactivity
 
         private void OnTick()
         {
+            // Avoiding iterating over a changing collection by grabbing a pooled dictionary.
             var temp = DictionaryPool<int, AnimationData>.Get();
             try
             {
@@ -75,7 +76,9 @@ namespace UnityGLTF.Interactivity
         // A lot harder to follow than what we had before.
         private bool SampleAnimation(AnimationData a)
         {
-            float r;
+            float r, T;
+
+            T = _animations[a.index].length;
 
             if (a.startTime == a.endTime)
             {
@@ -117,9 +120,15 @@ namespace UnityGLTF.Interactivity
 
             return true;
 
+            float GetTimeStamp(float r)
+            {
+                var s = r > 0 ? Mathf.Ceil((r - T) / T) : Mathf.Floor(r / T);
+                return T == 0 ? 0 : r - s * T;
+            }
+
             void SampleAnimationAtTime(float r)
             {
-                _animations[a.index].time = r;
+                _animations[a.index].time = GetTimeStamp(r);
                 animationComponent.Sample();
             }
 
