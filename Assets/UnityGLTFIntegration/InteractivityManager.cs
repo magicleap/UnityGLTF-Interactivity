@@ -142,11 +142,5 @@ namespace UnityGLTF.Interactivity
         {
             _loader.SaveModel(_saveToFile, _lastLoadPacket.importer, _lastLoadPacket.extensionData);
         }
-
-        public void OnDestroy()
-        {
-            // Can be null if an exception is thrown or load does not complete before it's assigned.
-            _behaviourEngine?.CancelExecution();
-        }
     }
 }

@@ -8,7 +8,7 @@ namespace UnityGLTF.Interactivity
         {
         }
 
-        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
+        protected override void Execute(string socket, ValidationResult validationResult)
         {
             for (int i = 0; i < node.flows.Count; i++)
             {

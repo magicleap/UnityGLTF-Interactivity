@@ -12,7 +12,7 @@ namespace UnityGLTF.Interactivity
         {
         }
 
-        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
+        protected override void Execute(string socket, ValidationResult validationResult)
         {
             if (socket != ConstStrings.IN)
                 throw new ArgumentException($"Only valid input socket for this node is \"{ConstStrings.IN}\"");

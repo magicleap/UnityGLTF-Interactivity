@@ -9,7 +9,7 @@ namespace UnityGLTF.Interactivity
         {
         }
 
-        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
+        protected override void Execute(string socket, ValidationResult validationResult)
         {
             if (!TryEvaluateValue("message", out string message))
                 TryExecuteFlow(ConstStrings.ERR);

@@ -23,7 +23,7 @@ namespace UnityGLTF.Interactivity
             throw new ArgumentException($"Socket {socket} is not valid on this node!");
         }
 
-        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
+        protected override void Execute(string socket, ValidationResult validationResult)
         {
             Util.Log($"Starting a loop with start index {_startIndex} and end index {_endIndex}");
 

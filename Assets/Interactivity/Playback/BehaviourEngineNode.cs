@@ -50,12 +50,12 @@ namespace UnityGLTF.Interactivity
             Util.Log($"Finished creating BehaviourGraphNode {node.type}");
         }
 
-        public void ValidateAndExecute(string socket, CancellationToken cancellationToken)
+        public void ValidateAndExecute(string socket)
         {
-            Execute(socket, Validate(socket), cancellationToken);
+            Execute(socket, Validate(socket));
         }
 
-        protected virtual void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken) { }
+        protected virtual void Execute(string socket, ValidationResult validationResult) { }
         public virtual IProperty GetOutputValue(string socket) => null;
         public virtual bool ValidateConfiguration(string socket) => true;
         public virtual bool ValidateFlows(string socket) => true;

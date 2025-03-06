@@ -12,6 +12,7 @@ namespace UnityGLTF.Interactivity
         public readonly Graph graph;
         public readonly Dictionary<Node, BehaviourEngineNode> engineNodes = new();
         public AnimationWrapper animationWrapper { get; private set; }
+        public readonly InterpolationManager interpolationManager = new();
 
         public event Action onStart;
 
@@ -21,8 +22,6 @@ namespace UnityGLTF.Interactivity
         public event Action<Flow> onFlowTriggered;
 
         public readonly PointerResolver pointerResolver;
-
-        private CancellationTokenSource _cancellationToken = new();
 
         public BehaviourEngine(Graph graph, PointerResolver pointerResolver)
         {
@@ -42,6 +41,7 @@ namespace UnityGLTF.Interactivity
 
         public void Tick()
         {
+            interpolationManager.OnTick();
             onTick?.Invoke();
         }
 
@@ -59,7 +59,7 @@ namespace UnityGLTF.Interactivity
 
             onFlowTriggered?.Invoke(flow);
 
-            node.ValidateAndExecute(flow.toSocket, _cancellationToken.Token);
+            node.ValidateAndExecute(flow.toSocket);
         }
 
         public void FireCustomEvent(int eventIndex, Dictionary<string, IProperty> outValues = null)
@@ -128,13 +128,6 @@ namespace UnityGLTF.Interactivity
                 return;
 
             animationWrapper.StopAnimationAt(index, stopTime, callback);
-        }
-
-        public void CancelExecution()
-        {
-            _cancellationToken.Cancel();
-            _cancellationToken.Dispose();
-            _cancellationToken = new();
         }
 
         public bool HasAnimationWrapper()
