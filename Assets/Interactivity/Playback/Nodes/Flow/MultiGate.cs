@@ -40,6 +40,8 @@ namespace UnityGLTF.Interactivity
                 }
                 maxReps--;
             } while (isLoop && maxReps > 0);
+
+            TryExecuteFlow(ConstStrings.COMPLETED);
         }
 
         public override bool ValidateValues(string socket)

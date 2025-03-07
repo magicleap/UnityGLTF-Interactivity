@@ -1,15 +1,15 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
 {
     public class FlowCancelDelay : BehaviourEngineNode
     {
-        private int delayIndex;
+        private int delayIndex = 0;
         public FlowCancelDelay(BehaviourEngine engine, Node node) : base(engine, node)
         {
-
         }
 
         public override IProperty GetOutputValue(string socket)
@@ -22,17 +22,35 @@ namespace UnityGLTF.Interactivity
 
         protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
-            Util.Log($"Canceling the delayed output flow");
+            Util.Log($"Canceling the delayed output for the replacement behavior");
 
-            TryExecuteFlow(ConstStrings.OUT);
+            TryExecuteFlow(ConstStrings.COMPLETED);
         }
 
-        public override bool ValidateValues(string socket)
+        private async Task HandleInSocket(ValidationResult validationResult, CancellationToken cancellationToken)
         {
-            if (!TryEvaluateValue(ConstStrings.CONDITION, out bool condition))
-                return false;
+            if (validationResult != ValidationResult.Valid)
+            {
+                TryExecuteFlow(ConstStrings.ERR);
+                return;
+            }
 
-            return true;
+            if (TryEvaluateValue(ConstStrings.IN, out BehaviourEngineNode inputNode))
+            {
+                engine.graph.nodes.Remove(inputNode.node);
+            }
+            else
+                engine.graph.nodes.RemoveAt(delayIndex);
+
+            Util.Log($"Cancelling this input node {delayIndex}");
+            cancellationToken = new CancellationToken(true);
+
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            await Task.Yield();
+            
+            TryExecuteFlow(ConstStrings.COMPLETED);
         }
     }
 }
