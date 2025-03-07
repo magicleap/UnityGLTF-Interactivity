@@ -1,42 +1,46 @@
 using Newtonsoft.Json.Linq;
-using System.IO;
 using UnityEngine;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Tests
 {
-    public class TestGraph : MonoBehaviour
+    /// <summary>
+    /// Creates a test graph with every supported material pointer and sets them all to preset values on start.
+    /// </summary>
+    public class MaterialPointerTestGraph : ITestGraphGenerator
     {
-        [SerializeField] private TextAsset _json;
-        [SerializeField] private GameObject go;
-        private readonly BehaviourEngine engine;
-
-        private void Awake()
+        private static void CreatePointerPair(int i, Graph graph, string pointer, string type)
         {
-            var serializer = new GraphSerializer();
+            var onStartNode = graph.CreateNode("event/onStart", new Vector2(0f, 500f * i));
+            var pointerSetNode = graph.CreateNode("pointer/set", new Vector2(500f, 500f * i));
 
-            var extensionData = serializer.Deserialize(_json.text);
-            //var graph = CreateGraph();
+            onStartNode.AddFlow(ConstStrings.OUT, pointerSetNode, ConstStrings.IN);
+            pointerSetNode.AddValue("nodeIndex", 1);
+            pointerSetNode.AddConfiguration("type", new JArray(type));
+            pointerSetNode.AddConfiguration("pointer", new JArray(pointer));
 
-            SaveGraph(serializer, extensionData);
-
-            //Util.Log($"Nodes: {graph.nodes.Count}, Variables: {graph.variables.Count}, Types: {graph.types.Count}, Events: {graph.customEvents.Count}");
-
-            //engine = new BehaviourEngine(graph, go);
-
-            //engine.StartPlayback();
-            //engine.FireEvent(0);
+            switch (type)
+            {
+                case "float":
+                    pointerSetNode.AddValue("value", 0.75f);
+                    break;
+                case "float2":
+                    pointerSetNode.AddValue("value", new Vector2(0.5f, 0.2f));
+                    break;
+                case "float3":
+                    pointerSetNode.AddValue("value", new Vector3(0.25f, 0.4f, 0.7f));
+                    break;
+                case "float4":
+                    pointerSetNode.AddValue("value", new Vector4(0.25f, 0.4f, 0.7f, 0.5f));
+                    break;
+                default:
+                    break;
+            }
         }
 
-        private void Update()
-        {
-            engine.Tick();
-        }
-
-        public static Graph CreateTestGraph()
+        public Graph CreateTestGraph()
         {
             var graph = new Graph();
             graph.AddDefaultTypes();
-
 
             var materialPointers = new (string, string)[]
             {
@@ -143,42 +147,6 @@ namespace UnityGLTF.Interactivity
             }
 
             return graph;
-        }
-
-        public void SaveGraph(GraphSerializer serializer, KHR_interactivity extensionData)
-        {
-            var json = serializer.Serialize(extensionData);
-
-            File.WriteAllText($"{Application.persistentDataPath}/graph.json", json);
-        }
-
-        private static void CreatePointerPair(int i, Graph graph, string pointer, string type)
-        {
-            var onStartNode = graph.CreateNode("event/onStart", new Vector2(0f, 500f * i));
-            var pointerSetNode = graph.CreateNode("pointer/set", new Vector2(500f, 500f * i));
-
-            onStartNode.AddFlow(ConstStrings.OUT, pointerSetNode, ConstStrings.IN);
-            pointerSetNode.AddValue("nodeIndex", 1);
-            pointerSetNode.AddConfiguration("type", new JArray(type));
-            pointerSetNode.AddConfiguration("pointer", new JArray(pointer));
-
-            switch (type)
-            {
-                case "float":
-                    pointerSetNode.AddValue("value", 0.75f);
-                    break;
-                case "float2":
-                    pointerSetNode.AddValue("value", new Vector2(0.5f, 0.2f));
-                    break;
-                case "float3":
-                    pointerSetNode.AddValue("value", new Vector3(0.25f, 0.4f, 0.7f));
-                    break;
-                case "float4":
-                    pointerSetNode.AddValue("value", new Vector4(0.25f, 0.4f, 0.7f, 0.5f));
-                    break;
-                default:
-                    break;
-            }
         }
     }
 }

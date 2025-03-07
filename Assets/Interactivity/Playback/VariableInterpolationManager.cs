@@ -94,7 +94,6 @@ namespace UnityGLTF.Interactivity
 
         private IInterpolator GetInterpolator(in VariableInterpolateData data)
         {
-            var v = data.variable;
             var cp1 = data.cp1;
             var cp2 = data.cp2;
 
