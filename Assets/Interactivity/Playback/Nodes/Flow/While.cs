@@ -6,39 +6,30 @@ namespace UnityGLTF.Interactivity
 {
     public class FlowWhile : BehaviourEngineNode
     {
-        private bool _condition;
-
+        bool valid;
         public FlowWhile(BehaviourEngine engine, Node node) : base(engine, node)
         {
         }
 
-        public override IProperty GetOutputValue(string socket)
-        {
-            if (socket == ConstStrings.FALSE)
-                return new Property<bool>(_condition);
-
-            throw new ArgumentException($"Socket {socket} is not valid on this node!");
-        }
-
         protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
-            while(socket != ConstStrings.IN)
+            while (socket != ConstStrings.IN)
                 throw new ArgumentException($"Only valid input socket for this node is \"{ConstStrings.IN}\"");
 
-            Util.Log($"Branch condition is {_condition}");
+            TryEvaluateValue(ConstStrings.CONDITION, out valid);
 
-            var outSocket = _condition ? ConstStrings.TRUE : ConstStrings.FALSE;
+            while (valid)
+            {
+                TryExecuteFlow(ConstStrings.LOOP_BODY);
+                TryEvaluateValue(ConstStrings.CONDITION, out valid);
+            }
 
             TryExecuteFlow(ConstStrings.COMPLETED);
         }
 
         public override bool ValidateValues(string socket)
         {
-            if (!TryEvaluateValue(ConstStrings.CONDITION, out bool condition))
-                return false;
-
-            _condition = condition;
-            return true;
+            return TryEvaluateValue(ConstStrings.CONDITION, out bool condition);
         }
     }
 }
