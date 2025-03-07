@@ -17,8 +17,9 @@ namespace UnityGLTF.Interactivity
 
             return a switch
             {
-                // TODO: float2x2/3x3 support
-                Property<Matrix4x4> aProp when b is Property<Matrix4x4> bProp => new Property<Matrix4x4>(math.mul(aProp.value, bProp.value)),
+                Property<float2x2> aProp when b is Property<float2x2> bProp => new Property<float2x2>(math.mul(aProp.value, bProp.value)),
+                Property<float3x3> aProp when b is Property<float3x3> bProp => new Property<float3x3>(math.mul(aProp.value, bProp.value)),
+                Property<float4x4> aProp when b is Property<float4x4> bProp => new Property<float4x4>(math.mul(aProp.value, bProp.value)),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
         }

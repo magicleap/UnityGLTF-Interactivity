@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityGLTF.Interactivity.Extensions;
@@ -93,7 +94,9 @@ namespace UnityGLTF.Interactivity
                 Property<Vector2> property => GetInterpolator(property, data),
                 Property<Vector3> property => ProcessVector3(property, data),
                 Property<Vector4> property => ProcessVector4(property, data),
-                Property<Matrix4x4> property => GetInterpolator(property, data),
+                Property<float2x2> property => GetInterpolator(property, data),
+                Property<float3x3> property => GetInterpolator(property, data),
+                Property<float4x4> property => GetInterpolator(property, data),
 
                 _ => throw new InvalidOperationException($"Type {data.endValue.GetTypeSignature()} is not supported for interpolation."),
             };

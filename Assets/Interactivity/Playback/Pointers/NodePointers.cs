@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityGLTF.Interactivity.Extensions;
 
@@ -13,8 +14,8 @@ namespace UnityGLTF.Interactivity
         public Pointer<bool> visibility;
         public Pointer<bool> selectability;
         public Pointer<bool> hoverability;
-        public Pointer<Matrix4x4> matrix;
-        public Pointer<Matrix4x4> globalMatrix;
+        public Pointer<float4x4> matrix;
+        public Pointer<float4x4> globalMatrix;
         public GameObject gameObject;
 
         public NodePointers(GameObject go, GLTF.Schema.Node schema)
@@ -46,14 +47,14 @@ namespace UnityGLTF.Interactivity
                 evaluator = (a, b, t) => Vector3.Lerp(a, b, t)
             };
 
-            matrix = new Pointer<Matrix4x4>()
+            matrix = new Pointer<float4x4>()
             {
                 setter = (v) => go.transform.SetFromLocalMatrix(v, isRightHanded: true),
                 getter = () => go.transform.GetLocalMatrix(isRightHanded: true),
                 evaluator = (a, b, t) => a.LerpToComponentwise(b, t) // Spec has floatNxN lerp componentwise.
             };
 
-            globalMatrix = new Pointer<Matrix4x4>()
+            globalMatrix = new Pointer<float4x4>()
             {
                 setter = (v) => go.transform.SetFromWorldMatrix(v, isRightHanded: true),
                 getter = () => go.transform.GetWorldMatrix(isRightHanded: true),

@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -202,8 +203,12 @@ namespace UnityGLTF.Interactivity
                 AddValue(valueData.id, Vector3.zero);
             else if (type == typeof(Vector4))
                 AddValue(valueData.id, Vector4.zero);
-            else if (type == typeof(Matrix4x4))
-                AddValue(valueData.id, Matrix4x4.zero);
+            else if (type == typeof(float2x2))
+                AddValue(valueData.id, float2x2.zero);
+            else if (type == typeof(float3x3))
+                AddValue(valueData.id, float3x3.zero);
+            else if (type == typeof(float4x4))
+                AddValue(valueData.id, float4x4.zero);
             else
                 throw new InvalidOperationException($"No default value available for {type}");
         }

@@ -16,10 +16,11 @@ namespace UnityGLTF.Interactivity
 
             bool isValid;
 
-            var prop = a switch
+            IProperty prop = a switch
             {
-                // TODO: float2x2/3x3 support
-                Property<Matrix4x4> aProp => new Property<Matrix4x4>(Inverse(aProp.value, out isValid)),
+                Property<float2x2> aProp => new Property<float2x2>(Inverse(aProp.value, out isValid)),
+                Property<float3x3> aProp => new Property<float3x3>(Inverse(aProp.value, out isValid)),
+                Property<float4x4> aProp => new Property<float4x4>(Inverse(aProp.value, out isValid)),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
 
@@ -31,13 +32,47 @@ namespace UnityGLTF.Interactivity
             };
         }
 
-        private static Matrix4x4 Inverse (Matrix4x4 m, out bool isValid)
+        private static float2x2 Inverse(float2x2 m, out bool isValid)
         {
-            var inverse = Matrix4x4.Inverse(m);
+            var det = math.determinant(m);
+            if (det == 0f || float.IsInfinity(det) || float.IsNaN(det))
+            {
+                isValid = false;
+                return float2x2.zero;
+            }
+
+            var inverse = math.inverse(m);
             isValid = true;
 
-            if (inverse == Matrix4x4.zero)
+            return inverse;
+        }
+
+        private static float3x3 Inverse(float3x3 m, out bool isValid)
+        {
+            var det = math.determinant(m);
+            if (det == 0f || float.IsInfinity(det) || float.IsNaN(det))
+            {
                 isValid = false;
+                return float3x3.zero;
+            }
+
+            var inverse = math.inverse(m);
+            isValid = true;
+
+            return inverse;
+        }
+
+        private static float4x4 Inverse(float4x4 m, out bool isValid)
+        {
+            var det = math.determinant(m);
+            if (det == 0f || float.IsInfinity(det) || float.IsNaN(det))
+            {
+                isValid = false;
+                return float4x4.zero;
+            }
+
+            var inverse = math.inverse(m);
+            isValid = true;
 
             return inverse;
         }

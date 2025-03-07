@@ -15,10 +15,12 @@ namespace UnityGLTF.Interactivity
         {
             TryEvaluateValue(ConstStrings.A, out IProperty a);
 
-            if (a is not Property<Matrix4x4> mProp)
+            if (a is not Property<float4x4> mProp)
                 throw new InvalidOperationException($"Type of value a must be Matrix4x4 but a {a.GetTypeSignature()} was passed in!");
 
-            mProp.value.GetTRS(out Vector3 translation, out Quaternion rotation, out Vector3 scale);
+            // Conversion here since the Matrix4x4 methods all work and I'm too lazy to redo it for float4x4.
+            var m = (Matrix4x4)mProp.value;
+            m.GetTRS(out Vector3 translation, out Quaternion rotation, out Vector3 scale);
 
             return id switch
             {

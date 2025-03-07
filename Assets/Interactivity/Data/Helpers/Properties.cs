@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -22,7 +23,9 @@ namespace UnityGLTF.Interactivity
                 case "float2": return typeof(Vector2);
                 case "float3": return typeof(Vector3);
                 case "float4": return typeof(Vector4);
-                case "float4x4": return typeof(Matrix4x4);
+                case "float2x2": return typeof(float2x2);
+                case "float3x3": return typeof(float3x3);
+                case "float4x4": return typeof(float4x4);
                 case "int[]": return typeof(int[]);
                 default: return typeof(string);
             }
@@ -36,7 +39,9 @@ namespace UnityGLTF.Interactivity
             if (type == typeof(Vector2)) return "float2";
             if (type == typeof(Vector3)) return "float3";
             if (type == typeof(Vector4)) return "float4";
-            if (type == typeof(Matrix4x4)) return "float4x4";
+            if (type == typeof(float2x2)) return "float2x2";
+            if (type == typeof(float3x3)) return "float3x3";
+            if (type == typeof(float4x4)) return "float4x4";
             if (type == typeof(int[])) return "int[]";
             throw new InvalidOperationException($"Invalid type {type} used!");
         }
@@ -67,9 +72,17 @@ namespace UnityGLTF.Interactivity
             {
                 return new Property<Vector4>(Parser.ToVector4(value));
             }
-            else if (type == typeof(Matrix4x4))
+            else if (type == typeof(float2x2))
             {
-                return new Property<Matrix4x4>(Parser.ToMatrix4x4(value));
+                return new Property<float2x2>(Parser.ToFloat2x2(value));
+            }
+            else if (type == typeof(float3x3))
+            {
+                return new Property<float3x3>(Parser.ToFloat3x3(value));
+            }
+            else if (type == typeof(float4x4))
+            {
+                return new Property<float4x4>(Parser.ToFloat4x4(value));
             }
             else if (type == typeof(int[]))
             {
@@ -119,16 +132,38 @@ namespace UnityGLTF.Interactivity
             {
                 return new Property<Vector4>(new Vector4(float.NaN, float.NaN, float.NaN, float.NaN));
             }
-            else if (type == typeof(Matrix4x4))
+            else if (type == typeof(float2x2))
             {
-                var m = new Matrix4x4();
+                var m = new float2x2();
+
+                for (int i = 0; i < 4; i++)
+                {
+                    m[i] = float.NaN;
+                }
+
+                return new Property<float2x2>(m);
+            }
+            else if (type == typeof(float3x3))
+            {
+                var m = new float3x3();
+
+                for (int i = 0; i < 9; i++)
+                {
+                    m[i] = float.NaN;
+                }
+
+                return new Property<float3x3>(m);
+            }
+            else if (type == typeof(float4x4))
+            {
+                var m = new float4x4();
 
                 for (int i = 0; i < 16; i++)
                 {
                     m[i] = float.NaN;
                 }
 
-                return new Property<Matrix4x4>(m);
+                return new Property<float4x4>(m);
             }
 
             throw new InvalidOperationException($"No default value for {type} included in this spec.");
