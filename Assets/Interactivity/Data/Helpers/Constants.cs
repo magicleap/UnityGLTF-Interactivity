@@ -73,6 +73,24 @@ namespace UnityGLTF.Interactivity
         public const string B = "b";
         public const string C = "c";
         public const string D = "d";
+        public const string E = "e";
+        public const string F = "f";
+        public const string G = "g";
+        public const string H = "h";
+        public const string I = "i";
+        public const string J = "j";
+        public const string K = "k";
+        public const string L = "l";
+        public const string M = "m";
+        public const string N = "n";
+        public const string O = "o";
+        public const string P = "p";
+
+        public static readonly string[] Letters = new string[]
+        {
+            A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P
+        };
+
         public const string DONE = "done";
         public const string IN = "in";
         public const string OUT = "out";
