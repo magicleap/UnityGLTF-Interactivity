@@ -1,6 +1,8 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -50,10 +52,46 @@ namespace UnityGLTF.Interactivity
             return await InterpolateAsync(p.getter(), to, p.setter, evaluator, d.duration, d.cancellationToken);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 CubicBezier(float t, Vector2 cp0, Vector2 cp1)
         {
             var omt = 1 - t;
             return 3f * t * omt * omt * cp0 + 3f * t * t * omt * cp1 + t * t * t * Vector2.one;
+        }
+
+        public static float4 nlerp(float4 q1, float4 q2, float t)
+        {
+            float dt = math.dot(q1, q2);
+            if (dt < 0.0f)
+            {
+                q2 = -q2;
+            }
+            
+            return math.normalize(math.lerp(q1, q2, t));
+        }
+
+        public static float4 SlerpVector4(float4 q1, float4 q2, float t)
+        {
+            float dt = math.dot(q1, q2);
+            if (dt < 0.0f)
+            {
+                dt = -dt;
+                q2 = -q2;
+            }
+
+            if (dt < 0.9995f)
+            {
+                float angle = math.acos(dt);
+                float s = math.rsqrt(1.0f - dt * dt);    // 1.0f / sin(angle)
+                float w1 = math.sin(angle * (1.0f - t)) * s;
+                float w2 = math.sin(angle * t) * s;
+                return q1 * w1 + q2 * w2;
+            }
+            else
+            {
+                // if the angle is small, use linear interpolation
+                return nlerp(q1, q2, t);
+            }
         }
     }
 }

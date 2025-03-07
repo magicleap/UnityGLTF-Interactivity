@@ -86,6 +86,7 @@ namespace UnityGLTF.Interactivity
             ["type/intToBool"] = (engine, node) => new TypeIntToBool(engine, node),
             ["type/intToFloat"] = (engine, node) => new TypeIntToFloat(engine, node),
             ["variable/get"] = (engine, node) => new VariableGet(engine, node),
+            ["variable/interpolate"] = (engine, node) => new VariableInterpolate(engine, node),
             ["variable/set"] = (engine, node) => new VariableSet(engine, node),
             ["math/acos"] = (engine, node) => new MathACos(engine, node),
             ["math/acosh"] = (engine, node) => new MathACosH(engine, node),

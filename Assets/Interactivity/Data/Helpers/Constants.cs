@@ -84,6 +84,7 @@ namespace UnityGLTF.Interactivity
         public const string TRANSLATION = "translation";
         public const string ROTATION = "rotation";
         public const string SCALE = "scale";
+        public const string USE_SLERP = "useSlerp";
 
         public const string SELECTED_NODE_INDEX = "selectedNodeIndex";
         public const string SELECTION_POINT = "selectionPoint";

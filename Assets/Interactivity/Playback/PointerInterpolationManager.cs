@@ -6,7 +6,7 @@ using UnityGLTF.Interactivity.Extensions;
 
 namespace UnityGLTF.Interactivity
 {
-    public struct InterpolateData
+    public struct PointerInterpolateData
     {
         public IPointer pointer;
         public float startTime;
@@ -23,33 +23,33 @@ namespace UnityGLTF.Interactivity
         public bool Interpolate(float t);
     }
    
-    public struct Interpolator<T> : IInterpolator
+    public class PointerInterpolationManager
     {
-        public Action<T> setter;
-        public Func<T, T, float, T> evaluator;
-        public T from;
-        public T to;
-
-        public bool Interpolate(float t)
+        public struct Interpolator<T> : IInterpolator
         {
-            var end = t >= 1f;
+            public Action<T> setter;
+            public Func<T, T, float, T> evaluator;
+            public T from;
+            public T to;
 
-            t = end ? 1f : t;
+            public bool Interpolate(float t)
+            {
+                var end = t >= 1f;
 
-            setter(evaluator(from, to, t));
+                t = end ? 1f : t;
 
-            return end;
+                setter(evaluator(from, to, t));
+
+                return end;
+            }
         }
-    }
 
-    public class InterpolationManager
-    {
-        private Dictionary<IPointer, InterpolateData> _interpolationsInProgress = new();
+        private Dictionary<IPointer, PointerInterpolateData> _interpolationsInProgress = new();
 
         public void OnTick()
         {
             // Avoiding iterating over a changing collection by grabbing a pooled dictionary.
-            var temp = DictionaryPool<IPointer, InterpolateData>.Get();
+            var temp = DictionaryPool<IPointer, PointerInterpolateData>.Get();
             try
             {
                 foreach (var interp in _interpolationsInProgress)
@@ -64,11 +64,11 @@ namespace UnityGLTF.Interactivity
             }
             finally
             {
-                DictionaryPool<IPointer, InterpolateData>.Release(temp);
+                DictionaryPool<IPointer, PointerInterpolateData>.Release(temp);
             }
         }
 
-        private void DoInterpolate(InterpolateData data)
+        private void DoInterpolate(PointerInterpolateData data)
         {
             var t = (Time.time - data.startTime) / data.duration;
 
@@ -83,7 +83,7 @@ namespace UnityGLTF.Interactivity
             }
         }
 
-        public void StartInterpolation(ref InterpolateData data)
+        public void StartInterpolation(ref PointerInterpolateData data)
         {
             _interpolationsInProgress.Remove(data.pointer); // Stop any in-progress interpolations for this pointer.
 
@@ -105,7 +105,7 @@ namespace UnityGLTF.Interactivity
             Util.Log($"Starting Interpolation: Start Time {data.startTime}, Duration: {data.duration}");
         }
 
-        private IInterpolator ProcessVector3(Property<Vector3> property, InterpolateData data)
+        private IInterpolator ProcessVector3(Property<Vector3> property, PointerInterpolateData data)
         {
             return data.pointer switch
             {
@@ -117,7 +117,7 @@ namespace UnityGLTF.Interactivity
             };
         }
 
-        private IInterpolator ProcessVector4(Property<Vector4> property, InterpolateData data)
+        private IInterpolator ProcessVector4(Property<Vector4> property, PointerInterpolateData data)
         {
             return data.pointer switch
             {
@@ -129,7 +129,7 @@ namespace UnityGLTF.Interactivity
             };
         }
 
-        private IInterpolator GetInterpolator<T>(Property<T> property, in InterpolateData data)
+        private IInterpolator GetInterpolator<T>(Property<T> property, in PointerInterpolateData data)
         {
             var p = (Pointer<T>)data.pointer;
             var cp1 = data.cp1;

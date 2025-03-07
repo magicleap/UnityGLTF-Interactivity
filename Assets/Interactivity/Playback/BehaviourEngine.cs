@@ -12,7 +12,8 @@ namespace UnityGLTF.Interactivity
         public readonly Graph graph;
         public readonly Dictionary<Node, BehaviourEngineNode> engineNodes = new();
         public AnimationWrapper animationWrapper { get; private set; }
-        public readonly InterpolationManager interpolationManager = new();
+        public readonly PointerInterpolationManager pointerInterpolationManager = new();
+        public readonly VariableInterpolationManager variableInterpolationManager = new();
 
         public event Action onStart;
 
@@ -41,7 +42,8 @@ namespace UnityGLTF.Interactivity
 
         public void Tick()
         {
-            interpolationManager.OnTick();
+            pointerInterpolationManager.OnTick();
+            variableInterpolationManager.OnTick();
             onTick?.Invoke();
         }
 

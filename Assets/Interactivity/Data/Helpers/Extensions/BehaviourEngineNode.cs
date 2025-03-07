@@ -1,3 +1,5 @@
+using System;
+using UnityEngine;
 using UnityGLTF.Interactivity.Extensions;
 
 namespace UnityGLTF.Interactivity
@@ -77,6 +79,28 @@ namespace UnityGLTF.Interactivity
                 return false;
 
             value = ((Property<T>)property).value;
+            return true;
+        }
+
+        public bool TryGetVariableFromConfiguration(out Variable variable, out int index)
+        {
+            variable = null;
+            index = -1;
+
+            if (!configuration.TryGetValue(ConstStrings.VARIABLE, out Configuration config))
+                return false;
+
+            try
+            {
+                index = Parser.ToInt(config.value);
+                variable = engine.graph.variables[index];
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return false;
+            }
+
             return true;
         }
     }
