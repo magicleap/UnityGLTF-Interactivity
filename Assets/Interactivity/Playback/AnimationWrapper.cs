@@ -5,7 +5,7 @@ using UnityEngine.Pool;
 
 namespace UnityGLTF.Interactivity
 {
-    public struct AnimationData
+    public struct AnimationPlayData
     {
         public int index;
         public float startTime;
@@ -17,14 +17,26 @@ namespace UnityGLTF.Interactivity
         public Action stopDone;
     }
 
+    public class AnimationData
+    {
+        public float playhead;
+        public float virtualPlayhead;
+        public AnimationState anim;
+
+        public AnimationData(AnimationState anim)
+        {
+            this.anim = anim;
+        }
+    }
+
     public class AnimationWrapper : MonoBehaviour
     {
         public Animation animationComponent { get; private set; }
 
-        private AnimationState _currentAnimation;
-        private AnimationState[] _animations;
+        private AnimationData _currentAnimation;
 
-        private readonly Dictionary<int, AnimationData> _animationsInProgress = new();
+        private readonly Dictionary<int, AnimationPlayData> _animationsInProgress = new();
+        private AnimationData[] _animations;
 
         private BehaviourEngine _engine;
 
@@ -38,21 +50,21 @@ namespace UnityGLTF.Interactivity
             this.animationComponent = animationComponent;
 
             var clipCount = animationComponent.GetClipCount();
-            _animations = new AnimationState[clipCount];
+            _animations = new AnimationData[clipCount];
 
             var j = 0;
 
             foreach (AnimationState state in animationComponent)
             {
                 state.speed = 0f;
-                _animations[j++] = state;
+                _animations[j++] = new AnimationData(state);
             }
         }
 
         private void OnTick()
         {
             // Avoiding iterating over a changing collection by grabbing a pooled dictionary.
-            var temp = DictionaryPool<int, AnimationData>.Get();
+            var temp = DictionaryPool<int, AnimationPlayData>.Get();
             try
             {
                 foreach (var anim in _animationsInProgress)
@@ -67,17 +79,17 @@ namespace UnityGLTF.Interactivity
             }
             finally
             {
-                DictionaryPool<int, AnimationData>.Release(temp);
+                DictionaryPool<int, AnimationPlayData>.Release(temp);
             }
         }
 
         // This logic path hurts my soul but it's taken directly from the spec.
         // A lot harder to follow than what we had before.
-        private bool SampleAnimation(AnimationData a)
+        private bool SampleAnimation(AnimationPlayData a)
         {
             float r, T;
 
-            T = _animations[a.index].length;
+            T = _animations[a.index].anim.length;
 
             if (a.startTime == a.endTime)
             {
@@ -127,7 +139,10 @@ namespace UnityGLTF.Interactivity
 
             void SampleAnimationAtTime(float r)
             {
-                _animations[a.index].time = GetTimeStamp(r);
+                var t = GetTimeStamp(r);
+                _animations[a.index].playhead = t;
+                _animations[a.index].virtualPlayhead = r;
+                _animations[a.index].anim.time = t;
                 animationComponent.Sample();
             }
 
@@ -139,14 +154,14 @@ namespace UnityGLTF.Interactivity
             }
         }
 
-        public void PlayAnimation(in AnimationData data)
+        public void PlayAnimation(in AnimationPlayData data)
         {
             StopAnimation(data.index);
 
             _animationsInProgress.Add(data.index, data);
 
             _currentAnimation = _animations[data.index];
-            animationComponent.clip = _currentAnimation.clip;
+            animationComponent.clip = _currentAnimation.anim.clip;
             animationComponent.Play();
         }
 
@@ -163,6 +178,26 @@ namespace UnityGLTF.Interactivity
         internal void StopAnimation(int index)
         {
             _animationsInProgress.Remove(index);
+        }
+
+        public bool IsAnimationPlaying(int index)
+        {
+            return _animationsInProgress.ContainsKey(index);
+        }
+
+        public float GetAnimationMaxTime(int index)
+        {
+            return _animations[index].anim.length;
+        }
+
+        public float GetPlayhead(int index)
+        {
+            return _animations[index].playhead;
+        }
+
+        public float GetVirtualPlayhead(int index)
+        {
+            return _animations[index].virtualPlayhead;
         }
     }
 }

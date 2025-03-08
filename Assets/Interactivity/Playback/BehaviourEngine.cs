@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -24,10 +22,10 @@ namespace UnityGLTF.Interactivity
 
         public readonly PointerResolver pointerResolver;
 
-        public BehaviourEngine(Graph graph, PointerResolver pointerResolver)
+        public BehaviourEngine(Graph graph, GLTFSceneImporter importer)
         {
             this.graph = graph;
-            this.pointerResolver = pointerResolver;
+            pointerResolver = new PointerResolver(importer);
 
             for (int i = 0; i < graph.nodes.Count; i++)
             {
@@ -106,9 +104,10 @@ namespace UnityGLTF.Interactivity
         {
             animationWrapper = wrapper;
             wrapper.SetData(this, animation);
+            pointerResolver.RegisterAnimations(wrapper);
         }
 
-        public void PlayAnimation(in AnimationData data)
+        public void PlayAnimation(in AnimationPlayData data)
         {
             if (!HasAnimationWrapper())
                 return;

@@ -26,7 +26,7 @@ namespace UnityGLTF.Interactivity
 
             TryExecuteFlow(ConstStrings.OUT);
 
-            var data = new AnimationData()
+            var data = new AnimationPlayData()
             {
                 index = _animationIndex,
                 startTime = _startTime,

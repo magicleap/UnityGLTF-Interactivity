@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityGLTF.Interactivity.Materials;
 
@@ -12,6 +11,7 @@ namespace UnityGLTF.Interactivity
         private readonly List<NodePointers> _nodePointers = new();
         private readonly List<MaterialPointers> _materialPointers = new();
         private readonly List<CameraPointers> _cameraPointers = new();
+        private readonly List<AnimationPointers> _animationPointers = new();
         private readonly ScenePointers _scenePointers;
         private readonly ActiveCameraPointers _activeCameraPointers = ActiveCameraPointers.CreatePointers();
 
@@ -21,7 +21,16 @@ namespace UnityGLTF.Interactivity
         {
             RegisterNodes(importer);
             RegisterMaterials(importer);
+
             _scenePointers = new ScenePointers(importer);
+        }
+
+        public void RegisterAnimations(AnimationWrapper wrapper)
+        {
+            for (int i = 0; i < wrapper.animationComponent.GetClipCount(); i++)
+            {
+                _animationPointers.Add(new AnimationPointers(wrapper, i));
+            }
         }
 
         private void RegisterNodes(GLTFSceneImporter importer)
