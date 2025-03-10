@@ -67,7 +67,7 @@ namespace UnityGLTF.Interactivity
         {
             reader.AdvanceToNextToken('/');
 
-            var nodeIndex = PointerResolver.GetNodeIndexFromArgument(reader, engineNode);
+            var nodeIndex = PointerResolver.GetIndexFromArgument(reader, engineNode);
 
             var pointer = pointers[nodeIndex];
 

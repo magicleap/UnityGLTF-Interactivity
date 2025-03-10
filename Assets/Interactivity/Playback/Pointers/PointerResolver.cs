@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
+using UnityGLTF.Interactivity.Extensions;
 using UnityGLTF.Interactivity.Materials;
 
 namespace UnityGLTF.Interactivity
@@ -12,6 +13,7 @@ namespace UnityGLTF.Interactivity
         private readonly List<MaterialPointers> _materialPointers = new();
         private readonly List<CameraPointers> _cameraPointers = new();
         private readonly List<AnimationPointers> _animationPointers = new();
+        private readonly List<MeshPointers> _meshPointers = new();
         private readonly ScenePointers _scenePointers;
         private readonly ActiveCameraPointers _activeCameraPointers = ActiveCameraPointers.CreatePointers();
 
@@ -21,8 +23,17 @@ namespace UnityGLTF.Interactivity
         {
             RegisterNodes(importer);
             RegisterMaterials(importer);
+            RegisterMeshes(importer);
 
             _scenePointers = new ScenePointers(importer);
+        }
+
+        private void RegisterMeshes(GLTFSceneImporter importer)
+        {
+            for (int i = 0; i < importer.Root.Meshes.Count; i++)
+            {
+                _meshPointers.Add(new MeshPointers(importer.Root.Meshes[i]));
+            }
         }
 
         public void RegisterAnimations(AnimationWrapper wrapper)
@@ -94,19 +105,20 @@ namespace UnityGLTF.Interactivity
 
             return reader.AsReadOnlySpan() switch
             {
-                var a when a.SequenceEqual("nodes".AsSpan()) => NodePointers.ProcessNodePointer(reader, engineNode, _nodePointers),
-                var a when a.SequenceEqual("materials".AsSpan()) => MaterialPointers.ProcessMaterialPointer(reader, engineNode, _materialPointers),
-                var a when a.SequenceEqual("activeCamera".AsSpan()) => _activeCameraPointers.ProcessActiveCameraPointer(reader),
-                var a when a.SequenceEqual("cameras".AsSpan()) => CameraPointers.ProcessCameraPointer(reader, engineNode, _cameraPointers),
-                var a when a.SequenceEqual(Pointers.ANIMATIONS_LENGTH.AsSpan()) => _scenePointers.animationsLength,
-                var a when a.SequenceEqual(Pointers.MATERIALS_LENGTH.AsSpan()) => _scenePointers.materialsLength,
-                var a when a.SequenceEqual(Pointers.MESHES_LENGTH.AsSpan()) => _scenePointers.meshesLength,
-                var a when a.SequenceEqual(Pointers.NODES_LENGTH.AsSpan()) => _scenePointers.nodesLength,
+                var a when a.Is("nodes") => NodePointers.ProcessNodePointer(reader, engineNode, _nodePointers),
+                var a when a.Is("materials") => MaterialPointers.ProcessMaterialPointer(reader, engineNode, _materialPointers),
+                var a when a.Is("activeCamera") => _activeCameraPointers.ProcessActiveCameraPointer(reader),
+                var a when a.Is("cameras") => CameraPointers.ProcessCameraPointer(reader, engineNode, _cameraPointers),
+                var a when a.Is("meshes") => MeshPointers.ProcessPointer(reader, engineNode, _meshPointers),
+                var a when a.Is(Pointers.ANIMATIONS_LENGTH) => _scenePointers.animationsLength,
+                var a when a.Is(Pointers.MATERIALS_LENGTH) => _scenePointers.materialsLength,
+                var a when a.Is(Pointers.MESHES_LENGTH) => _scenePointers.meshesLength,
+                var a when a.Is(Pointers.NODES_LENGTH) => _scenePointers.nodesLength,
                 _ => throw new InvalidOperationException($"No valid pointer found with name {reader.ToString()}"),
             };
         }
 
-        public static int GetNodeIndexFromArgument(StringSpanReader reader, BehaviourEngineNode engineNode)
+        public static int GetIndexFromArgument(StringSpanReader reader, BehaviourEngineNode engineNode)
         {
             int nodeIndex;
 

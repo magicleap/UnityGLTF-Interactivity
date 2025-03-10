@@ -16,6 +16,8 @@ namespace UnityGLTF.Interactivity
         public Pointer<bool> hoverability;
         public Pointer<float4x4> matrix;
         public Pointer<float4x4> globalMatrix;
+        public ReadOnlyPointer<int> weightsLength;
+        public Pointer<float>[] weights;
         public GameObject gameObject;
 
         public NodePointers(GameObject go, GLTF.Schema.Node schema)
@@ -72,6 +74,27 @@ namespace UnityGLTF.Interactivity
 
             selectability = GetSelectabilityPointers(schema);
             hoverability = GetHoverabilityPointers(schema);
+
+            if(go.TryGetComponent(out SkinnedMeshRenderer smr))
+            {
+                weightsLength = new ReadOnlyPointer<int>(() => smr.sharedMesh.blendShapeCount);
+                weights = new Pointer<float>[smr.sharedMesh.blendShapeCount];
+
+                for (int i = 0; i < weights.Length; i++)
+                {
+                    weights[i] = new Pointer<float>()
+                    {
+                        setter = (v) => smr.SetBlendShapeWeight(i, v),
+                        getter = () => smr.GetBlendShapeWeight(i),
+                        evaluator = (a, b, t) => Mathf.Lerp(a, b, t)
+                    };
+                }
+            }
+            else
+            {
+                weightsLength = default;
+                weights = default;
+            }
         }
 
         private static Pointer<bool> GetSelectabilityPointers(GLTF.Schema.Node schema)
@@ -134,7 +157,7 @@ namespace UnityGLTF.Interactivity
         {
             reader.AdvanceToNextToken('/');
 
-            var nodeIndex = PointerResolver.GetNodeIndexFromArgument(reader, engineNode);
+            var nodeIndex = PointerResolver.GetIndexFromArgument(reader, engineNode);
 
             var nodePointer = pointers[nodeIndex];
 
@@ -146,6 +169,8 @@ namespace UnityGLTF.Interactivity
                 var a when a.Is("translation") => nodePointer.translation,
                 var a when a.Is("rotation") => nodePointer.rotation,
                 var a when a.Is("scale") => nodePointer.scale,
+                var a when a.Is("weights") => ProcessWeightsPointer(reader, engineNode, nodePointer),
+                var a when a.Is("weights.length") => nodePointer.weightsLength,
                 var a when a.Is("extensions") => ProcessExtensionPointer(reader, nodePointer),
                 _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
             };
@@ -155,7 +180,7 @@ namespace UnityGLTF.Interactivity
         {
             reader.AdvanceToNextToken('/');
 
-            // Path so far: /nodes/{}/extensions
+            // Path so far: /nodes/{}/extensions/
             return reader.AsReadOnlySpan() switch
             {
                 // TODO: Handle these properly via extensions in UnityGLTF?
@@ -163,6 +188,16 @@ namespace UnityGLTF.Interactivity
                 var a when a.Is("KHR_node_visibility") => nodePointer.visibility,
                 _ => throw new InvalidOperationException($"Extension {reader.ToString()} is unsupported at this time!"),
             };
+        }
+
+        private static IPointer ProcessWeightsPointer(StringSpanReader reader, BehaviourEngineNode engineNode, NodePointers pointer)
+        {
+            reader.AdvanceToNextToken('/');
+
+            // Path so far: /nodes/{}/weights/
+            var weightIndex = PointerResolver.GetIndexFromArgument(reader, engineNode);
+
+            return pointer.weights[weightIndex];
         }
     }
 }
