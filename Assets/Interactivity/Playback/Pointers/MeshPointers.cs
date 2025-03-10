@@ -13,6 +13,13 @@ namespace UnityGLTF.Interactivity
 
         public MeshPointers(GLTFMesh mesh)
         {
+            if(mesh.Weights == null || mesh.Weights.Count == 0)
+            {
+                weightsLength = new ReadOnlyPointer<int>(() => 0);
+                weights = new Pointer<float>[0];
+                return;
+            }
+
             weightsLength = new ReadOnlyPointer<int>(() => mesh.Weights.Count);
             weights = new Pointer<float>[mesh.Weights.Count];
 
