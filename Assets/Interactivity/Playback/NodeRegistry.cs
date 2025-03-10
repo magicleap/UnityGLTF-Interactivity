@@ -128,6 +128,7 @@ namespace UnityGLTF.Interactivity
             ["math/round"] = (engine, node) => new MathRound(engine, node),
             ["math/sign"] = (engine, node) => new MathSign(engine, node),
             ["math/sinh"] = (engine, node) => new MathSinH(engine, node),
+            ["math/switch"] = (engine, node) => new MathSwitch(engine, node),
             ["math/tanh"] = (engine, node) => new MathTanH(engine, node),
             ["math/transform"] = (engine, node) => new MathTransform(engine, node),
             ["math/transpose"] = (engine, node) => new MathTranspose(engine, node),
