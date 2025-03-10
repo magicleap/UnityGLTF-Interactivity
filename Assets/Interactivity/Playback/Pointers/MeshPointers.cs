@@ -40,8 +40,8 @@ namespace UnityGLTF.Interactivity
             // Path so far: /meshes/{}/
             return reader.AsReadOnlySpan() switch
             {
-                var a when a.Is("weights") => ProcessWeightsPointer(reader, engineNode, pointer),
-                var a when a.Is("weights.length") => pointer.weightsLength,
+                var a when a.Is(Pointers.WEIGHTS) => ProcessWeightsPointer(reader, engineNode, pointer),
+                var a when a.Is(Pointers.WEIGHTS_LENGTH) => pointer.weightsLength,
                 _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
             };
         }

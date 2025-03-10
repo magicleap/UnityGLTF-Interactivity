@@ -13,6 +13,12 @@ namespace UnityGLTF.Interactivity
         public const string MATERIALS_LENGTH = "materials.length";
         public const string MESHES_LENGTH = "meshes.length";
         public const string NODES_LENGTH = "nodes.length";
+        public const string WEIGHTS_LENGTH = "weights.length";
+        public const string WEIGHTS= "weights";
+        public const string EXTENSIONS = "extensions";
+        public const string TRANSLATION = "translation";
+        public const string ROTATION = "rotation";
+        public const string SCALE = "scale";
     }
 
     public static class ConstStrings

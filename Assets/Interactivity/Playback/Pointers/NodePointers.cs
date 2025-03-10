@@ -166,12 +166,12 @@ namespace UnityGLTF.Interactivity
             // Path so far: /nodes/{}/
             return reader.AsReadOnlySpan() switch
             {
-                var a when a.Is("translation") => nodePointer.translation,
-                var a when a.Is("rotation") => nodePointer.rotation,
-                var a when a.Is("scale") => nodePointer.scale,
-                var a when a.Is("weights") => ProcessWeightsPointer(reader, engineNode, nodePointer),
-                var a when a.Is("weights.length") => nodePointer.weightsLength,
-                var a when a.Is("extensions") => ProcessExtensionPointer(reader, nodePointer),
+                var a when a.Is(Pointers.TRANSLATION) => nodePointer.translation,
+                var a when a.Is(Pointers.ROTATION) => nodePointer.rotation,
+                var a when a.Is(Pointers.SCALE) => nodePointer.scale,
+                var a when a.Is(Pointers.WEIGHTS) => ProcessWeightsPointer(reader, engineNode, nodePointer),
+                var a when a.Is(Pointers.WEIGHTS_LENGTH) => nodePointer.weightsLength,
+                var a when a.Is(Pointers.EXTENSIONS) => ProcessExtensionPointer(reader, nodePointer),
                 _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
             };
         }
@@ -184,8 +184,9 @@ namespace UnityGLTF.Interactivity
             return reader.AsReadOnlySpan() switch
             {
                 // TODO: Handle these properly via extensions in UnityGLTF?
-                var a when a.Is("KHR_node_selectability") => nodePointer.selectability,
-                var a when a.Is("KHR_node_visibility") => nodePointer.visibility,
+                var a when a.Is(GLTF.Schema.KHR_node_selectability_Factory.EXTENSION_NAME) => nodePointer.selectability,
+                var a when a.Is(GLTF.Schema.KHR_node_visbility_Factory.EXTENSION_NAME) => nodePointer.visibility,
+                var a when a.Is(GLTF.Schema.KHR_node_hoverability_Factory.EXTENSION_NAME) => nodePointer.hoverability,
                 _ => throw new InvalidOperationException($"Extension {reader.ToString()} is unsupported at this time!"),
             };
         }
