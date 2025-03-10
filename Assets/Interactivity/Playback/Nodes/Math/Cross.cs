@@ -17,7 +17,7 @@ namespace UnityGLTF.Interactivity
 
             return a switch
             {
-                Property<Vector3> aProp when b is Property<Vector3> bProp => new Property<Vector3>(math.cross(aProp.value, bProp.value)),
+                Property<float3> aProp when b is Property<float3> bProp => new Property<float3>(math.cross(aProp.value, bProp.value)),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
         }

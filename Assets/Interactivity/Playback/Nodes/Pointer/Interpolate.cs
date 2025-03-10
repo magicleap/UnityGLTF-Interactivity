@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityGLTF.Interactivity.Extensions;
 
@@ -11,7 +12,7 @@ namespace UnityGLTF.Interactivity
         private IPointer _pointer;
         private IProperty _interpGoal;
         private float _duration;
-        private Vector2 _p1, _p2;
+        private float2 _p1, _p2;
 
         public PointerInterpolate(BehaviourEngine engine, Node node) : base(engine, node)
         {

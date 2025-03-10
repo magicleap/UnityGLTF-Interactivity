@@ -197,12 +197,12 @@ namespace UnityGLTF.Interactivity
                 AddValue(valueData.id, 0f);
             else if (type == typeof(bool))
                 AddValue(valueData.id, false);
-            else if (type == typeof(Vector2))
-                AddValue(valueData.id, Vector2.zero);
-            else if (type == typeof(Vector3))
-                AddValue(valueData.id, Vector3.zero);
-            else if (type == typeof(Vector4))
-                AddValue(valueData.id, Vector4.zero);
+            else if (type == typeof(float2))
+                AddValue(valueData.id, float2.zero);
+            else if (type == typeof(float3))
+                AddValue(valueData.id, float3.zero);
+            else if (type == typeof(float4))
+                AddValue(valueData.id, float4.zero);
             else if (type == typeof(float2x2))
                 AddValue(valueData.id, float2x2.zero);
             else if (type == typeof(float3x3))

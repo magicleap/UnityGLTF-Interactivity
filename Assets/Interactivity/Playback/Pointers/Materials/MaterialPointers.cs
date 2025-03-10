@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityGLTF.Interactivity.Extensions;
 
@@ -7,8 +8,8 @@ namespace UnityGLTF.Interactivity.Materials
 {
     public struct TransformPointers
     {
-        public Pointer<Vector2> offset;
-        public Pointer<Vector2> scale;
+        public Pointer<float2> offset;
+        public Pointer<float2> scale;
         public Pointer<float> rotation;
         public Pointer<float> texCoord;
     }

@@ -18,9 +18,9 @@ namespace UnityGLTF.Interactivity
             {
                 Property<int> prop => new Property<int>((int)math.sign(prop.value)),
                 Property<float> prop => new Property<float>(math.sign(prop.value)),
-                Property<Vector2> prop => new Property<Vector2>(math.sign(prop.value)),
-                Property<Vector3> prop => new Property<Vector3>(math.sign(prop.value)),
-                Property<Vector4> prop => new Property<Vector4>(math.sign(prop.value)),
+                Property<float2> prop => new Property<float2>(math.sign(prop.value)),
+                Property<float3> prop => new Property<float3>(math.sign(prop.value)),
+                Property<float4> prop => new Property<float4>(math.sign(prop.value)),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
         }

@@ -39,28 +39,28 @@ namespace UnityGLTF.Interactivity
             return jArray[0].Value<string>();
         }
 
-        public static Vector2 ToVector2(JArray jArray)
+        public static float2 ToFloat2(JArray jArray)
         {
             if (jArray == null)
-                return new Vector2(float.NaN, float.NaN);
+                return new float2(float.NaN, float.NaN);
 
-            return new Vector2(jArray[0].Value<float>(), jArray[1].Value<float>());
+            return new float2(jArray[0].Value<float>(), jArray[1].Value<float>());
         }
 
-        public static Vector3 ToVector3(JArray jArray)
+        public static float3 ToFloat3(JArray jArray)
         {
             if (jArray == null)
-                return new Vector3(float.NaN, float.NaN, float.NaN);
+                return new float3(float.NaN, float.NaN, float.NaN);
 
-            return new Vector3(jArray[0].Value<float>(), jArray[1].Value<float>(), jArray[2].Value<float>());
+            return new float3(jArray[0].Value<float>(), jArray[1].Value<float>(), jArray[2].Value<float>());
         }
 
-        public static Vector4 ToVector4(JArray jArray)
+        public static float4 ToFloat4(JArray jArray)
         {
             if (jArray == null)
-                return new Vector4(float.NaN, float.NaN, float.NaN, float.NaN);
+                return new float4(float.NaN, float.NaN, float.NaN, float.NaN);
 
-            return new Vector4(jArray[0].Value<float>(), jArray[1].Value<float>(), jArray[2].Value<float>(), jArray[3].Value<float>());
+            return new float4(jArray[0].Value<float>(), jArray[1].Value<float>(), jArray[2].Value<float>(), jArray[3].Value<float>());
         }
 
         public static int[] ToIntArray(JArray jArray)
@@ -125,9 +125,9 @@ namespace UnityGLTF.Interactivity
             }
 
             // GLTF floatNxN are column-major and Unity.Mathematics floatNxN are ROW-MAJOR so we need to be careful.
-            var c0 = new Vector3(v(0), v(1), v(2));
-            var c1 = new Vector3(v(3), v(4), v(5));
-            var c2 = new Vector3(v(6), v(7), v(8));
+            var c0 = new float3(v(0), v(1), v(2));
+            var c1 = new float3(v(3), v(4), v(5));
+            var c2 = new float3(v(6), v(7), v(8));
 
             return new float3x3(c0, c1, c2);
 
@@ -156,10 +156,10 @@ namespace UnityGLTF.Interactivity
 
             // Unity Matrix4x4 and GLTF both use Column-Major matrices so we can do a 1:1 transfer.
             // Unity.Mathematics.float4x4 is ROW-MAJOR so we need to be careful.
-            var c0 = new Vector4(v(0), v(1), v(2), v(3));
-            var c1 = new Vector4(v(4), v(5), v(6), v(7));
-            var c2 = new Vector4(v(8), v(9), v(10), v(11));
-            var c3 = new Vector4(v(12), v(13), v(14), v(15));
+            var c0 = new float4(v(0), v(1), v(2), v(3));
+            var c1 = new float4(v(4), v(5), v(6), v(7));
+            var c2 = new float4(v(8), v(9), v(10), v(11));
+            var c3 = new float4(v(12), v(13), v(14), v(15));
 
             return new float4x4(c0, c1, c2, c3);
 

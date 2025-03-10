@@ -18,9 +18,9 @@ namespace UnityGLTF.Interactivity
             {
                 Property<int> intProp => new Property<int>(math.abs(intProp.value)),
                 Property<float> floatProp => new Property<float>(math.abs(floatProp.value)),
-                Property<Vector2> vector2Prop => new Property<Vector2>(math.abs(vector2Prop.value)),
-                Property<Vector3> vector3Prop => new Property<Vector3>(math.abs(vector3Prop.value)),
-                Property<Vector4> vector4Prop => new Property<Vector4>(math.abs(vector4Prop.value)),
+                Property<float2> float2Prop => new Property<float2>(math.abs(float2Prop.value)),
+                Property<float3> float3Prop => new Property<float3>(math.abs(float3Prop.value)),
+                Property<float4> float4Prop => new Property<float4>(math.abs(float4Prop.value)),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
         }

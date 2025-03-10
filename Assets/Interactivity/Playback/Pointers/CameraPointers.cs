@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityGLTF.Interactivity.Extensions;
 
@@ -24,42 +25,42 @@ namespace UnityGLTF.Interactivity
             {
                 setter = (v) => cam.orthographicSize = v / cam.aspect,
                 getter = () => cam.orthographicSize * cam.aspect,
-                evaluator = (a, b, t) => Mathf.Lerp(a, b, t)
+                evaluator = (a, b, t) => math.lerp(a, b, t)
             };
 
             orthographicYMag = new Pointer<float>()
             {
                 setter = (v) => cam.orthographicSize = v,
                 getter = () => cam.orthographicSize,
-                evaluator = (a, b, t) => Mathf.Lerp(a, b, t)
+                evaluator = (a, b, t) => math.lerp(a, b, t)
             };
 
             perspectiveAspectRatio = new Pointer<float>()
             {
                 setter = (v) => cam.aspect = v,
                 getter = () => cam.aspect,
-                evaluator = (a, b, t) => Mathf.Lerp(a, b, t)
+                evaluator = (a, b, t) => math.lerp(a, b, t)
             };
 
             perspectiveYFov = new Pointer<float>()
             {
                 setter = (v) => cam.fieldOfView = v,
                 getter = () => cam.fieldOfView,
-                evaluator = (a, b, t) => Mathf.Lerp(a, b, t)
+                evaluator = (a, b, t) => math.lerp(a, b, t)
             };
 
             zNear = new Pointer<float>()
             {
                 setter = (v) => cam.nearClipPlane = v,
                 getter = () => cam.nearClipPlane,
-                evaluator = (a, b, t) => Mathf.Lerp(a, b, t)
+                evaluator = (a, b, t) => math.lerp(a, b, t)
             };
 
             zFar = new Pointer<float>()
             {
                 setter = (v) => cam.farClipPlane = v,
                 getter = () => cam.farClipPlane,
-                evaluator = (a, b, t) => Mathf.Lerp(a, b, t)
+                evaluator = (a, b, t) => math.lerp(a, b, t)
             };
         }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity.Materials
@@ -23,7 +24,7 @@ namespace UnityGLTF.Interactivity.Materials
             {
                 setter = (v) => mat.SetFloat(hash, v),
                 getter = () => mat.GetFloat(hash),
-                evaluator = (a, b, t) => Mathf.Lerp(a, b, t)
+                evaluator = (a, b, t) => math.lerp(a, b, t)
             };
         }
 
@@ -37,23 +38,23 @@ namespace UnityGLTF.Interactivity.Materials
             };
         }
 
-        public static Pointer<Vector2> CreateOffsetPointer(Material mat, int hash)
+        public static Pointer<float2> CreateOffsetPointer(Material mat, int hash)
         {
-            return new Pointer<Vector2>()
+            return new Pointer<float2>()
             {
                 setter = (v) => mat.SetTextureOffset(hash, v),
                 getter = () => mat.GetTextureOffset(hash),
-                evaluator = (a, b, t) => Vector2.Lerp(a, b, t)
+                evaluator = (a, b, t) => math.lerp(a, b, t)
             };
         }
 
-        public static Pointer<Vector2> CreateScalePointer(Material mat, int hash)
+        public static Pointer<float2> CreateScalePointer(Material mat, int hash)
         {
-            return new Pointer<Vector2>()
+            return new Pointer<float2>()
             {
                 setter = (v) => mat.SetTextureScale(hash, v),
                 getter = () => mat.GetTextureScale(hash),
-                evaluator = (a, b, t) => Vector2.Lerp(a, b, t)
+                evaluator = (a, b, t) => math.lerp(a, b, t)
             };
         }
     }

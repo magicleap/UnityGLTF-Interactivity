@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -19,11 +20,26 @@ namespace UnityGLTF.Interactivity
                 Property<bool> aProp when b is Property<bool> bProp => new Property<bool>(aProp.value == bProp.value),
                 Property<int> aInt when b is Property<int> bInt => new Property<bool>(aInt.value == bInt.value),
                 Property<float> aFloat when b is Property<float> bFloat => new Property<bool>(aFloat.value == bFloat.value),
-                Property<Vector2> aVec2 when b is Property<Vector2> bVec2 => new Property<bool>(aVec2.value == bVec2.value),
-                Property<Vector3> aVec3 when b is Property<Vector3> bVec3 => new Property<bool>(aVec3.value == bVec3.value),
-                Property<Vector4> aVec4 when b is Property<Vector4> bVec4 => new Property<bool>(aVec4.value == bVec4.value),
+                Property<float2> pA when b is Property<float2> pB => new Property<bool>(AllEqual(pA.value, pB.value)),
+                Property<float3> pA when b is Property<float3> pB => new Property<bool>(AllEqual(pA.value, pB.value)),
+                Property<float4> pA when b is Property<float4> pB => new Property<bool>(AllEqual(pA.value, pB.value)),
                 _ => throw new InvalidOperationException($"No supported type found or input types did not match. Types were A: {a.GetTypeSignature()}, B: {b.GetTypeSignature()}"),
             };
+        }
+
+        private static bool AllEqual(float2 a, float2 b)
+        {
+            return a.x == b.x && a.y == b.y;
+        }
+
+        private static bool AllEqual(float3 a, float3 b)
+        {
+            return a.x == b.x && a.y == b.y && a.z == b.z;
+        }
+
+        private static bool AllEqual(float4 a, float4 b)
+        {
+            return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
         }
     }
 }

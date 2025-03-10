@@ -8,9 +8,9 @@ namespace UnityGLTF.Interactivity
 {
     public struct NodePointers
     {
-        public Pointer<Vector3> translation;
-        public Pointer<Quaternion> rotation;
-        public Pointer<Vector3> scale;
+        public Pointer<float3> translation;
+        public Pointer<quaternion> rotation;
+        public Pointer<float3> scale;
         public Pointer<bool> visibility;
         public Pointer<bool> selectability;
         public Pointer<bool> hoverability;
@@ -28,25 +28,25 @@ namespace UnityGLTF.Interactivity
             // Unity is left-handed with y-up and z-forward.
             // GLTF is right-handed with y-up and z-forward.
             // Handedness is easiest to swap here though we could do it during deserialization for performance.
-            translation = new Pointer<Vector3>()
+            translation = new Pointer<float3>()
             {
                 setter = (v) => go.transform.localPosition = v.SwapHandedness(),
                 getter = () => go.transform.localPosition.SwapHandedness(),
-                evaluator = (a, b, t) => Vector3.Lerp(a, b, t)
+                evaluator = (a, b, t) => math.lerp(a, b, t)
             };
 
-            rotation = new Pointer<Quaternion>()
+            rotation = new Pointer<quaternion>()
             {
-                setter = (v) => go.transform.localRotation = v.SwapHandedness(),
+                setter = (v) => go.transform.localRotation = ((Quaternion)v).SwapHandedness(),
                 getter = () => go.transform.localRotation.SwapHandedness(),
-                evaluator = (a, b, t) => Quaternion.Slerp(a, b, t)
+                evaluator = (a, b, t) => math.slerp(a, b, t)
             };
 
-            scale = new Pointer<Vector3>()
+            scale = new Pointer<float3>()
             {
                 setter = (v) => go.transform.localScale = v.SwapHandedness(),
                 getter = () => go.transform.localScale.SwapHandedness(),
-                evaluator = (a, b, t) => Vector3.Lerp(a, b, t)
+                evaluator = (a, b, t) => math.lerp(a, b, t)
             };
 
             matrix = new Pointer<float4x4>()
@@ -86,7 +86,7 @@ namespace UnityGLTF.Interactivity
                     {
                         setter = (v) => smr.SetBlendShapeWeight(i, v),
                         getter = () => smr.GetBlendShapeWeight(i),
-                        evaluator = (a, b, t) => Mathf.Lerp(a, b, t)
+                        evaluator = (a, b, t) => math.lerp(a, b, t)
                     };
                 }
             }

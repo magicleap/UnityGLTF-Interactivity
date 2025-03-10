@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -30,7 +31,7 @@ namespace UnityGLTF.Interactivity
             return true;
         }
 
-        public static bool TryGet(GameObject prefab, Vector3 position, Quaternion rotation, out GameObject obj)
+        public static bool TryGet(GameObject prefab, float3 position, quaternion rotation, out GameObject obj)
         {
             obj = null;
 
@@ -44,7 +45,7 @@ namespace UnityGLTF.Interactivity
             return true;
         }
 
-        public static bool TryGet(GameObject prefab, Vector3 position, Quaternion rotation, Vector3 localScale, out GameObject obj)
+        public static bool TryGet(GameObject prefab, float3 position, quaternion rotation, float3 localScale, out GameObject obj)
         {
             obj = null;
 

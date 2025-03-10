@@ -16,9 +16,9 @@ namespace UnityGLTF.Interactivity
 
             return a switch
             {
-                Property<Vector2> aProp => new Property<float>(math.length(aProp.value)),
-                Property<Vector3> aProp => new Property<float>(math.length(aProp.value)),
-                Property<Vector4> aProp => new Property<float>(math.length(aProp.value)),
+                Property<float2> aProp => new Property<float>(math.length(aProp.value)),
+                Property<float3> aProp => new Property<float>(math.length(aProp.value)),
+                Property<float4> aProp => new Property<float>(math.length(aProp.value)),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
         }

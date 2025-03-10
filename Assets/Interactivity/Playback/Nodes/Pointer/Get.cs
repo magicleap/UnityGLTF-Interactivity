@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityGLTF.Interactivity.Extensions;
 
@@ -39,18 +40,18 @@ namespace UnityGLTF.Interactivity
             {
                 ReadOnlyPointer<int> pInt => new Property<int>(pInt.GetValue()),
                 ReadOnlyPointer<float> pFloat => new Property<float>(pFloat.GetValue()),
-                ReadOnlyPointer<Color> pColor => new Property<Vector3>(pColor.GetValue().ToVector3()),
-                ReadOnlyPointer<Quaternion> pQuat => new Property<Vector3>(pQuat.GetValue().ToVector4()),
-                ReadOnlyPointer<Vector2> pVec2 => new Property<Vector2>(pVec2.GetValue()),
-                ReadOnlyPointer<Vector3> pVec3 => new Property<Vector3>(pVec3.GetValue()),
-                ReadOnlyPointer<Vector4> pVec4 => new Property<Vector4>(pVec4.GetValue()),
+                ReadOnlyPointer<Color> pColor => new Property<float4>(pColor.GetValue().ToFloat4()),
+                ReadOnlyPointer<quaternion> pQuat => new Property<float4>(pQuat.GetValue().ToFloat4()),
+                ReadOnlyPointer<float2> pVec2 => new Property<float2>(pVec2.GetValue()),
+                ReadOnlyPointer<float3> pVec3 => new Property<float3>(pVec3.GetValue()),
+                ReadOnlyPointer<float4> pVec4 => new Property<float4>(pVec4.GetValue()),
                 Pointer<int> pInt => new Property<int>(pInt.GetValue()),
                 Pointer<float> pFloat => new Property<float>(pFloat.GetValue()),
-                Pointer<Color> pColor => new Property<Vector3>(pColor.GetValue().ToVector3()),
-                Pointer<Quaternion> pQuat => new Property<Vector4>(pQuat.GetValue().ToVector4()),
-                Pointer<Vector2> pVec2 => new Property<Vector2>(pVec2.GetValue()),
-                Pointer<Vector3> pVec3 => new Property<Vector3>(pVec3.GetValue()),
-                Pointer<Vector4> pVec4 => new Property<Vector4>(pVec4.GetValue()),
+                Pointer<Color> pColor => new Property<float4>(pColor.GetValue().ToFloat4()),
+                Pointer<quaternion> pQuat => new Property<float4>(pQuat.GetValue().ToFloat4()),
+                Pointer<float2> pVec2 => new Property<float2>(pVec2.GetValue()),
+                Pointer<float3> pVec3 => new Property<float3>(pVec3.GetValue()),
+                Pointer<float4> pVec4 => new Property<float4>(pVec4.GetValue()),
 
                 _ => throw new InvalidOperationException("No supported type found."),
             };

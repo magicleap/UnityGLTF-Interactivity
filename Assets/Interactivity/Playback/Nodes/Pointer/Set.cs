@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityGLTF.Interactivity.Extensions;
 
@@ -30,25 +31,25 @@ namespace UnityGLTF.Interactivity
                 case Property<float> prop when _pointer is Pointer<float> p:
                     p.setter(prop.value);
                     break;
-                case Property<Vector2> prop when _pointer is Pointer<Vector2> p:
+                case Property<float2> prop when _pointer is Pointer<float2> p:
                     p.setter(prop.value);
                     break;
-                case Property<Vector3> prop when _pointer is Pointer<Vector3> p:
+                case Property<float3> prop when _pointer is Pointer<float3> p:
                     p.setter(prop.value);
                     break;
-                case Property<Vector3> prop when _pointer is Pointer<Color> p:
+                case Property<float3> prop when _pointer is Pointer<Color> p:
                     p.setter(prop.value.ToColor());
                     break;
-                //case Property<Vector3> prop when _pointer is Pointer<Quaternion> p:
-                //    p.setter(Quaternion.Euler(prop.value));
+                //case Property<float3> prop when _pointer is Pointer<quaternion> p:
+                //    p.setter(quaternion.Euler(prop.value));
                 //    break;
-                case Property<Vector4> prop when _pointer is Pointer<Vector4> p:
+                case Property<float4> prop when _pointer is Pointer<float4> p:
                     p.setter(prop.value);
                     break;
-                case Property<Vector4> prop when _pointer is Pointer<Color> p:
+                case Property<float4> prop when _pointer is Pointer<Color> p:
                     p.setter(prop.value.ToColor());
                     break;
-                case Property<Vector4> prop when _pointer is Pointer<Quaternion> p:
+                case Property<float4> prop when _pointer is Pointer<quaternion> p:
                     p.setter(prop.value.ToQuaternion());
                     break;
                 case Property<bool> prop when _pointer is Pointer<bool> p:

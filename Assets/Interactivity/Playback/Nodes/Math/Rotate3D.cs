@@ -18,12 +18,12 @@ namespace UnityGLTF.Interactivity
 
             return a switch
             {
-                Property<Vector3> aProp when b is Property<Vector3> bProp && c is Property<float> cProp => new Property<Vector3>(rotate(aProp.value, bProp.value, cProp.value)),
+                Property<float3> aProp when b is Property<float3> bProp && c is Property<float> cProp => new Property<float3>(rotate(aProp.value, bProp.value, cProp.value)),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
         }
 
-        private static Vector3 rotate(float3 vec, Vector3 axis, float rad)
+        private static float3 rotate(float3 vec, float3 axis, float rad)
         {
             // TODO: Test rotation direction to make sure it matches the spec (counter-clockwise).
             return math.mul(quaternion.AxisAngle(axis, rad), vec);

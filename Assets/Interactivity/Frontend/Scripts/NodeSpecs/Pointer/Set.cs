@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -23,7 +24,7 @@ namespace UnityGLTF.Interactivity
 
             var values = new NodeValue[]
             {
-                new NodeValue(ConstStrings.VALUE, "Value to set.", new Type[]  { typeof(int), typeof(float), typeof(Vector2), typeof(Vector3), typeof(Vector4) }),
+                new NodeValue(ConstStrings.VALUE, "Value to set.", new Type[]  { typeof(int), typeof(float), typeof(float2), typeof(float3), typeof(float4) }),
             };
 
             return (flows, values);

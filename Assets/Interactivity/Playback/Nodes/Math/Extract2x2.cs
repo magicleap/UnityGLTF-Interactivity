@@ -15,7 +15,7 @@ namespace UnityGLTF.Interactivity
             TryEvaluateValue(ConstStrings.A, out IProperty a);
 
             if (a is not Property<float2x2> property)
-                throw new InvalidOperationException("Input A is not a Vector3!");
+                throw new InvalidOperationException("Input A is not a float3!");
 
             return id switch
             {

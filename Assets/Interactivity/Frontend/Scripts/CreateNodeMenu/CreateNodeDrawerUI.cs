@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +14,7 @@ namespace UnityGLTF.Interactivity.Frontend
         [SerializeField] private GameObject _nodeEntryPrefab;
         [SerializeField] private Button _button;
 
-        private Quaternion _arrowDownRotation;
+        private quaternion _arrowDownRotation;
 
         public CreateNodeMenuUI menuUI { get; private set; }
         public string category { get; private set; }
@@ -54,7 +55,7 @@ namespace UnityGLTF.Interactivity.Frontend
 
         public void ShowEntries(bool show)
         {
-            _arrowTransform.rotation = show ? Quaternion.identity : _arrowDownRotation;
+            _arrowTransform.rotation = show ? quaternion.identity : _arrowDownRotation;
 
             for (int i = 0; i < _nodeEntries.Length; i++)
             {

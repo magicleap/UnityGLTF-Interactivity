@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityGLTF.Interactivity.Extensions;
 
@@ -7,8 +8,8 @@ namespace UnityGLTF.Interactivity
     public struct ActiveCameraPointers
     {
         // These are readonly in the spec but I'm a rebel
-        public Pointer<Vector3> translation;
-        public Pointer<Quaternion> rotation;
+        public Pointer<float3> translation;
+        public Pointer<quaternion> rotation;
 
         public static ActiveCameraPointers CreatePointers()
         {
@@ -18,18 +19,18 @@ namespace UnityGLTF.Interactivity
             // Handedness is easiest to swap here though we could do it during deserialization for performance.
             var pointers = new ActiveCameraPointers();
 
-            pointers.translation = new Pointer<Vector3>()
+            pointers.translation = new Pointer<float3>()
             {
                 setter = (v) => Camera.main.transform.localPosition = v.SwapHandedness(),
                 getter = () => Camera.main.transform.localPosition.SwapHandedness(),
-                evaluator = (a, b, t) => Vector3.Lerp(a, b, t)
+                evaluator = (a, b, t) => math.lerp(a, b, t)
             };
 
-            pointers.rotation = new Pointer<Quaternion>()
+            pointers.rotation = new Pointer<quaternion>()
             {
-                setter = (v) => Camera.main.transform.localRotation = v.SwapHandedness(),
+                setter = (v) => Camera.main.transform.localRotation = ((Quaternion)v).SwapHandedness(),
                 getter = () => Camera.main.transform.localRotation.SwapHandedness(),
-                evaluator = (a, b, t) => Quaternion.Slerp(a, b, t)
+                evaluator = (a, b, t) => math.slerp(a, b, t)
             };
 
             return pointers;

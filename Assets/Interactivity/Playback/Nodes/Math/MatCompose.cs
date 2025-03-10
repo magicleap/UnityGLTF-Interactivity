@@ -19,7 +19,7 @@ namespace UnityGLTF.Interactivity
 
             return translation switch
             {
-                Property<Vector3> tProp when rotation is Property<Vector4> rProp && scale is Property<Vector3> sProp => new Property<float4x4>(TRS(tProp.value, rProp.value.ToQuaternion(), sProp.value)),
+                Property<float3> tProp when rotation is Property<float4> rProp && scale is Property<float3> sProp => new Property<float4x4>(TRS(tProp.value, rProp.value.ToQuaternion(), sProp.value)),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
         }

@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -178,23 +179,23 @@ namespace UnityGLTF.Interactivity
                     writer.WriteValue(bProp.value);
                     type = typeIndexByType[typeof(bool)];
                     break;
-                case Property<Vector2> f2Prop:
+                case Property<float2> f2Prop:
                     writer.WriteValue(f2Prop.value.x);
                     writer.WriteValue(f2Prop.value.y);
-                    type = typeIndexByType[typeof(Vector2)];
+                    type = typeIndexByType[typeof(float2)];
                     break;
-                case Property<Vector3> f3Prop:
+                case Property<float3> f3Prop:
                     writer.WriteValue(f3Prop.value.x);
                     writer.WriteValue(f3Prop.value.y);
                     writer.WriteValue(f3Prop.value.z);
-                    type = typeIndexByType[typeof(Vector3)];
+                    type = typeIndexByType[typeof(float3)];
                     break;
-                case Property<Vector4> f4Prop:
+                case Property<float4> f4Prop:
                     writer.WriteValue(f4Prop.value.x);
                     writer.WriteValue(f4Prop.value.y);
                     writer.WriteValue(f4Prop.value.z);
                     writer.WriteValue(f4Prop.value.w);
-                    type = typeIndexByType[typeof(Vector4)];
+                    type = typeIndexByType[typeof(float4)];
                     break;
                 default:
                     throw new NotImplementedException();

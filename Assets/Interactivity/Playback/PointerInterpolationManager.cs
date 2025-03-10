@@ -13,8 +13,8 @@ namespace UnityGLTF.Interactivity
         public float startTime;
         public float duration;
         public IProperty endValue;
-        public Vector2 cp1;
-        public Vector2 cp2;
+        public float2 cp1;
+        public float2 cp2;
         public Action done;
         public IInterpolator interpolator;
     }
@@ -91,9 +91,9 @@ namespace UnityGLTF.Interactivity
             var interpolator = data.endValue switch
             {
                 Property<float> property => GetInterpolator(property, data),
-                Property<Vector2> property => GetInterpolator(property, data),
-                Property<Vector3> property => ProcessVector3(property, data),
-                Property<Vector4> property => ProcessVector4(property, data),
+                Property<float2> property => GetInterpolator(property, data),
+                Property<float3> property => Processfloat3(property, data),
+                Property<float4> property => Processfloat4(property, data),
                 Property<float2x2> property => GetInterpolator(property, data),
                 Property<float3x3> property => GetInterpolator(property, data),
                 Property<float4x4> property => GetInterpolator(property, data),
@@ -108,27 +108,27 @@ namespace UnityGLTF.Interactivity
             Util.Log($"Starting Interpolation: Start Time {data.startTime}, Duration: {data.duration}");
         }
 
-        private IInterpolator ProcessVector3(Property<Vector3> property, PointerInterpolateData data)
+        private IInterpolator Processfloat3(Property<float3> property, PointerInterpolateData data)
         {
             return data.pointer switch
             {
-                Pointer<Vector3> => GetInterpolator(property, data),
+                Pointer<float3> => GetInterpolator(property, data),
                 Pointer<Color> => GetInterpolator(new Property<Color>(property.value.ToColor()), data),
-                Pointer<Quaternion> => GetInterpolator(new Property<Quaternion>(Quaternion.Euler(property.value)), data),
+                Pointer<quaternion> => GetInterpolator(new Property<quaternion>(quaternion.Euler(property.value)), data),
 
-                _ => throw new InvalidOperationException($"Pointer type {data.pointer.GetSystemType()} is not supported for this Vector3 property."),
+                _ => throw new InvalidOperationException($"Pointer type {data.pointer.GetSystemType()} is not supported for this float3 property."),
             };
         }
 
-        private IInterpolator ProcessVector4(Property<Vector4> property, PointerInterpolateData data)
+        private IInterpolator Processfloat4(Property<float4> property, PointerInterpolateData data)
         {
             return data.pointer switch
             {
-                Pointer<Vector4> => GetInterpolator(property, data),
+                Pointer<float4> => GetInterpolator(property, data),
                 Pointer<Color> => GetInterpolator(new Property<Color>(property.value.ToColor()), data),
-                Pointer<Quaternion> => GetInterpolator(new Property<Quaternion>(property.value.ToQuaternion()), data),
+                Pointer<quaternion> => GetInterpolator(new Property<quaternion>(property.value.ToQuaternion()), data),
 
-                _ => throw new InvalidOperationException($"Pointer type {data.pointer.GetSystemType()} is not supported for this Vector4 property."),
+                _ => throw new InvalidOperationException($"Pointer type {data.pointer.GetSystemType()} is not supported for this float4 property."),
             };
         }
 

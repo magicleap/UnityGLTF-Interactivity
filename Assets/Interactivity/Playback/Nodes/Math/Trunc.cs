@@ -17,9 +17,9 @@ namespace UnityGLTF.Interactivity
             return a switch
             {
                 Property<float> prop => new Property<float>(math.trunc(prop.value)),
-                Property<Vector2> prop => new Property<Vector2>(math.trunc(prop.value)),
-                Property<Vector3> prop => new Property<Vector3>(math.trunc(prop.value)),
-                Property<Vector4> prop => new Property<Vector4>(math.trunc(prop.value)),
+                Property<float2> prop => new Property<float2>(math.trunc(prop.value)),
+                Property<float3> prop => new Property<float3>(math.trunc(prop.value)),
+                Property<float4> prop => new Property<float4>(math.trunc(prop.value)),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityGLTF.Interactivity.Extensions;
@@ -12,8 +13,8 @@ namespace UnityGLTF.Interactivity
         public float startTime;
         public float duration;
         public IProperty endValue;
-        public Vector2 cp1;
-        public Vector2 cp2;
+        public float2 cp1;
+        public float2 cp2;
         public Action done;
         public IInterpolator interpolator;
         public bool slerp;
@@ -100,10 +101,10 @@ namespace UnityGLTF.Interactivity
             var interpolator = data.variable.property switch
             {
                 Property<float> => GetInterpolator(GetFloatEvaluator(cp1,cp2),  data),
-                Property<Vector2> => GetInterpolator(GetVector2Evaluator(cp1, cp2), data),
-                Property<Vector3> => GetInterpolator(GetVector3Evaluator(cp1, cp2), data),
-                Property<Vector4> when data.slerp => GetInterpolator(GetQuaternionEvaluator(cp1, cp2), data),
-                Property<Vector4> when !data.slerp=> GetInterpolator(GetVector4Evaluator(cp1, cp2), data),
+                Property<float2> => GetInterpolator(Getfloat2Evaluator(cp1, cp2), data),
+                Property<float3> => GetInterpolator(Getfloat3Evaluator(cp1, cp2), data),
+                Property<float4> when data.slerp => GetInterpolator(GetquaternionEvaluator(cp1, cp2), data),
+                Property<float4> when !data.slerp=> GetInterpolator(Getfloat4Evaluator(cp1, cp2), data),
 
                 _ => throw new NotImplementedException(),
             };
@@ -125,30 +126,30 @@ namespace UnityGLTF.Interactivity
             };
         }
 
-        private Func<float,float,float, Property<float>> GetFloatEvaluator(Vector2 cp1, Vector2 cp2)
+        private Func<float,float,float, Property<float>> GetFloatEvaluator(float2 cp1, float2 cp2)
         {
-            return (a, b, t) => new Property<float>(Mathf.Lerp(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
+            return (a, b, t) => new Property<float>(math.lerp(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
         }
 
-        private Func<Vector2, Vector2, float, Property<Vector2>> GetVector2Evaluator(Vector2 cp1, Vector2 cp2)
+        private Func<float2, float2, float, Property<float2>> Getfloat2Evaluator(float2 cp1, float2 cp2)
         {
-            return (a, b, t) => new Property<Vector2>(Vector2.Lerp(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
+            return (a, b, t) => new Property<float2>(math.lerp(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
         }
 
-        private Func<Vector3, Vector3, float, Property<Vector3>> GetVector3Evaluator(Vector2 cp1, Vector2 cp2)
+        private Func<float3, float3, float, Property<float3>> Getfloat3Evaluator(float2 cp1, float2 cp2)
         {
-            return (a, b, t) => new Property<Vector3>(Vector3.Lerp(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
+            return (a, b, t) => new Property<float3>(math.lerp(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
         }
 
-        private Func<Vector4, Vector4, float, Property<Vector4>> GetVector4Evaluator(Vector2 cp1, Vector2 cp2)
+        private Func<float4, float4, float, Property<float4>> Getfloat4Evaluator(float2 cp1, float2 cp2)
         {
-            return (a, b, t) => new Property<Vector4>(Vector4.Lerp(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
+            return (a, b, t) => new Property<float4>(math.lerp(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
         }
 
-        private Func<Vector4, Vector4, float, Property<Vector4>> GetQuaternionEvaluator(Vector2 cp1, Vector2 cp2)
+        private Func<float4, float4, float, Property<float4>> GetquaternionEvaluator(float2 cp1, float2 cp2)
         {
             // Just a copy from unity mathematics library to avoid a bunch of type conversions.
-            return (a, b, t) => new Property<Vector4>(Helpers.SlerpVector4(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
+            return (a, b, t) => new Property<float4>(Helpers.Slerpfloat4(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
         }
     }
 }

@@ -19,9 +19,9 @@ namespace UnityGLTF.Interactivity
             return a switch
             {
                 Property<float> aProp when b is Property<float> bProp && c is Property<float> cProp => new Property<float>(math.lerp(aProp.value, bProp.value, cProp.value)),
-                Property<Vector2> aProp when b is Property<Vector2> bProp && c is Property<Vector2> cProp => new Property<Vector2>(math.lerp(aProp.value, bProp.value, cProp.value)),
-                Property<Vector3> aProp when b is Property<Vector3> bProp && c is Property<Vector3> cProp => new Property<Vector3>(math.lerp(aProp.value, bProp.value, cProp.value)),
-                Property<Vector4> aProp when b is Property<Vector4> bProp && c is Property<Vector4> cProp => new Property<Vector4>(math.lerp(aProp.value, bProp.value, cProp.value)),
+                Property<float2> aProp when b is Property<float2> bProp && c is Property<float2> cProp => new Property<float2>(math.lerp(aProp.value, bProp.value, cProp.value)),
+                Property<float3> aProp when b is Property<float3> bProp && c is Property<float3> cProp => new Property<float3>(math.lerp(aProp.value, bProp.value, cProp.value)),
+                Property<float4> aProp when b is Property<float4> bProp && c is Property<float4> cProp => new Property<float4>(math.lerp(aProp.value, bProp.value, cProp.value)),
                 _ => throw new InvalidOperationException("No supported type found or input types did not match."),
             };
         }

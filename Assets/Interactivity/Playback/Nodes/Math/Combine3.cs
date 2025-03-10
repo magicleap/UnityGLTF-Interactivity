@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -24,7 +25,7 @@ namespace UnityGLTF.Interactivity
             if (c is not Property<float> cFloat)
                 throw new InvalidOperationException("Input C is not a float!");
 
-            return new Property<Vector3>(new Vector3(aFloat.value, bFloat.value, cFloat.value));
+            return new Property<float3>(new float3(aFloat.value, bFloat.value, cFloat.value));
         }
     }
 }

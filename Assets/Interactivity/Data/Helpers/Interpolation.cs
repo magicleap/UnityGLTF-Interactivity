@@ -11,8 +11,8 @@ namespace UnityGLTF.Interactivity
     {
         public IPointer pointer;
         public float duration;
-        public Vector2 cp0;
-        public Vector2 cp1;
+        public float2 cp0;
+        public float2 cp1;
         public NodeEngineCancelToken cancellationToken;
     }
 
@@ -53,10 +53,10 @@ namespace UnityGLTF.Interactivity
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 CubicBezier(float t, Vector2 cp0, Vector2 cp1)
+        public static float2 CubicBezier(float t, float2 cp0, float2 cp1)
         {
             var omt = 1 - t;
-            return 3f * t * omt * omt * cp0 + 3f * t * t * omt * cp1 + t * t * t * Vector2.one;
+            return 3f * t * omt * omt * cp0 + 3f * t * t * omt * cp1 + t * t * t * (new float2(1f,1f));
         }
 
         public static float4 nlerp(float4 q1, float4 q2, float t)
@@ -70,7 +70,7 @@ namespace UnityGLTF.Interactivity
             return math.normalize(math.lerp(q1, q2, t));
         }
 
-        public static float4 SlerpVector4(float4 q1, float4 q2, float t)
+        public static float4 Slerpfloat4(float4 q1, float4 q2, float t)
         {
             float dt = math.dot(q1, q2);
             if (dt < 0.0f)

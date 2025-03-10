@@ -1,6 +1,7 @@
 using GLTF.Schema;
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityGLTF.Interactivity.Extensions;
 
@@ -29,7 +30,7 @@ namespace UnityGLTF.Interactivity
                 {
                     setter = (v) => { }, // TODO: Figure this out, Unity does not handle blend shapes like GLTF does so setting it directly on a mesh is difficult.
                     getter = () => (float)mesh.Weights[i],
-                    evaluator = (a, b, t) => Mathf.Lerp(a, b, t)
+                    evaluator = (a, b, t) => math.lerp(a, b, t)
                 };
             }
         }

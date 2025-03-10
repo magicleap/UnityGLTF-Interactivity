@@ -1,4 +1,5 @@
 using Newtonsoft.Json.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity.Tests
@@ -24,14 +25,15 @@ namespace UnityGLTF.Interactivity.Tests
                     pointerSetNode.AddValue("value", 0.75f);
                     break;
                 case "float2":
-                    pointerSetNode.AddValue("value", new Vector2(0.5f, 0.2f));
+                    pointerSetNode.AddValue("value", new float2(0.5f, 0.2f));
                     break;
                 case "float3":
-                    pointerSetNode.AddValue("value", new Vector3(0.25f, 0.4f, 0.7f));
+                    pointerSetNode.AddValue("value", new float3(0.25f, 0.4f, 0.7f));
                     break;
                 case "float4":
-                    pointerSetNode.AddValue("value", new Vector4(0.25f, 0.4f, 0.7f, 0.5f));
+                    pointerSetNode.AddValue("value", new float4(0.25f, 0.4f, 0.7f, 0.5f));
                     break;
+
                 default:
                     break;
             }

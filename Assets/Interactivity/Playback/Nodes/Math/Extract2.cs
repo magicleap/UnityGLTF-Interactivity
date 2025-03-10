@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -13,8 +14,8 @@ namespace UnityGLTF.Interactivity
         {
             TryEvaluateValue(ConstStrings.A, out IProperty a);
 
-            if (a is not Property<Vector2> property)
-                throw new InvalidOperationException("Input A is not a Vector3!");
+            if (a is not Property<float2> property)
+                throw new InvalidOperationException("Input A is not a float3!");
 
             switch (id)
             {

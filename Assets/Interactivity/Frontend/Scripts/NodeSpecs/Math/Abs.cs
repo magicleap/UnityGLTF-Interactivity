@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -9,7 +10,7 @@ namespace UnityGLTF.Interactivity
         {
             var values = new NodeValue[]
             {
-                new NodeValue(ConstStrings.A, "Argument.", new Type[]  { typeof(float), typeof(int), typeof(Vector2), typeof(Vector3), typeof(Vector4) }),
+                new NodeValue(ConstStrings.A, "Argument.", new Type[]  { typeof(float), typeof(int), typeof(float2), typeof(float3), typeof(float4) }),
             };
 
             return (null, values);
@@ -19,7 +20,7 @@ namespace UnityGLTF.Interactivity
         {
             var values = new NodeValue[]
             {
-                new NodeValue(ConstStrings.VALUE, "If a > 0 then -a, else a.", new Type[]  { typeof(float), typeof(int), typeof(Vector2), typeof(Vector3), typeof(Vector4) }),
+                new NodeValue(ConstStrings.VALUE, "If a > 0 then -a, else a.", new Type[]  { typeof(float), typeof(int), typeof(float2), typeof(float3), typeof(float4) }),
             };
 
             return (null, values);

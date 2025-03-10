@@ -17,9 +17,9 @@ namespace UnityGLTF.Interactivity
             return a switch
             {
                 Property<float> floatProp => new Property<float>(math.acos(floatProp.value)),
-                Property<Vector2> vector2Prop => new Property<Vector2>(math.acos(vector2Prop.value)),
-                Property<Vector3> vector3Prop => new Property<Vector3>(math.acos(vector3Prop.value)),
-                Property<Vector4> vector4Prop => new Property<Vector4>(math.acos(vector4Prop.value)),
+                Property<float2> float2Prop => new Property<float2>(math.acos(float2Prop.value)),
+                Property<float3> float3Prop => new Property<float3>(math.acos(float3Prop.value)),
+                Property<float4> float4Prop => new Property<float4>(math.acos(float4Prop.value)),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
         }

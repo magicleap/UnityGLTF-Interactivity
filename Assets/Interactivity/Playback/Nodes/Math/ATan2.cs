@@ -18,9 +18,9 @@ namespace UnityGLTF.Interactivity
             return a switch
             {
                 Property<float> aProp when b is Property<float> bProp => new Property<float>(math.atan2(aProp.value, bProp.value)),
-                Property<Vector2> aProp when b is Property<Vector2> bProp => new Property<Vector2>(math.atan2(aProp.value, bProp.value)),
-                Property<Vector2> aProp when b is Property<Vector2> bProp => new Property<Vector2>(math.atan2(aProp.value, bProp.value)),
-                Property<Vector2> aProp when b is Property<Vector2> bProp => new Property<Vector2>(math.atan2(aProp.value, bProp.value)),
+                Property<float2> aProp when b is Property<float2> bProp => new Property<float2>(math.atan2(aProp.value, bProp.value)),
+                Property<float3> aProp when b is Property<float3> bProp => new Property<float3>(math.atan2(aProp.value, bProp.value)),
+                Property<float4> aProp when b is Property<float4> bProp => new Property<float4>(math.atan2(aProp.value, bProp.value)),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
         }

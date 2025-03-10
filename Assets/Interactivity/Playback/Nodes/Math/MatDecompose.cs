@@ -24,9 +24,9 @@ namespace UnityGLTF.Interactivity
 
             return id switch
             {
-                ConstStrings.TRANSLATION => new Property<Vector3>(translation),
-                ConstStrings.ROTATION => new Property<Vector4>(rotation.ToVector4()),
-                ConstStrings.SCALE => new Property<Vector3>(scale),
+                ConstStrings.TRANSLATION => new Property<float3>(translation),
+                ConstStrings.ROTATION => new Property<float4>(rotation.ToFloat4()),
+                ConstStrings.SCALE => new Property<float3>(scale),
                 _ => throw new InvalidOperationException($"Requested output {id} is not part of the spec for this node."),
             };
         }

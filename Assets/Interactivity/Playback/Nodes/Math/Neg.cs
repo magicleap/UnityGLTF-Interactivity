@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -17,9 +18,9 @@ namespace UnityGLTF.Interactivity
             {
                 Property<int> intProp => new Property<int>(-intProp.value),
                 Property<float> floatProp => new Property<float>(-floatProp.value),
-                Property<Vector2> vector2Prop => new Property<Vector2>(-vector2Prop.value),
-                Property<Vector3> vector3Prop => new Property<Vector3>(-vector3Prop.value),
-                Property<Vector4> vector4Prop => new Property<Vector4>(-vector4Prop.value),
+                Property<float2> float2Prop => new Property<float2>(-float2Prop.value),
+                Property<float3> float3Prop => new Property<float3>(-float3Prop.value),
+                Property<float4> float4Prop => new Property<float4>(-float4Prop.value),
                 _ => throw new InvalidOperationException("No supported type found."),
             };
         }

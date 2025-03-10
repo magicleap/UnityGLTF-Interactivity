@@ -20,9 +20,9 @@ namespace UnityGLTF.Interactivity
                 case "bool": return typeof(bool);
                 case "int": return typeof(int);
                 case "float": return typeof(float);
-                case "float2": return typeof(Vector2);
-                case "float3": return typeof(Vector3);
-                case "float4": return typeof(Vector4);
+                case "float2": return typeof(float2);
+                case "float3": return typeof(float3);
+                case "float4": return typeof(float4);
                 case "float2x2": return typeof(float2x2);
                 case "float3x3": return typeof(float3x3);
                 case "float4x4": return typeof(float4x4);
@@ -36,9 +36,9 @@ namespace UnityGLTF.Interactivity
             if (type == typeof(bool)) return "bool";
             if (type == typeof(int)) return "int";
             if (type == typeof(float)) return "float";
-            if (type == typeof(Vector2)) return "float2";
-            if (type == typeof(Vector3)) return "float3";
-            if (type == typeof(Vector4)) return "float4";
+            if (type == typeof(float2)) return "float2";
+            if (type == typeof(float3)) return "float3";
+            if (type == typeof(float4)) return "float4";
             if (type == typeof(float2x2)) return "float2x2";
             if (type == typeof(float3x3)) return "float3x3";
             if (type == typeof(float4x4)) return "float4x4";
@@ -60,17 +60,17 @@ namespace UnityGLTF.Interactivity
             {
                 return new Property<bool>(Parser.ToBool(value));
             }
-            else if (type == typeof(Vector2))
+            else if (type == typeof(float2))
             {
-                return new Property<Vector2>(Parser.ToVector2(value));
+                return new Property<float2>(Parser.ToFloat2(value));
             }
-            else if (type == typeof(Vector3))
+            else if (type == typeof(float3))
             {
-                return new Property<Vector3>(Parser.ToVector3(value));
+                return new Property<float3>(Parser.ToFloat3(value));
             }
-            else if (type == typeof(Vector4))
+            else if (type == typeof(float4))
             {
-                return new Property<Vector4>(Parser.ToVector4(value));
+                return new Property<float4>(Parser.ToFloat4(value));
             }
             else if (type == typeof(float2x2))
             {
@@ -120,17 +120,17 @@ namespace UnityGLTF.Interactivity
             {
                 return new Property<bool>(false);
             }
-            else if (type == typeof(Vector2))
+            else if (type == typeof(float2))
             {
-                return new Property<Vector2>(new Vector2(float.NaN, float.NaN));
+                return new Property<float2>(new float2(float.NaN, float.NaN));
             }
-            else if (type == typeof(Vector3))
+            else if (type == typeof(float3))
             {
-                return new Property<Vector3>(new Vector3(float.NaN, float.NaN, float.NaN));
+                return new Property<float3>(new float3(float.NaN, float.NaN, float.NaN));
             }
-            else if (type == typeof(Vector4))
+            else if (type == typeof(float4))
             {
-                return new Property<Vector4>(new Vector4(float.NaN, float.NaN, float.NaN, float.NaN));
+                return new Property<float4>(new float4(float.NaN, float.NaN, float.NaN, float.NaN));
             }
             else if (type == typeof(float2x2))
             {

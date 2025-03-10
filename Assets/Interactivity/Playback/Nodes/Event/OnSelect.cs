@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -10,8 +11,8 @@ namespace UnityGLTF.Interactivity
 
         // Default values grabbed from spec
         private int _selectedNodeIndex = -1;
-        private Vector3 _selectionPoint = new Vector3(float.NaN, float.NaN, float.NaN);
-        private Vector3 _selectionRayOrigin = new Vector3(float.NaN, float.NaN, float.NaN);
+        private float3 _selectionPoint = new float3(float.NaN, float.NaN, float.NaN);
+        private float3 _selectionRayOrigin = new float3(float.NaN, float.NaN, float.NaN);
 
         private Transform _parentNode = null;
 
@@ -32,8 +33,8 @@ namespace UnityGLTF.Interactivity
             return id switch
             {
                 ConstStrings.SELECTED_NODE_INDEX =>  new Property<int>(_selectedNodeIndex),
-                ConstStrings.SELECTION_POINT =>      new Property<Vector3>(_selectionPoint),
-                ConstStrings.SELECTION_RAY_ORIGIN => new Property<Vector3>(_selectionRayOrigin),
+                ConstStrings.SELECTION_POINT =>      new Property<float3>(_selectionPoint),
+                ConstStrings.SELECTION_RAY_ORIGIN => new Property<float3>(_selectionRayOrigin),
                 _ => throw new InvalidOperationException($"Socket {id} is not valid for this node!"),
             };
         }

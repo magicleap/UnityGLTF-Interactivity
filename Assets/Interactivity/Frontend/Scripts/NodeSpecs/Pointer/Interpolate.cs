@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -23,9 +24,9 @@ namespace UnityGLTF.Interactivity
             var values = new NodeValue[]
             {
                 new NodeValue(ConstStrings.DURATION, "Interpolation duration.", new Type[]  { typeof(float) }),
-                new NodeValue(ConstStrings.VALUE, "Target value to interpolate to.", new Type[]  { typeof(int), typeof(float), typeof(Vector2), typeof(Vector3), typeof(Vector4) }),
-                new NodeValue(ConstStrings.P1, "Control point 1.", new Type[]  { typeof(Vector2) }),
-                new NodeValue(ConstStrings.P2, "Control point 2.", new Type[]  { typeof(Vector2) }),
+                new NodeValue(ConstStrings.VALUE, "Target value to interpolate to.", new Type[]  { typeof(int), typeof(float), typeof(float2), typeof(float3), typeof(float4) }),
+                new NodeValue(ConstStrings.P1, "Control point 1.", new Type[]  { typeof(float2) }),
+                new NodeValue(ConstStrings.P2, "Control point 2.", new Type[]  { typeof(float2) }),
             };
 
             return (flows, values);
