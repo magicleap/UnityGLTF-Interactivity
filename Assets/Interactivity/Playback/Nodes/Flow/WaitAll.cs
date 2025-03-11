@@ -13,7 +13,7 @@ namespace UnityGLTF.Interactivity
         {
         }
 
-        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
+        protected override void Execute(string socket, ValidationResult validationResult)
         {
             Util.Log("Waiting for all");
 

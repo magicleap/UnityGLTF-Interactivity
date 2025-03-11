@@ -15,7 +15,7 @@ namespace UnityGLTF.Interactivity
             engine.onTick += PlayTimeIncreased;
         }
 
-        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
+        protected override void Execute(string socket, ValidationResult validationResult)
         {
             if (_lastRemainingTime >= _duration)
             {

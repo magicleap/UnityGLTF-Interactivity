@@ -18,7 +18,7 @@ namespace UnityGLTF.Interactivity
 
         }
 
-        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
+        protected override void Execute(string socket, ValidationResult validationResult)
         {
             List<Flow> executionSequence = node.flows;
             do

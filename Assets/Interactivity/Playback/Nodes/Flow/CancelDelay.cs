@@ -1,4 +1,6 @@
 using System;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -20,27 +22,14 @@ namespace UnityGLTF.Interactivity
             throw new ArgumentException($"Socket {socket} is not valid on this node!");
         }
 
-        protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
+        protected override void Execute(string socket, ValidationResult validationResult)
         {
-            Util.Log($"Canceling the delayed output for the replacement behavior");
-            if (validationResult != ValidationResult.Valid)
-            {
-                TryExecuteFlow(ConstStrings.ERR);
+            Node nodeToCancel = engine.graph.nodes[delayIndex];
+            FlowSetDelay x = (FlowSetDelay)engine.engineNodes[node];
+            if (nodeToCancel == null || x == null)
                 return;
-            }
 
-            if (TryEvaluateValue(ConstStrings.IN, out BehaviourEngineNode inputNode))
-            {
-                engine.graph.nodes.Remove(inputNode.node);
-            }
-            else
-                engine.graph.nodes.RemoveAt(delayIndex);
-
-            Util.Log($"Cancelling this input node {delayIndex}");
-            cancellationToken = new CancellationToken(true);
-
-            if (cancellationToken.IsCancellationRequested)
-                return;
+            x.SetCancel(true);
 
             TryExecuteFlow(ConstStrings.COMPLETED);
         }
