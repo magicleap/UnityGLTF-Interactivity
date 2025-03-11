@@ -11,9 +11,11 @@ namespace UnityGLTF.Interactivity
 
         private float _duration;
         private bool _cancel;
+        private int indexID;
 
         public FlowSetDelay(BehaviourEngine engine, Node node) : base(engine, node)
         {
+            engine.cancelableNodes.Add(indexID, node);
         }
 
         public override IProperty GetOutputValue(string socket)

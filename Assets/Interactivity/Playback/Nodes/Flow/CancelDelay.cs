@@ -23,12 +23,6 @@ namespace UnityGLTF.Interactivity
         protected override void Execute(string socket, ValidationResult validationResult, CancellationToken cancellationToken)
         {
             Util.Log($"Canceling the delayed output for the replacement behavior");
-
-            TryExecuteFlow(ConstStrings.COMPLETED);
-        }
-
-        private async Task HandleInSocket(ValidationResult validationResult, CancellationToken cancellationToken)
-        {
             if (validationResult != ValidationResult.Valid)
             {
                 TryExecuteFlow(ConstStrings.ERR);
@@ -48,8 +42,6 @@ namespace UnityGLTF.Interactivity
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            await Task.Yield();
-            
             TryExecuteFlow(ConstStrings.COMPLETED);
         }
     }
