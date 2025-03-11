@@ -73,15 +73,21 @@ namespace UnityGLTF.Interactivity
             }
         }
 
-        public NodePointers PointersOf(GameObject go)
+        public bool TryGetPointersOf(GameObject go, out NodePointers pointers)
         {
+            pointers = default;
+
             for (int i = 0; i < _nodePointers.Count; i++)
             {
                 if (_nodePointers[i].gameObject == go)
-                    return _nodePointers[i];
+                {
+                    pointers = _nodePointers[i];
+                    return true;
+                }
             }
 
-            throw new InvalidOperationException($"No node pointers found for {go.name}!");
+            Debug.LogWarning($"No node pointers found for {go.name}!");
+            return false;
         }
 
         public int IndexOf(GameObject go)

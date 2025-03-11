@@ -145,7 +145,7 @@ namespace UnityGLTF.Interactivity
                 hoverability = new Pointer<bool>()
                 {
                     setter = (v) => { },
-                    getter = () => false,
+                    getter = () => true,
                     evaluator = null
                 };
             }

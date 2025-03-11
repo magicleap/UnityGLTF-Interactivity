@@ -33,7 +33,7 @@ namespace UnityGLTF.Interactivity
             return id switch
             {
                 "timeSinceStart" => new Property<float>(Time.time - _startTime),
-                "timeSinceLastTick" => new Property<float>(Time.time - _lastTickTime),
+                "timeSinceLastTick" => new Property<float>(Time.deltaTime),
                 _ => throw new InvalidOperationException($"No valid output with name {id}"),
             };
         }

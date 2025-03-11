@@ -15,7 +15,9 @@ namespace UnityGLTF.Interactivity
 
         public event Action onStart;
 
-        public event Action<Ray, RaycastHit, RaycastHit[]> onSelect;
+        public event Action<RayArgs> onSelect;
+        public event Action<RayArgs> onHoverIn;
+        public event Action<RayArgs> onHoverOut;
         public event Action onTick;
         public event Action<int, Dictionary<string, IProperty>> onCustomEventFired;
         public event Action<Flow> onFlowTriggered;
@@ -45,11 +47,20 @@ namespace UnityGLTF.Interactivity
             onTick?.Invoke();
         }
 
-        public void Select(in Ray ray, in RaycastHit hit, RaycastHit[] otherHits)
+        public void Select(in RayArgs args)
         {
-            onSelect?.Invoke(ray, hit, otherHits);
+            onSelect?.Invoke(args);
         }
 
+        public void HoverIn(in RayArgs args)
+        {
+            onHoverIn?.Invoke(args);
+        }
+
+        public void HoverOut(in RayArgs args)
+        {
+            onHoverOut?.Invoke(args);
+        }
 
         public void ExecuteFlow(Flow flow)
         {

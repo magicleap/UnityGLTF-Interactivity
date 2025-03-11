@@ -1,25 +1,22 @@
 using System;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
 {
-    public class EventOnSelect : BehaviourEngineNode
+    public class EventOnHoverOut : BehaviourEngineNode
     {
         // TODO: Add this limitation from spec:
-        // A behavior graph MUST NOT contain two or more event/onSelect nodes with the same nodeIndex configuration value.
+        // A behavior graph MUST NOT contain two or more event/onHoverOut nodes with the same nodeIndex configuration value.
 
         // Default values grabbed from spec
-        private int _selectedNodeIndex = -1;
-        private float3 _selectionPoint = new float3(float.NaN, float.NaN, float.NaN);
-        private float3 _selectionRayOrigin = new float3(float.NaN, float.NaN, float.NaN);
+        private int _hoverNodeIndex = -1;
         private int _controllerIndex = -1;
 
-        private Transform _parentNode = null;
+        private readonly Transform _parentNode = null;
 
-        public EventOnSelect(BehaviourEngine engine, Node node) : base(engine, node)
+        public EventOnHoverOut(BehaviourEngine engine, Node node) : base(engine, node)
         {
-            engine.onSelect += OnSelect;
+            engine.onHoverOut += OnHoverOut;
 
             if (!configuration.TryGetValue(ConstStrings.NODE_INDEX, out Configuration config))
                 return;
@@ -33,15 +30,13 @@ namespace UnityGLTF.Interactivity
         {
             return id switch
             {
-                ConstStrings.SELECTED_NODE_INDEX =>  new Property<int>(_selectedNodeIndex),
-                ConstStrings.SELECTION_POINT =>      new Property<float3>(_selectionPoint),
-                ConstStrings.SELECTION_RAY_ORIGIN => new Property<float3>(_selectionRayOrigin),
+                ConstStrings.HOVER_NODE_INDEX => new Property<int>(_hoverNodeIndex),
                 ConstStrings.CONTROLLER_INDEX => new Property<int>(_controllerIndex),
                 _ => throw new InvalidOperationException($"Socket {id} is not valid for this node!"),
             };
         }
 
-        private void OnSelect(RayArgs args)
+        private void OnHoverOut(RayArgs args)
         {
             // TODO: Add support for stopPropagation once we understand what it actually does.
             // I've read that part of the spec a handful of times and still am not sure.
@@ -59,12 +54,10 @@ namespace UnityGLTF.Interactivity
             if (!shouldExecute)
                 return;
 
-            _selectedNodeIndex = nodeIndex;
-            _selectionPoint = args.hit.point;
-            _selectionRayOrigin = args.ray.origin;
+            _hoverNodeIndex = nodeIndex;
             _controllerIndex = args.controllerIndex;
 
-            Util.Log($"OnSelect node {nodeIndex} corresponding to GO {go.name}", go);
+            Util.Log($"OnHoverIn node {nodeIndex} corresponding to GO {go.name}", go);
 
             TryExecuteFlow(ConstStrings.OUT);
         }

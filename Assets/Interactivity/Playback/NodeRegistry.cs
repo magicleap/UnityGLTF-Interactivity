@@ -24,6 +24,8 @@ namespace UnityGLTF.Interactivity
             ["animation/stop"] = (engine, node) => new AnimationStop(engine, node),
             ["animation/stopAt"] = (engine, node) => new AnimationStopAt(engine, node),
             ["debug/log"] = (engine, node) => new DebugLog(engine, node),
+            ["event/onHoverIn"] = (engine, node) => new EventOnHoverIn(engine, node),
+            ["event/onHoverOut"] = (engine, node) => new EventOnHoverOut(engine, node),
             ["event/onStart"] = (engine, node) => new EventOnStart(engine, node),
             ["event/onSelect"] = (engine, node) => new EventOnSelect(engine, node),
             ["event/onTick"] = (engine, node) => new EventOnTick(engine, node),
