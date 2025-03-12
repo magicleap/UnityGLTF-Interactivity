@@ -6,14 +6,15 @@ namespace UnityGLTF.Interactivity
 {
     public class FlowWhile : BehaviourEngineNode
     {
-        bool valid;
+        private bool valid;
+
         public FlowWhile(BehaviourEngine engine, Node node) : base(engine, node)
         {
         }
 
         protected override void Execute(string socket, ValidationResult validationResult)
         {
-            while (socket != ConstStrings.IN)
+            if (socket != ConstStrings.IN)
                 throw new ArgumentException($"Only valid input socket for this node is \"{ConstStrings.IN}\"");
 
             TryEvaluateValue(ConstStrings.CONDITION, out valid);
