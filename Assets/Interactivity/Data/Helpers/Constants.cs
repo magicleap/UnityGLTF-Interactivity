@@ -116,7 +116,5 @@ namespace UnityGLTF.Interactivity
         public const string SELECTION_RAY_ORIGIN = "selectionRayOrigin";
         public const string STOP_PROPAGATION = "stopPropagation";
         public const string HOVER_NODE_INDEX = "hoverNodeIndex";
-
-        public const string EXTENSION_NAME = "KHR_interactivity";
     }
 }

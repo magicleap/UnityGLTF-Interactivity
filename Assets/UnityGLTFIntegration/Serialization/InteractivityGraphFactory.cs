@@ -7,7 +7,7 @@ namespace UnityGLTF.Interactivity
     {
         public InteractivityGraphFactory()
         {
-            ExtensionName = ConstStrings.EXTENSION_NAME;
+            ExtensionName = InteractivityGraphExtension.EXTENSION_NAME;
         }
 
         public override IExtension Deserialize(GLTFRoot root, JProperty extensionToken)

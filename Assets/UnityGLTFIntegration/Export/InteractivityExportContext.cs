@@ -30,18 +30,26 @@ namespace UnityGLTF.Interactivity
 
             if (exporter.RootTransforms == null) return;
             EventWrapper wrapper = null;
+            Transform t;
 
-            foreach (var t in exporter.RootTransforms)
+            // This assumes that EventWrapper exists on one of the root transforms which I think must be true due to how we import.
+            foreach (var transform in exporter.RootTransforms)
             {
-                if (t.parent.TryGetComponent(out wrapper))
-                    break;
+                t = transform;
+                while (t.parent != null)
+                {
+                    if (t.parent.TryGetComponent(out wrapper))
+                        break;
+
+                    t = t.parent;
+                }
             }
 
             if (wrapper == null)
                 return;
 
-            exporter.DeclareExtensionUsage(ConstStrings.EXTENSION_NAME, true);
-            gltfRoot.AddExtension(ConstStrings.EXTENSION_NAME, new InteractivityGraphExtension(wrapper.extensionData));
+            exporter.DeclareExtensionUsage(InteractivityGraphExtension.EXTENSION_NAME, true);
+            gltfRoot.AddExtension(InteractivityGraphExtension.EXTENSION_NAME, new InteractivityGraphExtension(wrapper.extensionData));
         }
         public override void AfterTextureExport(GLTFSceneExporter exporter, GLTFSceneExporter.UniqueTexture texture, int index, GLTFTexture tex)
         {

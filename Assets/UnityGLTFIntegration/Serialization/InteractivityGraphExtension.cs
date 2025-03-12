@@ -7,6 +7,8 @@ namespace UnityGLTF.Interactivity
 {
     public class InteractivityGraphExtension : IExtension
     {
+        public const string EXTENSION_NAME = "KHR_interactivity";
+
         public KHR_interactivity extensionData { get; private set; }
 
         private readonly GraphSerializer _serializer = new();
@@ -23,7 +25,7 @@ namespace UnityGLTF.Interactivity
 
         public void Deserialize(JProperty extensionToken)
         {
-            if (!extensionToken.Name.Equals(ConstStrings.EXTENSION_NAME))
+            if (!extensionToken.Name.Equals(EXTENSION_NAME))
                 return;
 
             extensionData = _serializer.Deserialize(extensionToken.Value.ToString());
@@ -37,7 +39,7 @@ namespace UnityGLTF.Interactivity
 
                 JObject jobject = JObject.Parse(json);
 
-                return new JProperty(ConstStrings.EXTENSION_NAME, jobject);
+                return new JProperty(EXTENSION_NAME, jobject);
             }
             catch (Exception ex)
             {

@@ -42,7 +42,7 @@ namespace UnityGLTF.Interactivity
             if (extensions == null)
                 return;
 
-            if (!extensions.TryGetValue(ConstStrings.EXTENSION_NAME, out IExtension extensionValue))
+            if (!extensions.TryGetValue(InteractivityGraphExtension.EXTENSION_NAME, out IExtension extensionValue))
                 return;
 
             if (extensionValue is not InteractivityGraphExtension interactivityGraph)
