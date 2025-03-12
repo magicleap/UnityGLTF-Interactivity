@@ -49,11 +49,7 @@ namespace UnityGLTF.Interactivity
 
             foreach (var kvp in jList)
             {
-                valueSockets.Add(new ValueSocket()
-                {
-                    name = kvp.Key,
-                    type = kvp.Value[ConstStrings.TYPE].Value<int>()
-                });
+                valueSockets.Add(new ValueSocket(kvp.Key, kvp.Value[ConstStrings.TYPE].Value<int>()));
             }
 
             return valueSockets;

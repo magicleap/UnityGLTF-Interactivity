@@ -33,22 +33,21 @@ namespace UnityGLTF.Interactivity
         private static void WriteEventValues(JsonWriter writer, List<EventValue> events)
         {
             writer.WritePropertyName(ConstStrings.VALUES);
-            writer.WriteStartArray();
+            writer.WriteStartObject();
 
             for (int i = 0; i < events.Count; i++)
             {
                 WriteEventValue(writer, events[i]);
             }
 
-            writer.WriteEndArray();
+            writer.WriteEndObject();
         }
 
         private static void WriteEventValue(JsonWriter writer, EventValue eventValue)
         {
             writer.WriteStartObject();
 
-            writer.WritePropertyName(ConstStrings.ID);
-            writer.WriteValue(eventValue.id);
+            writer.WritePropertyName(eventValue.id);
 
             writer.WritePropertyName(ConstStrings.TYPE);
             writer.WriteValue(eventValue.type);

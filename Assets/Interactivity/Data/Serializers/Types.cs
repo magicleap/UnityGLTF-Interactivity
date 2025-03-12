@@ -10,9 +10,15 @@ namespace UnityGLTF.Interactivity
         {
             var typeIndexByType = new Dictionary<Type, int>();
 
-            for (int i = 0; i < value.types.Count; i++)
+            var count = 0;
+            foreach(var type in value.types)
             {
-                typeIndexByType.Add(Helpers.GetSystemType(value.types[i]), i);
+                var systemType = Helpers.GetSystemType(type);
+
+                if (typeIndexByType.ContainsKey(systemType))
+                    continue;
+
+                typeIndexByType.Add(systemType, count++);
             }
 
             return typeIndexByType;

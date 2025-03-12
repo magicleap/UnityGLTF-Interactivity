@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 
 namespace UnityGLTF.Interactivity
 {
@@ -7,15 +8,32 @@ namespace UnityGLTF.Interactivity
     {
         public override void WriteJson(JsonWriter writer, KHR_interactivity value, JsonSerializer serializer)
         {
-            // TODO: Fix Serialization for new spec.
-            //writer.WriteStartObject();
+            writer.WriteStartObject();
+            writer.WritePropertyName(ConstStrings.GRAPHS);
+            writer.WriteStartArray();
 
-            //var typeIndexByType = TypesSerializer.GetSystemTypeByIndexDictionary(value);
-            //NodesSerializer.WriteJson(writer, value.nodes, typeIndexByType);
-            //VariablesSerializer.WriteJson(writer, value.variables, typeIndexByType);
-            //EventsSerializer.WriteJson(writer, value.customEvents);
-            //TypesSerializer.WriteJson(writer, value.types);
-            //writer.WriteEndObject();
+            for (int i = 0; i < value.graphs.Count; i++)
+            {
+                WriteGraph(writer, value.graphs[i]);
+            }
+
+            writer.WriteEndArray();
+            writer.WritePropertyName(ConstStrings.GRAPH);
+            writer.WriteValue(0); // TODO: Default graph selection for users?
+            writer.WriteEndObject();
+        }
+
+        private void WriteGraph(JsonWriter writer, Graph graph)
+        {
+            writer.WriteStartObject();
+            var typeIndexByType = TypesSerializer.GetSystemTypeByIndexDictionary(graph);
+            var declarations = DeclarationsSerializer.GetDeclarations(graph.nodes, typeIndexByType);
+            TypesSerializer.WriteJson(writer, graph.types);
+            VariablesSerializer.WriteJson(writer, graph.variables, typeIndexByType);
+            EventsSerializer.WriteJson(writer, graph.customEvents);
+            DeclarationsSerializer.WriteJson(writer, declarations);
+            NodesSerializer.WriteJson(writer, graph.nodes, declarations, typeIndexByType);
+            writer.WriteEndObject();
         }
 
         public override KHR_interactivity ReadJson(JsonReader reader, System.Type objectType, KHR_interactivity existingValue, bool hasExistingValue, JsonSerializer serializer)

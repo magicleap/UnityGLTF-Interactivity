@@ -6,6 +6,7 @@ namespace UnityGLTF.Interactivity
     {
         private const int MAX_RAYCAST_HITS = 32;
 
+        public KHR_interactivity extensionData { get; private set; }
         public BehaviourEngine engine { get; private set; }
 
         private static readonly RaycastHit[] _raycastHits = new RaycastHit[MAX_RAYCAST_HITS];
@@ -15,8 +16,10 @@ namespace UnityGLTF.Interactivity
         private RayArgs _currentHover;
         private bool _isHovering;
 
-        public void SetData(BehaviourEngine engine)
+        // TODO: Make this wrapper accept an array of BehaviourEngine objects so we can switch which graphs are being executed.
+        public void SetData(BehaviourEngine engine, KHR_interactivity extensionData)
         {
+            this.extensionData = extensionData;
             this.engine = engine;
         }
 

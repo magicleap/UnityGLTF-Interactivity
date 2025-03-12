@@ -21,6 +21,12 @@ namespace UnityGLTF.Interactivity
 
     public class ValueSocket
     {
+        public ValueSocket(string name, int type)
+        {
+            this.name = name;
+            this.type = type;
+        }
+
         public string name { get; set; }
         public int type { get; set; }
     }

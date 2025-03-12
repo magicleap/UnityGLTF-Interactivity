@@ -17,6 +17,7 @@ namespace UnityGLTF.Interactivity
         [SerializeField] private string _modelName = "interactive";
         [SerializeField] private string _saveToFile = "saveTest.glb";
         [SerializeField] private int _loadTimeout = 8;
+        [SerializeField] private GLTFSettings _settings;
 
         private InteractiveGLBLoader _loader;
 
@@ -71,7 +72,7 @@ namespace UnityGLTF.Interactivity
 
             var eventWrapper = importer.SceneParent.gameObject.AddComponent<EventWrapper>();
 
-            eventWrapper.SetData(_behaviourEngine);
+            eventWrapper.SetData(_behaviourEngine, interactivityGraph.extensionData);
 
             _lastLoadPacket = new LoadPacket()
             {
@@ -84,7 +85,7 @@ namespace UnityGLTF.Interactivity
 
         public void SaveModel()
         {
-            _loader.SaveModel(_saveToFile, _lastLoadPacket.importer, _lastLoadPacket.extensionData);
+            _loader.SaveModel(_saveToFile, _settings, _lastLoadPacket.importer, _lastLoadPacket.extensionData);
         }
     }
 }

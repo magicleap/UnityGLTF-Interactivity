@@ -10,30 +10,30 @@ namespace UnityGLTF.Interactivity
 {
     public static class NodesSerializer
     {
-        public static void WriteJson(JsonWriter writer, List<Node> nodes, Dictionary<Type, int> typeIndexByType)
+        public static void WriteJson(JsonWriter writer, List<Node> nodes, Dictionary<string, DeclarationsSerializer.DeclarationData> declarations, Dictionary<Type, int> typeIndexByType)
         {
             writer.WritePropertyName(ConstStrings.NODES);
             writer.WriteStartArray();
 
             for (int i = 0; i < nodes.Count; i++)
             {
-                WriteNode(writer, nodes, i, typeIndexByType);
+                WriteNode(writer, nodes, i, declarations, typeIndexByType);
             }
 
             writer.WriteEndArray();
         }
 
-        private static void WriteNode(JsonWriter writer, List<Node> nodes, int nodeIndex, Dictionary<Type, int> typeIndexByType)
+        private static void WriteNode(JsonWriter writer, List<Node> nodes, int nodeIndex, Dictionary<string, DeclarationsSerializer.DeclarationData> declarations, Dictionary<Type, int> typeIndexByType)
         {
             var node = nodes[nodeIndex];
 
             writer.WriteStartObject();
 
-            writer.WritePropertyName(ConstStrings.TYPE);
-            writer.WriteValue(node.type);
+            writer.WritePropertyName(ConstStrings.DECLARATION);
+            writer.WriteValue(declarations[node.type].index);
 
-            WriteValues(writer, nodes, nodeIndex, typeIndexByType);
             WriteConfiguration(writer, node.configuration);
+            WriteValues(writer, nodes, nodeIndex, typeIndexByType);
             WriteFlows(writer, nodes, nodeIndex);
             WriteMetadata(writer, node.metadata);
 
@@ -59,22 +59,20 @@ namespace UnityGLTF.Interactivity
             var flows = nodes[nodeIndex].flows;
 
             writer.WritePropertyName(ConstStrings.FLOWS);
-            writer.WriteStartArray();
+            writer.WriteStartObject();
 
             for (int i = 0; i < flows.Count; i++)
             {
                 WriteFlow(writer, nodes, flows[i]);
             }
 
-            writer.WriteEndArray();
+            writer.WriteEndObject();
         }
 
         private static void WriteFlow(JsonWriter writer, List<Node> nodes, Flow flow)
         {
+            writer.WritePropertyName(flow.fromSocket);
             writer.WriteStartObject();
-
-            writer.WritePropertyName(ConstStrings.ID);
-            writer.WriteValue(flow.fromSocket);
 
             writer.WritePropertyName(ConstStrings.NODE);
 
@@ -91,23 +89,21 @@ namespace UnityGLTF.Interactivity
         private static void WriteConfiguration(JsonWriter writer, List<Configuration> configuration)
         {
             writer.WritePropertyName(ConstStrings.CONFIGURATION);
-            writer.WriteStartArray();
+            writer.WriteStartObject();
 
             for (int i = 0; i < configuration.Count; i++)
             {
                 WriteConfigurationEntry(writer, configuration[i]);
             }
 
-            writer.WriteEndArray();
+            writer.WriteEndObject();
         }
 
         private static void WriteConfigurationEntry(JsonWriter writer, Configuration configuration)
         {
+            writer.WritePropertyName(configuration.id);
+
             writer.WriteStartObject();
-
-            writer.WritePropertyName(ConstStrings.ID);
-            writer.WriteValue(configuration.id);
-
             writer.WritePropertyName(ConstStrings.VALUE);
 
             if (configuration.value is JArray array)
@@ -123,22 +119,20 @@ namespace UnityGLTF.Interactivity
             var values = nodes[nodeIndex].values;
 
             writer.WritePropertyName(ConstStrings.VALUES);
-            writer.WriteStartArray();
+            writer.WriteStartObject();
 
             for (int i = 0; i < values.Count; i++)
             {
                 WriteValue(writer, nodes, values[i], typeIndexByType);
             }
 
-            writer.WriteEndArray();
+            writer.WriteEndObject();
         }
 
         private static void WriteValue(JsonWriter writer, List<Node> nodes, Value value, Dictionary<Type, int> typeIndexByType)
         {
+            writer.WritePropertyName(value.id);
             writer.WriteStartObject();
-
-            writer.WritePropertyName(ConstStrings.ID);
-            writer.WriteValue(value.id);
 
             if (value.node != null)
             {
@@ -197,6 +191,45 @@ namespace UnityGLTF.Interactivity
                     writer.WriteValue(f4Prop.value.w);
                     type = typeIndexByType[typeof(float4)];
                     break;
+                case Property<float2x2> p:
+                    writer.WriteValue(p.value.c0.x);
+                    writer.WriteValue(p.value.c0.y);
+                    writer.WriteValue(p.value.c1.x);
+                    writer.WriteValue(p.value.c0.y);
+                    type = typeIndexByType[typeof(float2x2)];
+                    break;
+                case Property<float3x3> p:
+                    writer.WriteValue(p.value.c0.x);
+                    writer.WriteValue(p.value.c0.y);
+                    writer.WriteValue(p.value.c0.z);
+                    writer.WriteValue(p.value.c1.x);
+                    writer.WriteValue(p.value.c1.y);
+                    writer.WriteValue(p.value.c1.z);
+                    writer.WriteValue(p.value.c2.x);
+                    writer.WriteValue(p.value.c2.y);
+                    writer.WriteValue(p.value.c2.z);
+                    type = typeIndexByType[typeof(float3x3)];
+                    break;
+                case Property<float4x4> p:
+                    writer.WriteValue(p.value.c0.x);
+                    writer.WriteValue(p.value.c0.y);
+                    writer.WriteValue(p.value.c0.z);
+                    writer.WriteValue(p.value.c0.w);
+                    writer.WriteValue(p.value.c1.x);
+                    writer.WriteValue(p.value.c1.y);
+                    writer.WriteValue(p.value.c1.z);
+                    writer.WriteValue(p.value.c1.w);
+                    writer.WriteValue(p.value.c2.x);
+                    writer.WriteValue(p.value.c2.y);
+                    writer.WriteValue(p.value.c2.z);
+                    writer.WriteValue(p.value.c2.w);
+                    writer.WriteValue(p.value.c3.x);
+                    writer.WriteValue(p.value.c3.y);
+                    writer.WriteValue(p.value.c3.z);
+                    writer.WriteValue(p.value.c3.w);
+                    type = typeIndexByType[typeof(float4x4)];
+                    break;
+
                 default:
                     throw new NotImplementedException();
             }

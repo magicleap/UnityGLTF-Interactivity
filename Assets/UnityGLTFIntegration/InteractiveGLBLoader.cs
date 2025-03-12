@@ -59,12 +59,10 @@ namespace UnityGLTF.Interactivity
             }
         }
 
-        public void SaveModel(string fileName, GLTFSceneImporter importer, KHR_interactivity extensionData)
+        public void SaveModel(string fileName, GLTFSettings settings, GLTFSceneImporter importer, KHR_interactivity extensionData)
         {
+            Util.Log($"Scene parent is {importer.SceneParent.name}", importer.SceneParent.gameObject);
             Transform glbTransform = importer.SceneParent.GetChild(0);
-
-            GLTFSettings settings = new GLTFSettings();
-            settings.ExportPlugins.Add(new InteractivityExportPlugin(extensionData));
 
             var sceneExporter = new GLTFSceneExporter(glbTransform, new ExportContext(settings));
 

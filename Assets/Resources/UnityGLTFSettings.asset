@@ -120,7 +120,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d87ebf60834245a388cd150253839d, type: 3}
   m_Name: AnimationPointerExport
   m_EditorClassIdentifier: 
-  enabled: 0
+  enabled: 1
 --- !u!114 &-2214513826426282409
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -294,7 +294,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2b6fa8618a247c3a77768773459dcd5, type: 3}
   m_Name: VisibilityExport
   m_EditorClassIdentifier: 
-  enabled: 0
+  enabled: 1
 --- !u!114 &3027376517490801318
 MonoBehaviour:
   m_ObjectHideFlags: 3

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -12,6 +13,17 @@ namespace UnityGLTF.Interactivity.Extensions
                 return true;
 
             if (arr.Length <= 0)
+                return true;
+
+            return false;
+        }
+
+        public static bool IsNullOrEmpty<T>(this List<T> arr)
+        {
+            if (arr == null)
+                return true;
+
+            if (arr.Count <= 0)
                 return true;
 
             return false;
