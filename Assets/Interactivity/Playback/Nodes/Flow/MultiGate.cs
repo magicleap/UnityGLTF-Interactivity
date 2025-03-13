@@ -1,53 +1,72 @@
 using System;
-using System.Collections.Generic;
-using System.Threading;
+using System.Linq;
 
 namespace UnityGLTF.Interactivity
 {
-    //TODO test
     public class FlowMultiGate : BehaviourEngineNode
     {
-        private bool isRandom;
-        private bool isLoop;
-        private int rand;
-        //Maximum reps before the do-while loop automatically exits
-        private int maxReps = 99;
+        private bool _isRandom = false;
+        private bool _isLoop = false;
+        private int _lastIndex = -1;
+        private readonly Flow[] _outputFlows;
+        private readonly bool[] _activated;
+
+        private const int _maxOutputFlows = 99;
 
         public FlowMultiGate(BehaviourEngine engine, Node node) : base(engine, node)
         {
-
+            TryGetConfig(ConstStrings.OUTPUT_FLOWS, out _outputFlows);
+            _activated = Enumerable.Repeat(false, _outputFlows.Length).ToArray();
         }
 
         protected override void Execute(string socket, ValidationResult validationResult)
         {
-            List<Flow> executionSequence = node.flows;
-            do
+            if (_outputFlows.Length > _maxOutputFlows)
+                throw new InvalidOperationException("There are too many output flows to execute");
+
+            switch (socket)
             {
-                if (isRandom)
-                {
-                    Random r = new Random();
-                    for (int i = node.flows.Count; i > 0; --i)
+                case ConstStrings.RESET:
+                    _lastIndex = -1;
+                    Array.Fill(_activated, false);
+                    break;
+                case ConstStrings.INPUT_FLOWS:
+                    Span<int> outputs = stackalloc int[_outputFlows.Length];
+                    if (_isRandom)
                     {
-                        rand = r.Next(i + 1);
-                        //swap values using tuple
-                        (executionSequence[rand], executionSequence[i]) = (executionSequence[i], executionSequence[rand]);
+                        if (_activated.Contains(false))
+                        {
+                            Random rnd = new Random(DateTime.Now.Millisecond);
+                            outputs = Enumerable.Range(0, outputs.Length).OrderBy(i => rnd.Next()).ToArray();
+                        }
                     }
-                }
 
-                foreach (Flow output in executionSequence)
-                {
-                    engine.ExecuteFlow(output);
-                }
-                maxReps--;
-            } while (isLoop && maxReps > 0);
+                    for (int i = 0; i < outputs.Length; i++)
+                    {
+                        _lastIndex = i;
+                        _activated[outputs[_lastIndex]] = true;
+                        engine.ExecuteFlow(node.flows[outputs[_lastIndex]]);
+                    }
 
-            TryExecuteFlow(ConstStrings.COMPLETED);
+                    TryExecuteFlow(ConstStrings.COMPLETED);
+                    break;
+                default:
+                    throw new InvalidOperationException("The input socket ran into an error");
+            }
         }
 
-        public override bool ValidateValues(string socket)
+        public override IProperty GetOutputValue(string socket)
         {
-            if (!TryEvaluateValue(ConstStrings.CONDITION, out bool condition))
+            return new Property<int>(_lastIndex);
+        }
+
+        public override bool ValidateConfiguration(string socket)
+        {
+            if (!TryGetConfig(ConstStrings.IS_LOOP, out _isLoop) || !TryGetConfig(ConstStrings.IS_RANDOM, out _isRandom))
+            {
+                _isLoop = _isRandom = false;
                 return false;
+            }
 
             return true;
         }
