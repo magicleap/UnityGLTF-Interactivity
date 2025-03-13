@@ -1,33 +1,36 @@
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading;
-using UnityEngine;
-using UnityEngine.Diagnostics;
-
 namespace UnityGLTF.Interactivity
 {
     public class FlowWaitAll : BehaviourEngineNode
     {
-        private List<Flow> inputFlows;
-        private HashSet<Node> _remainingNodes;
-        private Property<int> remainingCount = new Property<int>();
-        private bool _reset;
+        private readonly int _inputFlows;
+        private readonly bool[] _activated;
+
+        private int _remainingInputs;
 
         public FlowWaitAll(BehaviourEngine engine, Node node) : base(engine, node)
         {
-            engine.onFlowTriggered += CheckInputFlows;
-            if (!TryGetConfig(ConstStrings.INPUT_FLOWS, out inputFlows))
-                return;
+            if (!TryGetConfig(ConstStrings.INPUT_FLOWS, out _inputFlows))
+                _inputFlows = 0;
+
+            _remainingInputs = _inputFlows;
+            _activated = new bool[_inputFlows];
         }
 
         protected override void Execute(string socket, ValidationResult validationResult)
         {
-            Util.Log("Waiting for all");
+            if (socket.Equals(ConstStrings.RESET))
+            {
+                _remainingInputs = _inputFlows;
+                ResetBooleanArray(_activated);
+                return;
+            }
 
-            if (inputFlows.Count <= 0) return;
+            var index = int.Parse(socket); // Throws if an unexpected socket id is passed in that isn't in the spec.
 
-            if (_remainingNodes.Count <= 0)
+            _activated[index] = true;
+            _remainingInputs--;
+
+            if (_remainingInputs == 0)
                 TryExecuteFlow(ConstStrings.COMPLETED);
             else
                 TryExecuteFlow(ConstStrings.OUT);
@@ -35,15 +38,15 @@ namespace UnityGLTF.Interactivity
 
         public override IProperty GetOutputValue(string socket)
         {
-            return remainingCount;
+            return new Property<int>(_remainingInputs);
         }
 
-        private void CheckInputFlows(Flow flow)
+        private static void ResetBooleanArray(bool[] arr)
         {
-            if (_remainingNodes.Contains(flow.fromNode))
-                _remainingNodes.Remove(flow.fromNode);
-
-            
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = false;
+            }
         }
     }
 }

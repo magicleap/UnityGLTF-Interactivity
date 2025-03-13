@@ -74,6 +74,8 @@ namespace UnityGLTF.Interactivity
         public const string METADATA = "metadata";
         public const string CONFIGURATION = "configuration";
         public const string FLOWS = "flows";
+        public const string INPUT_FLOWS = "inputFlows";
+        public const string RESET = "reset";
 
         public const string A = "a";
         public const string B = "b";
