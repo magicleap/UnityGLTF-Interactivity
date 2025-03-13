@@ -44,8 +44,8 @@ namespace UnityGLTF.Interactivity
 
             scale = new Pointer<float3>()
             {
-                setter = (v) => go.transform.localScale = v.SwapHandedness(),
-                getter = () => go.transform.localScale.SwapHandedness(),
+                setter = (v) => go.transform.localScale = v,
+                getter = () => go.transform.localScale,
                 evaluator = (a, b, t) => math.lerp(a, b, t)
             };
 

@@ -92,7 +92,7 @@ namespace UnityGLTF.Interactivity.Extensions
             quaternion rot;
             float3 scale;
 
-            if(worldSpace)
+            if (worldSpace)
             {
                 pos = t.position;
                 rot = t.rotation;
@@ -105,38 +105,48 @@ namespace UnityGLTF.Interactivity.Extensions
                 scale = t.localScale;
             }
 
-            if(rightHanded)
+            var m = float4x4.TRS(pos, rot, scale);
+
+            if (rightHanded)
             {
-                pos = new float3(-pos.x, pos.y, pos.z);
-                rot = ((Quaternion)rot).SwapHandedness();
+                var c0 = new float4(-1f, 0f, 0f, 0f);
+                var c1 = new float4(0f, 1f, 0f, 0f);
+                var c2 = new float4(0f, 0f, 1f, 0f);
+                var c3 = new float4(0f, 0f, 0f, 1f);
+                var c = new float4x4(c0, c1, c2, c3);
+
+                m = math.mul(math.mul(c, m), math.transpose(c));
             }
 
-            return float4x4.TRS(pos, rot, scale);
+            return m;
         }
 
         public static void SetWorldMatrix(this Transform t, float4x4 m, bool worldSpace, bool rightHanded)
         {
-            Decompose((Matrix4x4)m, out var pos, out var rot, out var scale);
-
             if (rightHanded)
             {
-                pos = new float3(-pos.x, pos.y, pos.z);
-                rot = ((Quaternion)rot).SwapHandedness();
+                var c0 = new float4(-1f, 0f, 0f, 0f);
+                var c1 = new float4(0f, 1f, 0f, 0f);
+                var c2 = new float4(0f, 0f, 1f, 0f);
+                var c3 = new float4(0f, 0f, 0f, 1f);
+                var c = new float4x4(c0, c1, c2, c3);
+
+                m = math.mul(math.mul(c, m), math.transpose(c));
             }
+
+            Decompose((Matrix4x4)m, out var pos, out var rot, out var scale);
 
             if (worldSpace)
             {
-                t.position = pos;
-                t.rotation = rot;
+                t.SetPositionAndRotation(pos, rot);
                 t.SetGlobalScale(scale);
             }
             else
             {
-                t.localPosition = pos;
-                t.localRotation = rot;
+                t.SetLocalPositionAndRotation(pos, rot);
                 t.localScale = scale;
             }
-            
+
         }
 
         public static void SetGlobalScale(this Transform transform, Vector3 globalScale)
