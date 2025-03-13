@@ -51,15 +51,15 @@ namespace UnityGLTF.Interactivity
 
             matrix = new Pointer<float4x4>()
             {
-                setter = (v) => go.transform.SetFromLocalMatrix(v, isRightHanded: true),
-                getter = () => go.transform.GetLocalMatrix(isRightHanded: true),
+                setter = (v) => go.transform.SetWorldMatrix(v, worldSpace: false, rightHanded: true),
+                getter = () => go.transform.GetWorldMatrix(worldSpace: false, rightHanded: true),
                 evaluator = (a, b, t) => a.LerpToComponentwise(b, t) // Spec has floatNxN lerp componentwise.
             };
 
             globalMatrix = new Pointer<float4x4>()
             {
-                setter = (v) => go.transform.SetFromWorldMatrix(v, isRightHanded: true),
-                getter = () => go.transform.GetWorldMatrix(isRightHanded: true),
+                setter = (v) => go.transform.SetWorldMatrix(v, worldSpace: true, rightHanded: true),
+                getter = () => go.transform.GetWorldMatrix(worldSpace: true, rightHanded: true),
                 evaluator = (a, b, t) => a.LerpToComponentwise(b, t) // Spec has floatNxN lerp componentwise.
             };
 
@@ -172,6 +172,8 @@ namespace UnityGLTF.Interactivity
                 var a when a.Is(Pointers.WEIGHTS) => ProcessWeightsPointer(reader, engineNode, nodePointer),
                 var a when a.Is(Pointers.WEIGHTS_LENGTH) => nodePointer.weightsLength,
                 var a when a.Is(Pointers.EXTENSIONS) => ProcessExtensionPointer(reader, nodePointer),
+                var a when a.Is(Pointers.MATRIX) => nodePointer.matrix,
+                var a when a.Is(Pointers.GLOBAL_MATRIX) => nodePointer.globalMatrix,
                 _ => throw new InvalidOperationException($"Property {reader.ToString()} is unsupported at this time!"),
             };
         }

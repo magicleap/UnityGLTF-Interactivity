@@ -1,108 +1,169 @@
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity.Extensions
 {
     public static class TransformExtensions
     {
-        public static void GetTRS(this Matrix4x4 matrix, out Vector3 translation, out Quaternion rotation, out Vector3 scale)
+        public static void Decompose(
+       this Matrix4x4 m,
+       out Vector3 translation,
+       out Quaternion rotation,
+       out Vector3 scale
+       )
         {
-            float det = matrix.GetDeterminant();
-
-            // Scale
-            scale.x = matrix.MultiplyVector(new Vector3(1, 0, 0)).magnitude;
-            scale.y = matrix.MultiplyVector(new Vector3(0, 1, 0)).magnitude;
-            scale.z = matrix.MultiplyVector(new Vector3(0, 0, 1)).magnitude;
-            scale = (det < 0) ? -scale : scale;
-
-            // Rotation
-            Matrix4x4 rotationMatrix = matrix;
-            rotationMatrix.m03 = rotationMatrix.m13 = rotationMatrix.m23 = 0f;
-            rotationMatrix = rotationMatrix * new Matrix4x4 { m00 = 1f / scale.x, m11 = 1f / scale.y, m22 = 1f / scale.z, m33 = 1 };
-            rotation = Quaternion.LookRotation(rotationMatrix.GetColumn(2), rotationMatrix.GetColumn(1));
-
-            // Position
-            translation = matrix.GetColumn(3);
+            translation = new Vector3(m.m03, m.m13, m.m23);
+            var mRotScale = new float3x3(
+                m.m00, m.m01, m.m02,
+                m.m10, m.m11, m.m12,
+                m.m20, m.m21, m.m22
+                );
+            mRotScale.Decompose(out float4 mRotation, out float3 mScale);
+            rotation = new Quaternion(mRotation.x, mRotation.y, mRotation.z, mRotation.w);
+            scale = new Vector3(mScale.x, mScale.y, mScale.z);
         }
 
-        private static float GetDeterminant(this Matrix4x4 matrix)
+        /// <summary>
+        /// Decomposes a 4x4 TRS matrix into separate transforms (translation * rotation * scale)
+        /// Matrix may not contain skew
+        /// </summary>
+        /// <param name="translation">Translation</param>
+        /// <param name="rotation">Rotation</param>
+        /// <param name="scale">Scale</param>
+        public static void Decompose(
+            this float4x4 m,
+            out float3 translation,
+            out float4 rotation,
+            out float3 scale
+            )
         {
-            return matrix.m00 * (matrix.m11 * matrix.m22 - matrix.m12 * matrix.m21) -
-                    matrix.m10 * (matrix.m01 * matrix.m22 - matrix.m02 * matrix.m21) +
-                    matrix.m20 * (matrix.m01 * matrix.m12 - matrix.m02 * matrix.m11);
+            var mRotScale = new float3x3(
+                m.c0.xyz,
+                m.c1.xyz,
+                m.c2.xyz
+                );
+            mRotScale.Decompose(out rotation, out scale);
+            translation = m.c3.xyz;
         }
 
-        public static void SetFromLocalMatrix(this Transform transform, Matrix4x4 matrix, bool isRightHanded)
+        /// <summary>
+        /// Decomposes a 3x3 matrix into rotation and scale
+        /// </summary>
+        /// <param name="rotation">Rotation quaternion values</param>
+        /// <param name="scale">Scale</param>
+        public static void Decompose(this float3x3 m, out float4 rotation, out float3 scale)
         {
-            matrix.GetTRS(out Vector3 t, out Quaternion r, out Vector3 s);
+            var lenC0 = math.length(m.c0);
+            var lenC1 = math.length(m.c1);
+            var lenC2 = math.length(m.c2);
 
-            if (isRightHanded)
+            float3x3 rotationMatrix;
+            rotationMatrix.c0 = m.c0 / lenC0;
+            rotationMatrix.c1 = m.c1 / lenC1;
+            rotationMatrix.c2 = m.c2 / lenC2;
+
+            scale.x = lenC0;
+            scale.y = lenC1;
+            scale.z = lenC2;
+
+            if (rotationMatrix.IsNegative())
             {
-                t = new Vector3(-t.x, t.y, t.z);
-                r = new Quaternion(-r.x, r.y, r.z, -r.w);
+                rotationMatrix *= -1f;
+                scale *= -1f;
             }
 
-            // Assign local TRS to transform
-            transform.localPosition = t;
-            transform.localRotation = r;
-            transform.localScale = s;
+            // Inlined normalize(rotationMatrix)
+            rotationMatrix.c0 = math.normalize(rotationMatrix.c0);
+            rotationMatrix.c1 = math.normalize(rotationMatrix.c1);
+            rotationMatrix.c2 = math.normalize(rotationMatrix.c2);
+
+            rotation = new quaternion(rotationMatrix).value;
         }
 
-        public static void SetFromWorldMatrix(this Transform transform, Matrix4x4 matrix, bool isRightHanded)
+        static bool IsNegative(this float3x3 m)
         {
-            matrix.GetTRS(out Vector3 t, out Quaternion r, out Vector3 s);
-
-            if (isRightHanded)
-            {
-                t = new Vector3(-t.x, t.y, t.z);
-                r = new Quaternion(-r.x, r.y, r.z, -r.w);
-            }
-
-            // Assign world TRS to transform
-            transform.position = t;
-            transform.rotation = r;
-            transform.SetGlobalScale(s);
+            var cross = math.cross(m.c0, m.c1);
+            return math.dot(cross, m.c2) < 0f;
         }
 
-        public static Matrix4x4 GetLocalMatrix(this Transform transform, bool isRightHanded)
+        public static float4x4 GetWorldMatrix(this Transform t, bool worldSpace, bool rightHanded)
         {
-            Vector3 t = transform.localPosition;
-            Quaternion r = transform.localRotation;
-            Vector3 s = transform.localScale;
+            float3 pos;
+            quaternion rot;
+            float3 scale;
 
-            if (isRightHanded)
+            if(worldSpace)
             {
-                t = new Vector3(-t.x, t.y, t.z);
-                r = new Quaternion(-r.x, r.y, r.z, -r.w);
+                pos = t.position;
+                rot = t.rotation;
+                scale = t.lossyScale;
+            }
+            else
+            {
+                pos = t.localPosition;
+                rot = t.localRotation;
+                scale = t.localScale;
             }
 
-            Matrix4x4 matrix = Matrix4x4.identity;
-            matrix.SetTRS(t, r, s);
+            if(rightHanded)
+            {
+                pos = new float3(-pos.x, pos.y, pos.z);
+                rot = ((Quaternion)rot).SwapHandedness();
+            }
 
-            return matrix;
+            return float4x4.TRS(pos, rot, scale);
         }
 
-        public static Matrix4x4 GetWorldMatrix(this Transform transform, bool isRightHanded)
+        public static void SetWorldMatrix(this Transform t, float4x4 m, bool worldSpace, bool rightHanded)
         {
-            Vector3 t = transform.position;
-            Quaternion r = transform.rotation;
-            Vector3 s = transform.lossyScale;
+            Decompose((Matrix4x4)m, out var pos, out var rot, out var scale);
 
-            if (isRightHanded)
+            if (rightHanded)
             {
-                t = new Vector3(-t.x, t.y, t.z);
-                r = new Quaternion(-r.x, r.y, r.z, -r.w);
+                pos = new float3(-pos.x, pos.y, pos.z);
+                rot = ((Quaternion)rot).SwapHandedness();
             }
 
-            Matrix4x4 matrix = Matrix4x4.identity;
-            matrix.SetTRS(t, r, s);
-
-            return matrix;
+            if (worldSpace)
+            {
+                t.position = pos;
+                t.rotation = rot;
+                t.SetGlobalScale(scale);
+            }
+            else
+            {
+                t.localPosition = pos;
+                t.localRotation = rot;
+                t.localScale = scale;
+            }
+            
         }
 
         public static void SetGlobalScale(this Transform transform, Vector3 globalScale)
         {
             transform.localScale = Vector3.one;
             transform.localScale = new Vector3(globalScale.x / transform.lossyScale.x, globalScale.y / transform.lossyScale.y, globalScale.z / transform.lossyScale.z);
+        }
+
+        public static float3 SwapHandedness(this float3 v)
+        {
+            return new float3(-v.x, v.y, v.z);
+        }
+
+        public static Vector3 SwapHandedness(this Vector3 v)
+        {
+            return new Vector3(-v.x, v.y, v.z);
+        }
+
+        public static Quaternion SwapHandedness(this Quaternion q)
+        {
+            // TODO: Figure out if there's a way to do this without converting to euler angles and back as it's really slow.
+            var euler = q.eulerAngles;
+
+            euler.y *= -1;
+            euler.z *= -1;
+
+            return Quaternion.Euler(euler);
         }
     }
 }

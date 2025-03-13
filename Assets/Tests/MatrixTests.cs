@@ -50,9 +50,9 @@ public class MatrixTests
     [Test]
     public void LocalMatrix()
     {
-        var matrix = t.GetLocalMatrix(isRightHanded: false);
+        var matrix = t.GetWorldMatrix(worldSpace: false, rightHanded: false);
 
-        t2.SetFromLocalMatrix(matrix, isRightHanded: false);
+        t2.SetWorldMatrix(matrix, worldSpace: false, rightHanded: false);
 
         Debug.Log($"Positions: A {t.localPosition}, B {t2.localPosition}");
         Debug.Log($"Rotations: A {t.localRotation.eulerAngles}, B {t2.localRotation.eulerAngles}");
@@ -75,9 +75,59 @@ public class MatrixTests
     [Test]
     public void WorldMatrix()
     {
-        var matrix = t.GetWorldMatrix(isRightHanded: false);
+        var matrix = t.GetWorldMatrix(worldSpace: true, rightHanded: false);
 
-        t2.SetFromWorldMatrix(matrix, isRightHanded: false);
+        t2.SetWorldMatrix(matrix, worldSpace: true, rightHanded: false);
+
+        Debug.Log($"Positions: A {t.position}, B {t2.position}");
+        Debug.Log($"Rotations: A {t.rotation.eulerAngles}, B {t2.rotation.eulerAngles}");
+        Debug.Log($"Scales: A {t.lossyScale}, B {t2.lossyScale}");
+
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.position.x, t2.position.x, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.position.y, t2.position.y, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.position.z, t2.position.z, 0.01f);
+
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.rotation.x, t2.rotation.x, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.rotation.y, t2.rotation.y, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.rotation.z, t2.rotation.z, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.rotation.w, t2.rotation.w, 0.01f);
+
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.lossyScale.x, t2.lossyScale.x, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.lossyScale.y, t2.lossyScale.y, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.lossyScale.z, t2.lossyScale.z, 0.01f);
+    }
+
+    [Test]
+    public void LocalMatrixRightHandedConversion()
+    {
+        var matrix = t.GetWorldMatrix(worldSpace: false, rightHanded: true);
+
+        t2.SetWorldMatrix(matrix, worldSpace: false, rightHanded: true);
+
+        Debug.Log($"Positions: A {t.localPosition}, B {t2.localPosition}");
+        Debug.Log($"Rotations: A {t.localRotation.eulerAngles}, B {t2.localRotation.eulerAngles}");
+        Debug.Log($"Scales: A {t.localScale}, B {t2.localScale}");
+
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.localPosition.x, t2.localPosition.x, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.localPosition.y, t2.localPosition.y, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.localPosition.z, t2.localPosition.z, 0.01f);
+
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.localRotation.x, t2.localRotation.x, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.localRotation.y, t2.localRotation.y, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.localRotation.z, t2.localRotation.z, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.localRotation.w, t2.localRotation.w, 0.01f);
+
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.localScale.x, t2.localScale.x, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.localScale.y, t2.localScale.y, 0.01f);
+        UnityEngine.Assertions.Assert.AreApproximatelyEqual(t.localScale.z, t2.localScale.z, 0.01f);
+    }
+
+    [Test]
+    public void WorldMatrixRightHandedConversion()
+    {
+        var matrix = t.GetWorldMatrix(worldSpace: true, rightHanded: true);
+
+        t2.SetWorldMatrix(matrix, worldSpace: true, rightHanded: true);
 
         Debug.Log($"Positions: A {t.position}, B {t2.position}");
         Debug.Log($"Rotations: A {t.rotation.eulerAngles}, B {t2.rotation.eulerAngles}");

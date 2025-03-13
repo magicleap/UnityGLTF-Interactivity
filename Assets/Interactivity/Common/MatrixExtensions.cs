@@ -16,5 +16,17 @@ namespace UnityGLTF.Interactivity.Extensions
 
             return m;
         }
+
+        /// <summary>
+        /// Added because Unity's Mathematics library has a bug where float4x4.TRS creates a TSR matrix.
+        /// </summary>
+        public static float4x4 TRS(float3 translation, quaternion rotation, float3 scale)
+        {
+            float3x3 m = math.mul(Unity.Mathematics.float3x3.Scale(scale), new float3x3(rotation));
+            return new float4x4(new float4(m.c0, 0.0f),
+            new float4(m.c1, 0.0f),
+            new float4(m.c2, 0.0f),
+            new float4(translation, 1.0f));
+        }
     }
 }

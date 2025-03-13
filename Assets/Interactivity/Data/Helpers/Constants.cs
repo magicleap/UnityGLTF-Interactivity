@@ -19,6 +19,9 @@ namespace UnityGLTF.Interactivity
         public const string TRANSLATION = "translation";
         public const string ROTATION = "rotation";
         public const string SCALE = "scale";
+        public const string MATRIX = "matrix";
+        public const string GLOBAL_MATRIX = "globalMatrix";
+
     }
 
     public static class ConstStrings
