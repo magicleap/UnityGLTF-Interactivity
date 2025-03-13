@@ -75,7 +75,10 @@ namespace UnityGLTF.Interactivity
         public const string CONFIGURATION = "configuration";
         public const string FLOWS = "flows";
         public const string INPUT_FLOWS = "inputFlows";
+        public const string OUTPUT_FLOWS = "outputFlows";
         public const string RESET = "reset";
+        public const string IS_LOOP = "isLoop";
+        public const string IS_RANDOM = "isRandom";
 
         public const string A = "a";
         public const string B = "b";
