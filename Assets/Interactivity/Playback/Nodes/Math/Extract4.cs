@@ -15,7 +15,7 @@ namespace UnityGLTF.Interactivity
             TryEvaluateValue(ConstStrings.A, out IProperty a);
 
             if (a is not Property<float4> property)
-                throw new InvalidOperationException("Input A is not a float4!");
+                throw new InvalidOperationException($"Input A is not a float4! It is {a.GetTypeSignature()}");
 
             switch (id)
             {
