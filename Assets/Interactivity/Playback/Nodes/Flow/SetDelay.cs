@@ -8,9 +8,11 @@ namespace UnityGLTF.Interactivity
     public class FlowSetDelay : BehaviourEngineNode
     {
         public const float MAX_DELAY = 60f;
+        public bool _cancel;
 
         private float _duration;
-        private bool _cancel;
+        private float _timeStamp;
+        private int indexID;
 
         public FlowSetDelay(BehaviourEngine engine, Node node) : base(engine, node)
         {
@@ -24,29 +26,7 @@ namespace UnityGLTF.Interactivity
             throw new ArgumentException($"Socket {socket} is not valid on this node!");
         }
 
-        protected override async void Execute(string socket, ValidationResult validationResult)
-        {
-            switch (socket)
-            {
-                case "in":
-                    await HandleInSocket(validationResult);
-                    break;
-
-                case "cancel":
-                    HandleCancelSocket();
-                    break;
-
-                default:
-                    throw new ArgumentException("Not a valid input socket for this node.");
-            }
-        }
-
-        private void HandleCancelSocket()
-        {
-            _cancel = true;
-        }
-
-        private async Task HandleInSocket(ValidationResult validationResult)
+        protected override void Execute(string socket, ValidationResult validationResult)
         {
             if (validationResult != ValidationResult.Valid)
             {
@@ -55,26 +35,18 @@ namespace UnityGLTF.Interactivity
             }
 
             Util.Log($"Starting a delay of {_duration}s");
-
-            TryExecuteFlow(ConstStrings.OUT);
-
-            var duration = _duration;
-
-            while (duration > 0)
-            {
-                if (_cancel)
-                {
-                    _cancel = false;
-                    break;
-                }
-
-                duration -= Time.deltaTime;
-                await Task.Yield();
-            }
-
-            TryExecuteFlow(ConstStrings.DONE);
+            engine.onTick += ExecuteSetDelay;
         }
 
+        private void ExecuteSetDelay()
+        {
+            if (_cancel)
+                TryExecuteFlow(ConstStrings.DONE);
+
+            if (Time.timeSinceLevelLoad > _timeStamp + _duration)
+                TryExecuteFlow(ConstStrings.OUT);
+        }
+        
         public override bool ValidateValues(string socket)
         {
             if (socket == ConstStrings.CANCEL)
@@ -95,6 +67,11 @@ namespace UnityGLTF.Interactivity
                 return false;
 
             return true;
+        }
+
+        public void SetCancel(bool cancel)
+        {
+            _cancel = cancel;
         }
     }
 }
