@@ -23,6 +23,7 @@ namespace UnityGLTF.Interactivity
             ["animation/start"] = (engine, node) => new AnimationStart(engine, node),
             ["animation/stop"] = (engine, node) => new AnimationStop(engine, node),
             ["animation/stopAt"] = (engine, node) => new AnimationStopAt(engine, node),
+            ["ADBE/output_console_node"] = (engine, node) => new DebugLog(engine, node),
             ["debug/log"] = (engine, node) => new DebugLog(engine, node),
             ["event/onHoverIn"] = (engine, node) => new EventOnHoverIn(engine, node),
             ["event/onHoverOut"] = (engine, node) => new EventOnHoverOut(engine, node),
