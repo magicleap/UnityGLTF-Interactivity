@@ -34,6 +34,7 @@ namespace UnityGLTF.Interactivity
             if (eventIndex != _eventToListenFor)
                 return;
 
+            Util.Log($"Received event {engine.graph.customEvents[eventIndex].id} with id {eventIndex}.");
             _outValues = outValues;
 
             TryExecuteFlow(ConstStrings.OUT);
