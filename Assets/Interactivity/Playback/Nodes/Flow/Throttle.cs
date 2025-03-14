@@ -8,7 +8,7 @@ namespace UnityGLTF.Interactivity
         private float _duration;
         private float _timestamp;
         private float _elapsed;
-        private float _lastRemainingTime;
+        private float _lastRemainingTime = float.NaN;
 
         public FlowThrottle(BehaviourEngine engine, Node node) : base(engine, node)
         {
@@ -61,13 +61,7 @@ namespace UnityGLTF.Interactivity
 
         public override IProperty GetOutputValue(string socket)
         {
-            if (TryEvaluateValue(ConstStrings.OUTPUT_VALUE_SOCKETS, out float lastRemainingTime))
-            {
-                return new Property<float>(lastRemainingTime);
-            }
-            
-            Util.LogError("The output value socket is the wrong type of input!");
-            return base.GetOutputValue(socket);
+            return new Property<float>(_lastRemainingTime);
         }
     }
 }
