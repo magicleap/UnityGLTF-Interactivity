@@ -1,6 +1,4 @@
 using System;
-using System.Threading;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -8,20 +6,48 @@ namespace UnityGLTF.Interactivity
     public class FlowThrottle : BehaviourEngineNode
     {
         private float _duration;
+        private float _timestamp;
+        private float _elapsed;
         private float _lastRemainingTime;
 
         public FlowThrottle(BehaviourEngine engine, Node node) : base(engine, node)
         {
-            engine.onTick += PlayTimeIncreased;
+            _timestamp = Time.time;
         }
 
         protected override void Execute(string socket, ValidationResult validationResult)
         {
-            if (_lastRemainingTime >= _duration)
+
+            _elapsed = Time.time - _timestamp;
+            _lastRemainingTime = _duration - _elapsed;
+            switch (socket)
             {
-                _lastRemainingTime = 0;
-                TryExecuteFlow(ConstStrings.LOOP_BODY);
+                case ConstStrings.RESET:
+                    _lastRemainingTime = float.NaN;
+                    break;
+                case ConstStrings.IN:
+                    if (!CheckValidAndPosFloat(_lastRemainingTime))
+                        TryExecuteFlow(ConstStrings.ERR);
+                    else
+                    {
+                        if (float.IsNaN(_lastRemainingTime) || _duration <= _elapsed)
+                        {
+                            _timestamp = Time.time;
+                            _lastRemainingTime = 0;
+                            TryExecuteFlow(ConstStrings.OUT);
+                        }
+                    }
+                    break;
+                default:
+                    throw new InvalidOperationException($"Socket {socket} is not a valid input on this Throttle node!");
             }
+        }
+
+        private bool CheckValidAndPosFloat(float num)
+        {
+            if(num < 0 || float.IsNaN(num) || float.IsInfinity(num))
+                return false;
+            return true;
         }
 
         public override bool ValidateValues(string socket)
@@ -33,19 +59,6 @@ namespace UnityGLTF.Interactivity
             return true;
         }
 
-        public override bool ValidateFlows(string socket)
-        {
-            if (Validate(socket) != ValidationResult.Valid)
-            {
-                Util.LogError("Input flow is invalid!");
-                return false;
-            }
-
-
-
-            return base.ValidateFlows(socket);
-        }
-
         public override IProperty GetOutputValue(string socket)
         {
             if (TryEvaluateValue(ConstStrings.OUTPUT_VALUE_SOCKETS, out float lastRemainingTime))
@@ -55,11 +68,6 @@ namespace UnityGLTF.Interactivity
             
             Util.LogError("The output value socket is the wrong type of input!");
             return base.GetOutputValue(socket);
-        }
-
-        private void PlayTimeIncreased()
-        {
-            _lastRemainingTime += Time.deltaTime;
         }
     }
 }
