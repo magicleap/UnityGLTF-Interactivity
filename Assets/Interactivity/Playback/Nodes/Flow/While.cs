@@ -16,9 +16,7 @@ namespace UnityGLTF.Interactivity
         {
             if (socket != ConstStrings.IN)
                 throw new ArgumentException($"Only condition input socket for this node is \"{ConstStrings.IN}\"");
-
-            if(!TryEvaluateValue(ConstStrings.CONDITION, out condition))
-
+                
             while (condition)
             {
                 TryExecuteFlow(ConstStrings.LOOP_BODY);
