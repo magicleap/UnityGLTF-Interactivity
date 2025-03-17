@@ -9,7 +9,7 @@ namespace UnityGLTF.Interactivity
     {
 
         private int _nTimes;
-        private int _currentCount;
+        private int _currentCount = 0;
 
         public FlowDoN(BehaviourEngine engine, Node node) : base(engine, node)
         {
@@ -18,7 +18,7 @@ namespace UnityGLTF.Interactivity
 
         protected override void Execute(string socket, ValidationResult validationResult)
         {
-            Util.Log($"Starting a loop with doN {_nTimes}");
+            Util.Log($"Incrementing executed times to {_currentCount + 1} for an output that can be run {_nTimes} times");
 
             switch (socket)
             {
