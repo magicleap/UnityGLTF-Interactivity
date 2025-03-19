@@ -1,12 +1,10 @@
 using System;
-using System.Threading;
-using UnityEngine;
 
 namespace UnityGLTF.Interactivity
 {
     public class FlowWhile : BehaviourEngineNode
     {
-        private bool condition;
+        private bool _condition;
 
         public FlowWhile(BehaviourEngine engine, Node node) : base(engine, node)
         {
@@ -16,11 +14,11 @@ namespace UnityGLTF.Interactivity
         {
             if (socket != ConstStrings.IN)
                 throw new ArgumentException($"Only condition input socket for this node is \"{ConstStrings.IN}\"");
-                
-            while (condition)
+
+            while (_condition)
             {
                 TryExecuteFlow(ConstStrings.LOOP_BODY);
-                TryEvaluateValue(ConstStrings.CONDITION, out condition);
+                TryEvaluateValue(ConstStrings.CONDITION, out _condition);
             }
 
             TryExecuteFlow(ConstStrings.COMPLETED);
@@ -28,7 +26,7 @@ namespace UnityGLTF.Interactivity
 
         public override bool ValidateValues(string socket)
         {
-            return TryEvaluateValue(ConstStrings.CONDITION, out bool condition);
+            return TryEvaluateValue(ConstStrings.CONDITION, out _condition);
         }
     }
 }
