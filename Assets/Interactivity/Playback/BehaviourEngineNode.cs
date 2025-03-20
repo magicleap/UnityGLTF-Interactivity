@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Unity.Properties;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity

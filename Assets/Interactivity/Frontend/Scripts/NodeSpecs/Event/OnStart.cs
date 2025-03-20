@@ -1,6 +1,6 @@
 namespace UnityGLTF.Interactivity
 {
-    public class EventOnStartSpecs : NodeSpecifications
+    public class EventOnStartSpec : NodeSpecifications
     {
         protected override (NodeFlow[] flows, NodeValue[] values) GenerateOutputs()
         {

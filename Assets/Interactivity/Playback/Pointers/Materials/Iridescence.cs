@@ -6,11 +6,11 @@ namespace UnityGLTF.Interactivity.Materials
 {
     public struct IridescencePointers
     {
-        private static readonly int textureHash = Shader.PropertyToID("iridescenceTexture");
-        private static readonly int rotationHash = Shader.PropertyToID("iridescenceTextureRotation");
-        private static readonly int texCoordHash = Shader.PropertyToID("iridescenceTextureTexCoord");
-        private static readonly int iridescenceFactorHash = Shader.PropertyToID("iridescenceFactor");
-        private static readonly int iridescenceIorHash = Shader.PropertyToID("iridescenceIor");
+        public static readonly int textureHash = Shader.PropertyToID("iridescenceTexture");
+        public static readonly int rotationHash = Shader.PropertyToID("iridescenceTextureRotation");
+        public static readonly int texCoordHash = Shader.PropertyToID("iridescenceTextureTexCoord");
+        public static readonly int iridescenceFactorHash = Shader.PropertyToID("iridescenceFactor");
+        public static readonly int iridescenceIorHash = Shader.PropertyToID("iridescenceIor");
 
         public TransformPointers transformPointers;
         public Pointer<float> iridescenceFactor;

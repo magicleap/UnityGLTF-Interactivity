@@ -30,7 +30,7 @@ namespace UnityGLTF.Interactivity
             var declarations = DeclarationsSerializer.GetDeclarations(graph.nodes, typeIndexByType);
             TypesSerializer.WriteJson(writer, graph.types);
             VariablesSerializer.WriteJson(writer, graph.variables, typeIndexByType);
-            EventsSerializer.WriteJson(writer, graph.customEvents);
+            EventsSerializer.WriteJson(writer, graph.customEvents, typeIndexByType);
             DeclarationsSerializer.WriteJson(writer, declarations);
             NodesSerializer.WriteJson(writer, graph.nodes, declarations, typeIndexByType);
             writer.WriteEndObject();
@@ -59,7 +59,7 @@ namespace UnityGLTF.Interactivity
             var types = TypesDeserializer.GetTypes(jObj);
             var systemTypes = TypesDeserializer.GetSystemTypes(types);
             var variables = VariablesDeserializer.GetVariables(jObj, systemTypes);
-            var events = EventsDeserializer.GetEvents(jObj);
+            var events = EventsDeserializer.GetEvents(jObj, systemTypes);
             var declarations = DeclarationsDeserializer.GetDeclarations(jObj, systemTypes);
             var nodes = NodesDeserializer.GetNodes(jObj, systemTypes, declarations);
 
