@@ -218,8 +218,8 @@ public class MyTests
         while(duration > 0.0f)
         {
             eng.Tick();
-            duration -= Time.deltaTime;
-            yield return null;
+            duration -= Time.fixedDeltaTime;
+            yield return new WaitForFixedUpdate(); // to work in PlayMode
         }
 
         var m = importer.Result.MaterialCache[0];
