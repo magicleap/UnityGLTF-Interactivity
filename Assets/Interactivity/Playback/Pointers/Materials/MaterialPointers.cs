@@ -16,11 +16,11 @@ namespace UnityGLTF.Interactivity.Materials
 
     public struct MaterialPointers
     {
-        private static readonly int alphaCutoffHash = Shader.PropertyToID("alphaCutoff");
-        private static readonly int iorHash = Shader.PropertyToID("ior");
-        private static readonly int attenuationDistanceHash = Shader.PropertyToID("attenuationDistance");
-        private static readonly int attenuationColorHash = Shader.PropertyToID("attenuationColor");
-        private static readonly int dispersionHash = Shader.PropertyToID("dispersion");
+        public static readonly int alphaCutoffHash = Shader.PropertyToID("alphaCutoff");
+        public static readonly int iorHash = Shader.PropertyToID("ior");
+        public static readonly int attenuationDistanceHash = Shader.PropertyToID("attenuationDistance");
+        public static readonly int attenuationColorHash = Shader.PropertyToID("attenuationColor");
+        public static readonly int dispersionHash = Shader.PropertyToID("dispersion");
 
         public Pointer<float> alphaCutoff;
         public Pointer<float> ior;

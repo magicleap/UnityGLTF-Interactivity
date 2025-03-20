@@ -24,6 +24,7 @@ namespace UnityGLTF.Interactivity
             ["animation/stop"] = (engine, node) => new AnimationStop(engine, node),
             ["animation/stopAt"] = (engine, node) => new AnimationStopAt(engine, node),
             ["debug/log"] = (engine, node) => new DebugLog(engine, node),
+            ["debug/assert"] = (engine, node) => new DebugAssert(engine, node),
             ["event/onHoverIn"] = (engine, node) => new EventOnHoverIn(engine, node),
             ["event/onHoverOut"] = (engine, node) => new EventOnHoverOut(engine, node),
             ["event/onStart"] = (engine, node) => new EventOnStart(engine, node),
@@ -141,8 +142,11 @@ namespace UnityGLTF.Interactivity
 
         public static readonly Dictionary<string, NodeSpecifications> nodeSpecs = new()
         {
+            ["debug/log"] = new DebugLogSpec(),
+            ["debug/assert"] = new DebugAssertSpec(),
             ["event/onStart"] = new EventOnStartSpecs(),
             ["math/abs"] = new MathAbsSpec(),
+            ["math/add"] = new MathAddSpec(),
             ["pointer/interpolate"] = new PointerInterpolateSpecs(),
             ["pointer/set"] = new PointerSetSpecs(),
         };

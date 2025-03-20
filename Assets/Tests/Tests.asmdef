@@ -5,7 +5,9 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "UnityGLTF.Interactivity.Common",
-        "Unity.Mathematics"
+        "Unity.Mathematics",
+        "UnityGLTFScripts",
+        "UnityGLTF.Interactivity"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

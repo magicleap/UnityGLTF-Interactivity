@@ -15,7 +15,7 @@ namespace UnityGLTF.Interactivity.Tests
             var pointerSetNode = graph.CreateNode("pointer/set", new Vector2(500f, 500f * i));
 
             onStartNode.AddFlow(ConstStrings.OUT, pointerSetNode, ConstStrings.IN);
-            pointerSetNode.AddValue("nodeIndex", 1);
+            pointerSetNode.AddValue("nodeIndex", 0);
             pointerSetNode.AddConfiguration("type", new JArray(type));
             pointerSetNode.AddConfiguration("pointer", new JArray(pointer));
 
@@ -37,6 +37,19 @@ namespace UnityGLTF.Interactivity.Tests
                 default:
                     break;
             }
+        }
+
+        private static void CreatePointerPair<T>(Graph graph, string pointer, string type, T val)
+        {
+            var onStartNode = graph.CreateNode("event/onStart", Vector2.zero);
+            var pointerSetNode = graph.CreateNode("pointer/set", Vector2.zero);
+
+            onStartNode.AddFlow(ConstStrings.OUT, pointerSetNode, ConstStrings.IN);
+            pointerSetNode.AddValue("nodeIndex", 0);
+            pointerSetNode.AddConfiguration("type", new JArray(type));
+            pointerSetNode.AddConfiguration("pointer", new JArray(pointer));
+
+            pointerSetNode.AddValue("value", val);
         }
 
         public Graph CreateTestGraph()
@@ -146,7 +159,18 @@ namespace UnityGLTF.Interactivity.Tests
             for (int i = 0; i < materialPointers.Length; i++)
             {
                 CreatePointerPair(i, graph, materialPointers[i].Item1, materialPointers[i].Item2);
+                break;
             }
+
+            return graph;
+        }
+
+        public Graph CreateTestGraph<T>(string prop, string type, T val)
+        {
+            var graph = new Graph();
+            graph.AddDefaultTypes();
+
+            CreatePointerPair(graph, "/materials/{nodeIndex}/" + prop, type, val);
 
             return graph;
         }
