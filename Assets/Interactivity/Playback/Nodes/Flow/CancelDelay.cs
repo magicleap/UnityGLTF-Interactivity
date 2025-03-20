@@ -14,14 +14,6 @@ namespace UnityGLTF.Interactivity
         {
         }
 
-        public override IProperty GetOutputValue(string socket)
-        {
-            if (socket == ConstStrings.LAST_DELAY_INDEX)
-                throw new NotImplementedException("No idea what this should do so it never got implemented."); // TODO
-
-            throw new ArgumentException($"Socket {socket} is not valid on this node!");
-        }
-
         protected override void Execute(string socket, ValidationResult validationResult)
         {
             Node nodeToCancel = engine.graph.nodes[delayIndex];
@@ -29,7 +21,7 @@ namespace UnityGLTF.Interactivity
             if (nodeToCancel == null || x == null)
                 return;
 
-            x.SetCancel(true);
+            //x.SetCancel(true);
 
             TryExecuteFlow(ConstStrings.COMPLETED);
         }
