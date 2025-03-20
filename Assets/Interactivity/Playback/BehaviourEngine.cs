@@ -46,8 +46,6 @@ namespace UnityGLTF.Interactivity
             pointerInterpolationManager.OnTick();
             variableInterpolationManager.OnTick();
             nodeDelayManager.OnTick();
-            foreach (var flow in nodeDelayManager.flowsToExecute)
-                ExecuteFlow(flow);
 
             onTick?.Invoke();
         }

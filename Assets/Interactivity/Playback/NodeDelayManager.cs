@@ -1,96 +1,77 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor.Rendering;
 using UnityEngine;
-using UnityEngine.Android;
 using UnityEngine.Pool;
-using UnityGLTF.Interactivity.Frontend;
 
 namespace UnityGLTF.Interactivity
 {
     public struct NodeDelayData
     {
-        public int delayIndex { get; }
-        public List<Flow> outputFlows;
-        public double durationInMs;
-        public double startTimeInMs;
-        public double scheduledActivationTime;
-
-        public NodeDelayData(int _lastDelayIndex, List<Flow> _outputFlows, double _duration, double _startTime)
-        {
-            delayIndex = _lastDelayIndex;
-            outputFlows = _outputFlows;
-            durationInMs = _duration * 1000;
-            startTimeInMs = _startTime * 1000;
-            scheduledActivationTime = startTimeInMs + durationInMs;
-        }
+        public int delayIndex;
+        public FlowSetDelay sourceNode;
+        public float finishTime;
+        public Action doneCallback;
     }
 
     public class NodeDelayManager
     {
-        public List<NodeDelayData> delayedNodes = new();
-        public List<NodeDelayData> delayNodeToRemove = new();
-        public List<Flow> flowsToExecute { get; protected set; }
-        //use this to identify flows canceled by cancelDelay
-        public List<Flow> canceledFlows { get; protected set; }
-        public int currentDelayIndex = 0;
+        private List<NodeDelayData> _delayedNodes = new();
+        private int _currentDelayIndex = -1;
 
         public void OnTick()
         {
+            // Avoiding iterating over a changing collection by grabbing a pooled list.
             var temp = ListPool<NodeDelayData>.Get();
-            var flows = ListPool<Flow>.Get();
-
             try
             {
-                foreach (var nodeData in delayedNodes)
+                for (int i = 0; i < _delayedNodes.Count; i++)
                 {
-                    if (!delayNodeToRemove.Contains(nodeData))
-                        temp.Add(nodeData);
+                    if (Time.time >= _delayedNodes[i].finishTime)
+                        temp.Add(_delayedNodes[i]);
+                }
+
+                for (int i = 0; i < temp.Count; i++)
+                {
+                    temp[i].doneCallback();
+                    _delayedNodes.Remove(temp[i]);
                 }
             }
             finally
             {
-                foreach (var delay in temp)
-                {
-                    if (Time.timeAsDouble >= delay.scheduledActivationTime)
-                    {
-                        foreach (var flow in delay.outputFlows)
-                        {
-                            if (!canceledFlows.Contains(flow))
-                                flows.Add(flow);
-                        }
-                    }
-                }
-
-                delayedNodes = temp;
-                flowsToExecute = flows;
-                ListPool<Flow>.Release(flows);
                 ListPool<NodeDelayData>.Release(temp);
             }
         }
 
-        public void AddDelayNode(ref NodeDelayData data)
+        public int AddDelayNode(FlowSetDelay sourceNode, float duration, Action doneCallback)
         {
-            currentDelayIndex++;
-            delayedNodes.Add(data);
+            _currentDelayIndex++;
+
+            _delayedNodes.Add(new NodeDelayData()
+            {
+                delayIndex = _currentDelayIndex,
+                sourceNode = sourceNode,
+                finishTime = Time.time + duration,
+                doneCallback = doneCallback
+            });
+
+            return _currentDelayIndex;
         }
 
-        public void CancelDelaysFromNode(int delayNodeIndex)
+        public void CancelDelayByIndex(int delayIndex)
         {
-            foreach (var delay in delayedNodes)
+            for (int i = 0; i < _delayedNodes.Count; i++)
             {
-                if (delay.delayIndex == delayNodeIndex)
-                {
-                    delayNodeToRemove.Add(delay);
-                    Util.Log($"Removing nodes delayed by {delayNodeIndex} from the NodeDelayManager");
-                    break;
-                }
+                if (_delayedNodes[i].delayIndex != delayIndex)
+                    continue;
+
+                _delayedNodes.RemoveAt(i);
+                return;
             }
         }
 
-        public void CancelSingleDelay(int cancelIndex)
+        public void CancelDelaysFromNode(FlowSetDelay sourceNode)
         {
-            //TODO for use with CancelDelay nodes
+            _delayedNodes.RemoveAll(e => e.sourceNode == sourceNode);
         }
     }
 }

@@ -50,6 +50,7 @@ namespace UnityGLTF.Interactivity
         public const string START_INDEX = "startIndex";
         public const string END_INDEX = "endIndex";
         public const string LAST_DELAY_INDEX = "lastDelayIndex";
+        public const string DELAY_INDEX = "delayIndex";
         public const string INITIAL_INDEX = "initialIndex";
         public const string INDEX = "index";
         public const string ANIMATION = "animation";
