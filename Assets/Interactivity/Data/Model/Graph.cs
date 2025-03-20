@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -25,11 +23,17 @@ namespace UnityGLTF.Interactivity
 
         public Variable AddVariable<T>(string id, T initialValue)
         {
+            // Due to how this is overloaded the IProperty cast is required.
+            return AddVariable(id, (IProperty)new Property<T>(initialValue));
+        }
+
+        public Variable AddVariable(string id, IProperty initialValue)
+        {
             var variable = new Variable()
             {
                 id = id,
-                property = new Property<T>(initialValue),
-                initialValue = new Property<T>(initialValue),
+                property = initialValue,
+                initialValue = initialValue,
             };
 
             variables.Add(variable);
@@ -50,11 +54,12 @@ namespace UnityGLTF.Interactivity
             return true;
         }
 
-        public Customevent AddEvent(string id)
+        public Customevent AddEvent(string id, List<EventValue> eventValues = null)
         {
             var e = new Customevent()
             {
-                id = id
+                id = id,
+                values = eventValues
             };
 
             customEvents.Add(e);
@@ -62,6 +67,11 @@ namespace UnityGLTF.Interactivity
             onEventAdded?.Invoke(e);
 
             return e;
+        }
+
+        public Node CreateNode(string type)
+        {
+            return CreateNode(type, Vector2.zero);
         }
 
         public Node CreateNode(string type, Vector2 position)
@@ -135,6 +145,21 @@ namespace UnityGLTF.Interactivity
             }
 
             return -1;
+        }
+
+        public bool TryGetVariable(string id, out Variable variable)
+        {
+            variable = null;
+            for (int i = 0; i < variables.Count; i++)
+            {
+                if (variables[i].id != id)
+                    continue;
+
+                variable = variables[i];
+                return true;
+            }
+
+            return false;
         }
 
         public IProperty GetDefaultPropertyForType(int typeIndex)

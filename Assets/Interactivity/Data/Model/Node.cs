@@ -38,9 +38,27 @@ namespace UnityGLTF.Interactivity
 
             values.Add(v);
 
-            Util.Log($"Added value {id} with payload {value.ToString()}");
+            Util.Log($"Added value {id} with payload {value}");
 
             return v;
+        }
+
+        public Value AddValue(string id, Value value)
+        {
+            for (int i = 0; i < values.Count; i++)
+            {
+                if (!values[i].id.Equals(id))
+                    continue;
+
+                values[i].property = value.property;
+                return values[i];
+            }
+
+            values.Add(value);
+
+            Util.Log($"Added value {id} with payload {value}");
+
+            return value;
         }
 
         public bool TryGetValueById(string id, out Value value)
@@ -59,20 +77,20 @@ namespace UnityGLTF.Interactivity
             return false;
         }
 
-        public bool TryChangeValueToReference(string id, Node node, string socket, out Value value)
+        public bool TryChangeValueToReference(string inputSocket, Node outputNode, string outputSocket, out Value value)
         {
             value = null;
 
             for (int i = 0; i < values.Count; i++)
             {
-                if (values[i].id == id)
+                if (values[i].id == inputSocket)
                 {
                     value = values[i];
 
-                    if (!value.TryConnectToSocket(node, socket))
+                    if (!value.TryConnectToSocket(outputNode, outputSocket))
                         return false;
 
-                    Util.Log($"Changed value {id} on {type} to reference the output of {node.type}'s value {socket}");
+                    Util.Log($"Changed value {inputSocket} on {type} to reference the output of {outputNode.type}'s value {outputSocket}");
                     return true;
                 }
             }
@@ -80,19 +98,19 @@ namespace UnityGLTF.Interactivity
             return false;
         }
 
-        public Flow AddFlow(string id, Node node, string socket)
+        public Flow AddFlow(string fromSocket, Node toNode, string toSocket)
         {
             for (int i = 0; i < flows.Count; i++)
             {
-                if (flows[i].toNode == node && flows[i].fromSocket == id && flows[i].toSocket == socket)
-                    throw new InvalidOperationException($"{type} already has a flow from {id} to {socket} on that node {node.type}!");
+                if (flows[i].toNode == toNode && flows[i].fromSocket == fromSocket && flows[i].toSocket == toSocket)
+                    throw new InvalidOperationException($"{type} already has a flow from {fromSocket} to {toSocket} on that node {toNode.type}!");
             }
 
-            var flow = new Flow(this, id, node, socket);
+            var flow = new Flow(this, fromSocket, toNode, toSocket);
 
             flows.Add(flow);
 
-            Util.Log($"Created flow between {type} and {node.type} from {id} to {socket}");
+            Util.Log($"Created flow between {type} and {toNode.type} from {fromSocket} to {toSocket}");
 
             onFlowAdded?.Invoke(flow);
 
@@ -123,6 +141,11 @@ namespace UnityGLTF.Interactivity
             onFlowRemoved?.Invoke(flow);
 
             return flows.Remove(flow);
+        }
+
+        public Configuration AddConfiguration<T>(string id, T value)
+        {
+            return AddConfiguration(id, new JArray(value));
         }
 
         public Configuration AddConfiguration(string id, JArray value)

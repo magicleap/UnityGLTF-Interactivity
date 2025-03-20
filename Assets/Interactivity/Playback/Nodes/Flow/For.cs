@@ -25,11 +25,13 @@ namespace UnityGLTF.Interactivity
 
         protected override void Execute(string socket, ValidationResult validationResult)
         {
-            Util.Log($"Starting a loop with start index {_startIndex} and end index {_endIndex}");
+            Util.Log($"Starting a loop with start index {_startIndex} and end index {_endIndex} from initial value {_index}");
 
-            for (_index = _startIndex; _index < _endIndex; _index++)
+            for (int i = _index < _startIndex ? _startIndex : _index; i < _endIndex; i++)
             {
+                _index = i;
                 TryExecuteFlow(ConstStrings.LOOP_BODY);
+                Util.Log($"Loop is on iteration {i} and the index reads as {_index}");
             }
 
             TryExecuteFlow(ConstStrings.COMPLETED);

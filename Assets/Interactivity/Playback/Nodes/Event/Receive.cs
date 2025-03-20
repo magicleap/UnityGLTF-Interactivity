@@ -44,13 +44,16 @@ namespace UnityGLTF.Interactivity
         {
             var eventData = engine.graph.customEvents[_eventToListenFor];
 
+            if (eventData.values == null)
+                return;
+
             EventValue value;
 
             for (int i = 0; i < eventData.values.Count; i++)
             {
                 value = eventData.values[i];
 
-                _outValues.Add(value.id, engine.graph.GetDefaultPropertyForType(value.type));
+                _outValues.Add(value.id, value.property);
             }
         }
     }
