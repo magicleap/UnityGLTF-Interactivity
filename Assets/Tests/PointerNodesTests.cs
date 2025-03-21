@@ -52,15 +52,19 @@ public class PointerNodesTests : InteractivityTestsHelpers
         return graph;
     }
 
-    private async Task TestPointerSet<T>(string prop, string type, int hash, T targetVal) where T : struct
+    private IEnumerator TestPointerSet<T>(string prop, string type, int hash, T targetVal) where T : struct
     {
-        var importer = await LoadTestModel("material_pointers_test.gltf");        
+        var importer = LoadTestModel("material_pointers_test.gltf");
+        while(importer.IsCompleted == false)
+        {
+            yield return null;
+        }   
 
         var g = CreatePointerSetGraph(prop, type, targetVal);
 
-        RunTestForGraph(g, importer);
+        RunTestForGraph(g, importer.Result);
 
-        var m = importer.MaterialCache[0];
+        var m = importer.Result.MaterialCache[0];
         float val = m.UnityMaterialWithVertexColor.GetFloat(hash);
         Debug.Assert(val.Equals(targetVal));
     }
@@ -68,15 +72,13 @@ public class PointerNodesTests : InteractivityTestsHelpers
     [UnityTest]
     public IEnumerator TestPointerSetAlphaCutoff()
     {
-        Task task = TestPointerSet("alphaCutoff", "float", MaterialPointers.alphaCutoffHash, 0.72f);
-        yield return new WaitUntil(() => task.IsCompleted);
+        yield return TestPointerSet("alphaCutoff", "float", MaterialPointers.alphaCutoffHash, 0.72f);
     }
 
     [UnityTest]
     public IEnumerator TestPointerSetIridescence()
     {
-        Task task = TestPointerSet("extensions/KHR_materials_iridescence/iridescenceFactor", "float", IridescencePointers.iridescenceFactorHash, 0.72f);
-        yield return new WaitUntil(() => task.IsCompleted);
+        yield return TestPointerSet("extensions/KHR_materials_iridescence/iridescenceFactor", "float", IridescencePointers.iridescenceFactorHash, 0.72f);
     }
 
     public IEnumerator TestPointerInterpolateFloat(string prop, int propHash, float targetValue)
