@@ -11,10 +11,10 @@ namespace UnityGLTF.Interactivity
 
         protected override void Execute(string socket, ValidationResult validationResult)
         {
-            if (!TryEvaluateValue("message", out string message))
+            if (!TryEvaluateValue("message", out IProperty message))
                 TryExecuteFlow(ConstStrings.ERR);
 
-            Util.Log(message);
+            Util.Log(message.ToString());
 
             TryExecuteFlow(ConstStrings.OUT);
         }

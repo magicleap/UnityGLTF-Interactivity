@@ -14,7 +14,7 @@ namespace UnityGLTF.Interactivity
         public const string MESHES_LENGTH = "meshes.length";
         public const string NODES_LENGTH = "nodes.length";
         public const string WEIGHTS_LENGTH = "weights.length";
-        public const string WEIGHTS= "weights";
+        public const string WEIGHTS = "weights";
         public const string EXTENSIONS = "extensions";
         public const string TRANSLATION = "translation";
         public const string ROTATION = "rotation";
@@ -53,6 +53,7 @@ namespace UnityGLTF.Interactivity
         public const string START_INDEX = "startIndex";
         public const string END_INDEX = "endIndex";
         public const string LAST_DELAY_INDEX = "lastDelayIndex";
+        public const string DELAY_INDEX = "delayIndex";
         public const string INITIAL_INDEX = "initialIndex";
         public const string INDEX = "index";
         public const string ANIMATION = "animation";
@@ -77,6 +78,11 @@ namespace UnityGLTF.Interactivity
         public const string METADATA = "metadata";
         public const string CONFIGURATION = "configuration";
         public const string FLOWS = "flows";
+        public const string INPUT_FLOWS = "inputFlows";
+        public const string OUTPUT_FLOWS = "outputFlows";
+        public const string RESET = "reset";
+        public const string IS_LOOP = "isLoop";
+        public const string IS_RANDOM = "isRandom";
 
         public const string A = "a";
         public const string B = "b";
@@ -98,6 +104,14 @@ namespace UnityGLTF.Interactivity
         public static readonly string[] Letters = new string[]
         {
             A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P
+        };
+
+        public static readonly string[] Numbers = new string[]
+        {
+            "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15",
+            "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31",
+            "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47",
+            "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63", "64"
         };
 
         public const string DONE = "done";
