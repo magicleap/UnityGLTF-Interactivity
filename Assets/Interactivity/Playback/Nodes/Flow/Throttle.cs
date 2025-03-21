@@ -12,51 +12,39 @@ namespace UnityGLTF.Interactivity
 
         public FlowThrottle(BehaviourEngine engine, Node node) : base(engine, node)
         {
-            _timestamp = Time.time;
         }
 
         protected override void Execute(string socket, ValidationResult validationResult)
         {
-
-            _elapsed = Time.time - _timestamp;
-            _lastRemainingTime = _duration - _elapsed;
-            switch (socket)
+            if (socket.Equals(ConstStrings.RESET))
             {
-                case ConstStrings.RESET:
-                    _lastRemainingTime = float.NaN;
-                    break;
-                case ConstStrings.IN:
-                    if (!CheckValidAndPosFloat(_lastRemainingTime))
-                        TryExecuteFlow(ConstStrings.ERR);
-                    else
-                    {
-                        if (float.IsNaN(_lastRemainingTime) || _duration <= _elapsed)
-                        {
-                            _timestamp = Time.time;
-                            _lastRemainingTime = 0;
-                            TryExecuteFlow(ConstStrings.OUT);
-                        }
-                    }
-                    break;
-                default:
-                    throw new InvalidOperationException($"Socket {socket} is not a valid input on this Throttle node!");
+                _lastRemainingTime = float.NaN;
+                return;
             }
+                 
+            TryEvaluateValue(ConstStrings.DURATION, out _duration);
+            if (_duration >= 0 && !float.IsNaN(_duration) && !float.IsInfinity(_duration))
+            {
+                if (!float.IsNaN(_lastRemainingTime))
+                {
+                    _elapsed = Time.time - _timestamp;
+                    if (_duration > _elapsed)
+                        _lastRemainingTime = _duration - _elapsed;
+                    else
+                        ExecuteOutFlow();
+                }
+                else
+                    ExecuteOutFlow();
+            }
+            else
+                TryExecuteFlow(ConstStrings.ERR);    
         }
 
-        private bool CheckValidAndPosFloat(float num)
+        private void ExecuteOutFlow()
         {
-            if(num < 0 || float.IsNaN(num) || float.IsInfinity(num))
-                return false;
-            return true;
-        }
-
-        public override bool ValidateValues(string socket)
-        {
-            if (!TryEvaluateValue(ConstStrings.DURATION, out float duration))
-                return false;
-
-            _duration = duration;
-            return true;
+            _timestamp = Time.time;
+            _lastRemainingTime = 0;
+            TryExecuteFlow(ConstStrings.OUT);
         }
 
         public override IProperty GetOutputValue(string socket)
