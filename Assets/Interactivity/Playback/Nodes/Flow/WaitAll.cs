@@ -27,8 +27,9 @@ namespace UnityGLTF.Interactivity
 
             var index = int.Parse(socket); // Throws if an unexpected socket id is passed in that isn't in the spec.
 
+            if(!_activated[index])
+                _remainingInputs--;
             _activated[index] = true;
-            _remainingInputs--;
 
             if (_remainingInputs == 0)
                 TryExecuteFlow(ConstStrings.COMPLETED);
