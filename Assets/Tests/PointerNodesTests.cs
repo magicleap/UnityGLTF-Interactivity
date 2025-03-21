@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Unity.Mathematics;
 using UnityEngine;
@@ -33,39 +34,61 @@ public class PointerNodesTests : InteractivityTestsHelpers
         return graph;
     }
 
-    [UnityTest]
-    public IEnumerator TestPointerSet()
+    private Graph CreatePointerSetGraph<T>(string prop, string type, T val)
     {
-        var importer = LoadTestModel("material_pointers_test.gltf");        
-            
-        while(importer.IsCompleted == false)
-        {
-            yield return null;
-        }
+        var graph = new Graph();
+        graph.AddDefaultTypes();
 
-        var mtg = new MaterialPointerTestGraph();
-        var g = mtg.CreateTestGraph("alphaCutoff", "float", 0.67f);
+        var onStartNode = graph.CreateNode("event/onStart", Vector2.zero);
+        var pointerSetNode = graph.CreateNode("pointer/set", Vector2.zero);
 
-        RunTestForGraph(g, importer.Result);
+        onStartNode.AddFlow(ConstStrings.OUT, pointerSetNode, ConstStrings.IN);
+        pointerSetNode.AddValue("nodeIndex", 0);
+        pointerSetNode.AddConfiguration("type", new JArray(type));
+        pointerSetNode.AddConfiguration("pointer", new JArray("/materials/{nodeIndex}/" + prop));
 
-        var m = importer.Result.MaterialCache[0];
-        float ac = m.UnityMaterialWithVertexColor.GetFloat(MaterialPointers.alphaCutoffHash);
-        Debug.Assert(ac == 0.67f);
+        pointerSetNode.AddValue("value", val);
+
+        return graph;
+    }
+
+    private async Task TestPointerSet<T>(string prop, string type, int hash, T targetVal) where T : struct
+    {
+        var importer = await LoadTestModel("material_pointers_test.gltf");        
+
+        var g = CreatePointerSetGraph(prop, type, targetVal);
+
+        RunTestForGraph(g, importer);
+
+        var m = importer.MaterialCache[0];
+        float val = m.UnityMaterialWithVertexColor.GetFloat(hash);
+        Debug.Assert(val.Equals(targetVal));
     }
 
     [UnityTest]
-    public IEnumerator TestPointerInterpolate()
+    public IEnumerator TestPointerSetAlphaCutoff()
+    {
+        Task task = TestPointerSet("alphaCutoff", "float", MaterialPointers.alphaCutoffHash, 0.72f);
+        yield return new WaitUntil(() => task.IsCompleted);
+    }
+
+    [UnityTest]
+    public IEnumerator TestPointerSetIridescence()
+    {
+        Task task = TestPointerSet("extensions/KHR_materials_iridescence/iridescenceFactor", "float", IridescencePointers.iridescenceFactorHash, 0.72f);
+        yield return new WaitUntil(() => task.IsCompleted);
+    }
+
+    public IEnumerator TestPointerInterpolateFloat(string prop, int propHash, float targetValue)
     {
         var importer = LoadTestModel("material_pointers_test.gltf");        
-            
         while(importer.IsCompleted == false)
         {
             yield return null;
         }
 
         float duration = 3.5f;
-        float targetValue = 0.72f;
-        var g = CreatePointerInterpolateGraph(0, "alphaCutoff", duration, targetValue);
+        var g = CreatePointerInterpolateGraph(0, prop, duration, targetValue);
 
         var eng = RunTestForGraph(g, importer.Result);
 
@@ -77,7 +100,14 @@ public class PointerNodesTests : InteractivityTestsHelpers
         }
 
         var m = importer.Result.MaterialCache[0];
-        float ac = m.UnityMaterialWithVertexColor.GetFloat(MaterialPointers.alphaCutoffHash);
-        Debug.Assert(Mathf.Abs(ac - targetValue) < 0.01f);
+
+        float val = m.UnityMaterialWithVertexColor.GetFloat(propHash);
+        Debug.Assert(Mathf.Abs(val - targetValue) < 0.01f);
+    }
+
+    [UnityTest]
+    public IEnumerator TestPointerInterpolateAlphaCutoff()
+    {
+        yield return TestPointerInterpolateFloat("alphaCutoff", MaterialPointers.alphaCutoffHash, 0.78f);
     }
 }
