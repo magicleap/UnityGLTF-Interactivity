@@ -10,10 +10,14 @@ using UnityGLTF.Loader;
 
 public class InteractivityTestsHelpers
 {
-    protected BehaviourEngine RunTestForGraph(Graph g, GLTFSceneImporter importer)
+    protected BehaviourEngine RunTestForGraph(Graph g, GLTFSceneImporter importer, bool startPlayback = true)
     {
         BehaviourEngine eng = new BehaviourEngine(g, importer);
-        eng.StartPlayback();
+
+        if(startPlayback)
+        {
+            eng.StartPlayback();
+        }
         return eng;
     }
 

@@ -149,6 +149,7 @@ namespace UnityGLTF.Interactivity
             ["math/add"] = new MathAddSpec(),
             ["pointer/interpolate"] = new PointerInterpolateSpecs(),
             ["pointer/set"] = new PointerSetSpecs(),
+            ["pointer/get"] = new PointerGetSpecs(),
         };
     }
 }

@@ -55,6 +55,30 @@ public class PointerNodesTests : InteractivityTestsHelpers
         return (graph, pointerSetNode);
     }
 
+    private (Graph, Node) CreateMaterialPointerGetGraph<T>(string pointer, T val)
+    {
+        var graph = new Graph();
+        graph.AddDefaultTypes();
+
+        var onStartNode = graph.CreateNode("event/onStart", Vector2.zero);
+        var assertNode = graph.CreateNode("debug/assert", Vector2.zero);
+        onStartNode.AddFlow(ConstStrings.OUT, assertNode, ConstStrings.IN);
+
+
+        var pointerGetNode = graph.CreateNode("pointer/get", Vector2.zero);
+        pointerGetNode.AddValue("nodeIndex", 0);
+        pointerGetNode.AddConfiguration("pointer", new JArray(pointer));
+
+        assertNode.AddValue(ConstStrings.B, val);
+
+        if(assertNode.TryGetValueById(ConstStrings.A, out Value a))
+        {
+             a.TryConnectToSocket(pointerGetNode, ConstStrings.VALUE);
+        }
+
+        return (graph, pointerGetNode);
+    }
+
     private IEnumerator TestPointerSet<T>(string pointer, string type, T targetVal) where T : struct
     {
         var importer = LoadTestModel("material_pointers_test.gltf");
@@ -77,6 +101,31 @@ public class PointerNodesTests : InteractivityTestsHelpers
         Debug.Assert(((Pointer<T>)p).GetValue().Equals(targetVal));
     }
 
+    private IEnumerator TestPointerGet<T>(string pointer, T targetVal) where T : struct
+    {
+        var importer = LoadTestModel("material_pointers_test.gltf");
+        while(importer.IsCompleted == false)
+        {
+            yield return null;
+        }   
+
+        if(pointer.StartsWith("/materials") == false)
+        {
+            pointer = "/materials/{nodeIndex}/" + pointer;
+        }
+
+        var (g, n) = CreateMaterialPointerGetGraph(pointer, targetVal);
+
+        var eng = RunTestForGraph(g, importer.Result, false);
+
+        var p = eng.pointerResolver.GetPointer(pointer, eng.engineNodes[n]);
+        Debug.Assert(p != null);
+        Pointer<T> ptr = (Pointer<T>)p;
+        ptr.setter(targetVal);
+
+        eng.StartPlayback();
+    }
+
     [UnityTest]
     public IEnumerator TestPointerSetAlphaCutoff()
     {
@@ -87,6 +136,12 @@ public class PointerNodesTests : InteractivityTestsHelpers
     public IEnumerator TestPointerSetIridescence()
     {
         yield return TestPointerSet("extensions/KHR_materials_iridescence/iridescenceFactor", "float", 0.72f);
+    }
+
+    [UnityTest]
+    public IEnumerator TestPointerGetAlphaCutoff()
+    {
+        yield return TestPointerGet("alphaCutoff", 0.81f);
     }
 
     public IEnumerator TestPointerInterpolateFloat(string pointer, float targetValue)
