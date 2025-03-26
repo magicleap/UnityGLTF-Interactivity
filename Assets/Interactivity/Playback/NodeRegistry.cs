@@ -146,6 +146,7 @@ namespace UnityGLTF.Interactivity
             ["debug/log"] = new DebugLogSpec(),
             ["debug/assert"] = new DebugAssertSpec(),
             ["event/onStart"] = new EventOnStartSpecs(),
+            /**/["flow/branch"] = new FlowBranchSpecs(),
             ["pointer/interpolate"] = new PointerInterpolateSpecs(),
             ["pointer/set"] = new PointerSetSpecs(),
             ["pointer/get"] = new PointerGetSpecs(),
