@@ -30,7 +30,7 @@ namespace UnityGLTF.Interactivity
             {
                 new NodeValue(ConstStrings.A, _op1Description, new Type[]  { typeof(T), typeof(T1), typeof(T2), typeof(T3) }),
                 new NodeValue(ConstStrings.B, _op2Description, new Type[]  { typeof(T), typeof(T1), typeof(T2), typeof(T3) }),
-                new NodeValue(ConstStrings.C, _op2Description, new Type[]  { typeof(T), typeof(T1), typeof(T2), typeof(T3) }),
+                new NodeValue(ConstStrings.C, _op3Description, new Type[]  { typeof(T), typeof(T1), typeof(T2), typeof(T3) }),
             };
 
             return (null, values);
