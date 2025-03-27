@@ -27,7 +27,7 @@ namespace UnityGLTF.Interactivity
         public BehaviourEngine(Graph graph, GLTFSceneImporter importer)
         {
             this.graph = graph;
-            pointerResolver = new PointerResolver(importer);
+            pointerResolver = importer != null ? new PointerResolver(importer) : null;
 
             for (int i = 0; i < graph.nodes.Count; i++)
             {

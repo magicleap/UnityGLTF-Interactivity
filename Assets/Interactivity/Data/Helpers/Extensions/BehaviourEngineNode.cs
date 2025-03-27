@@ -82,6 +82,17 @@ namespace UnityGLTF.Interactivity
             return true;
         }
 
+        public bool TryEvaluateValueAsString(string valueId, out string value)
+        {
+            value = default;
+
+            if (!TryEvaluateValue(valueId, out IProperty property))
+                return false;
+
+            value = property.ToString();
+            return true;
+        }
+
         public bool TryGetVariableFromConfiguration(out Variable variable, out int index)
         {
             variable = null;
