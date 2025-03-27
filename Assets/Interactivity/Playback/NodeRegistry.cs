@@ -222,7 +222,7 @@ namespace UnityGLTF.Interactivity
             ["math/asin"] = new MathOneOperandSpec<float, float2, float3, float4>(),
             ["math/asinh"] = new MathOneOperandSpec<float, float2, float3, float4>(),
             ["math/atan"] = new MathOneOperandFloatSpec(),
-            ["math/atan2"] = new MathOneOperandFloatSpec(),
+            ["math/atan2"] = new MathTwoOperandsFloatSpec(),
             ["math/atanh"] = new MathOneOperandFloatSpec(),
             ["math/ceil"] = new MathOneOperandFloatSpec(),
             ["math/cosh"] = new MathOneOperandFloatSpec(),

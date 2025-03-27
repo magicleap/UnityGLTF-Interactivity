@@ -8,6 +8,25 @@ using UnityGLTF.Interactivity;
 public class MathNodesTests : InteractivityTestsHelpers
 {
     [Test]
+    public void TestAbs()
+    {
+        TestMathOpAllFloats1op("math/abs", math.abs(tv1));
+        TestMathOpInt1op("math/abs", (int)math.abs(tv1i));
+    }
+
+    [Test]
+    public void TestFloor()
+    {
+        TestMathOpAllFloats1op("math/floor", math.floor(tv1));
+    }
+
+    [Test]
+    public void TestCeil()
+    {
+        TestMathOpAllFloats1op("math/ceil", math.ceil(tv1));
+    }
+
+    [Test]
     public void TestAdd()
     {
         TestMathOpAllFloats2op("math/add", tv1 + tv2);
@@ -41,30 +60,6 @@ public class MathNodesTests : InteractivityTestsHelpers
     }
 
     [Test]
-    public void TestCeil()
-    {
-        TestMathOpAllFloats1op("math/ceil", math.ceil(tv1));
-    }
-
-    [Test]
-    public void TestFloor()
-    {
-        TestMathOpAllFloats1op("math/floor", math.floor(tv1));
-    }
-
-    [Test]
-    public void TestRad()
-    {
-        TestMathOpAllFloats1op("math/rad", math.radians(tv1));
-    }
-
-    [Test]
-    public void TestDeg()
-    {
-        TestMathOpAllFloats1op("math/deg", math.degrees(tv1));
-    }
-
-    [Test]
     public void TestEq()
     {
         TestOperationResultT("math/eq", tv1.x, tv2.x, false);
@@ -85,9 +80,57 @@ public class MathNodesTests : InteractivityTestsHelpers
     }
 
     [Test]
-    public void TestAbs()
+    public void TestTan()
     {
-        TestMathOpAllFloats1op("math/abs", math.abs(tv1));
-        TestMathOpInt1op("math/abs", (int)math.abs(tv1i));
+        TestMathOpAllFloats1op("math/tan", math.tan(tv1));
+        // TestOperationResult("math/tan", math.PI * 0.5f, math.INFINITY); // it fails because of PI not precise
+    }
+
+    [Test]
+    public void TestAsin()
+    {
+        TestMathOpAllFloats1op("math/asin", math.asin(tv1));
+
+        TestOperationResult("math/asin", 1000.0f, math.NAN);
+        TestOperationResult("math/asin", 1.0f, math.PI * 0.5f);
+    }
+
+    [Test]
+    public void TestAcos()
+    {
+        TestMathOpAllFloats1op("math/acos", math.acos(tv1));
+
+        TestOperationResult("math/acos", 1000.0f, math.NAN);
+        TestOperationResult("math/acos", 0.0f, math.PI * 0.5f);
+    }
+
+    [Test]
+    public void TestAtan()
+    {
+        TestMathOpAllFloats1op("math/atan", math.atan(tv1));
+
+        TestOperationResult("math/atan", 1.0f, math.PI / 4.0f);
+        TestOperationResult("math/atan", 0.0f, 0.0f);
+    }
+
+    [Test]
+    public void TestAtan2()
+    {
+        TestMathOpAllFloats2op("math/atan2", math.atan2(tv1, tv2));
+
+        TestOperationResult("math/atan2", 1.0f, 1.0f, math.PI / 4.0f);
+        TestOperationResult("math/atan2", 1.0f, 0.0f, math.PI / 2.0f);
+    }
+
+    [Test]
+    public void TestRad()
+    {
+        TestMathOpAllFloats1op("math/rad", math.radians(tv1));
+    }
+
+    [Test]
+    public void TestDeg()
+    {
+        TestMathOpAllFloats1op("math/deg", math.degrees(tv1));
     }
 }

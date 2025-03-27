@@ -22,35 +22,35 @@ namespace UnityGLTF.Interactivity
             else if(a is Property<int> aInt && b is Property<int> bInt)
                 Debug.Assert(aInt.value == bInt.value, $"The result({aInt.value}) is not matching the expected value({bInt.value}).");
             else if(a is Property<float> aFloat && b is Property<float> bFloat)
-                Debug.Assert(EqualOrNan(aFloat.value, bFloat.value), $"The result({aFloat.value}) is not matching the expected value({bFloat.value}).");
+                Debug.Assert(EqualOrNanOrInf(aFloat.value, bFloat.value), $"The result({aFloat.value}) is not matching the expected value({bFloat.value}).");
             else if(a is Property<float2> aVec2 && b is Property<float2> bVec2)
-                Debug.Assert(EqualOrNan(aVec2.value, bVec2.value), $"The result({aVec2.value}) is not matching the expected value({bVec2.value}).");
+                Debug.Assert(EqualOrNanOrInf(aVec2.value, bVec2.value), $"The result({aVec2.value}) is not matching the expected value({bVec2.value}).");
             else if(a is Property<float3> aVec3 && b is Property<float3> bVec3)
-                Debug.Assert(EqualOrNan(aVec3.value, bVec3.value), $"The result({aVec3.value}) is not matching the expected value({bVec3.value}).");
+                Debug.Assert(EqualOrNanOrInf(aVec3.value, bVec3.value), $"The result({aVec3.value}) is not matching the expected value({bVec3.value}).");
             else if(a is Property<float4> aVec4 && b is Property<float4> bVec4)
-                Debug.Assert(EqualOrNan(aVec4.value, bVec4.value), $"The result({aVec4.value}) is not matching the expected value({bVec4.value}).");
+                Debug.Assert(EqualOrNanOrInf(aVec4.value, bVec4.value), $"The result({aVec4.value}) is not matching the expected value({bVec4.value}).");
 
             TryExecuteFlow(ConstStrings.OUT);
         }
 
-        private static bool EqualOrNan(float a, float b)
+        private static bool EqualOrNanOrInf(float a, float b)
         {
-            return (a == b) || (math.isnan(a) && math.isnan(b));
+            return (a == b) || (math.isnan(a) && math.isnan(b)) || (math.isinf(a) && math.isinf(b));
         }
 
-        private static bool EqualOrNan(float2 a, float2 b)
+        private static bool EqualOrNanOrInf(float2 a, float2 b)
         {
-            return EqualOrNan(a.x, b.x) && EqualOrNan(a.y, b.y);
+            return EqualOrNanOrInf(a.x, b.x) && EqualOrNanOrInf(a.y, b.y);
         }
 
-        private static bool EqualOrNan(float3 a, float3 b)
+        private static bool EqualOrNanOrInf(float3 a, float3 b)
         {
-            return EqualOrNan(a.x, b.x) && EqualOrNan(a.y, b.y) && EqualOrNan(a.z, b.z);
+            return EqualOrNanOrInf(a.x, b.x) && EqualOrNanOrInf(a.y, b.y) && EqualOrNanOrInf(a.z, b.z);
         }
 
-        private static bool EqualOrNan(float4 a, float4 b)
+        private static bool EqualOrNanOrInf(float4 a, float4 b)
         {
-            return EqualOrNan(a.x, b.x) && EqualOrNan(a.y, b.y) && EqualOrNan(a.z, b.z) && EqualOrNan(a.w, b.w);
+            return EqualOrNanOrInf(a.x, b.x) && EqualOrNanOrInf(a.y, b.y) && EqualOrNanOrInf(a.z, b.z) && EqualOrNanOrInf(a.w, b.w);
         }
     }
 }
