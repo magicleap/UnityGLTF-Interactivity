@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityGLTF;
 using UnityGLTF.Interactivity;
@@ -55,6 +56,104 @@ public class InteractivityTestsHelpers
         );
 
         return importer;
+    }
+
+    protected void TestOperationResult<T, TRes>(string nodeStr, T[] values, TRes expectedResult)
+    {
+        Graph g = new Graph();
+        g.AddDefaultTypes();
+
+        var onStartNode = g.CreateNode("event/onStart", Vector2.zero);
+        var assertNode = g.CreateNode("debug/assert", Vector2.zero);
+        onStartNode.AddFlow(ConstStrings.OUT, assertNode, ConstStrings.IN);
+
+        var opNode = g.CreateNode(nodeStr, Vector2.zero);
+
+        Debug.Assert(values.Length <= ConstStrings.Letters.Length);
+        for(int i = 0; i < values.Length; i++)
+        {
+            opNode.AddValue(ConstStrings.Letters[i], values[i]);
+        }
+
+        assertNode.AddValue(ConstStrings.B, expectedResult);
+
+        if(assertNode.TryGetValueById(ConstStrings.A, out Value a))
+        {
+             a.TryConnectToSocket(opNode, ConstStrings.VALUE);
+        }
+
+        RunTestForGraph(g, null);
+    }
+
+    protected void TestOperationResult<T>(string nodeStr, T val1, T expectedResult)
+    {
+        TestOperationResult(nodeStr, new T[]{val1}, expectedResult);
+    }
+
+    protected void TestOperationResult<T>(string nodeStr, T val1, T val2, T expectedResult)
+    {
+        TestOperationResult(nodeStr, new T[]{val1, val2}, expectedResult);
+    }
+
+    protected void TestOperationResultT<T, TRes>(string nodeStr, T val1, TRes expectedResult)
+    {
+        TestOperationResult(nodeStr, new T[]{val1}, expectedResult);
+    }
+
+    protected void TestOperationResultT<T, TRes>(string nodeStr, T val1, T val2, TRes expectedResult)
+    {
+        TestOperationResult(nodeStr, new T[]{val1, val2}, expectedResult);
+    }
+
+    protected void TestOperationResult<T>(string nodeStr, T val1, T val2, T val3, T expectedResult)
+    {
+        TestOperationResult(nodeStr, new T[]{val1, val2, val3}, expectedResult);
+    }
+
+    protected float4 tv1 = new float4(34.0f, 41.0f, 30.0f, 70.0f);
+    protected float4 tv2 = new float4(30.0f, 40.0f, 50.0f, 60.0f);
+
+    protected float4 tv3 = new float4(92.0f, 43.0f, 59.0f, 90.0f);
+
+    protected int tv1i = 10;
+    protected int tv2i = 20;
+
+    protected bool tv1b = true;
+    protected bool tv2b = false;
+
+
+    protected void TestMathOpAllFloats1op(string opStr, float4 expectedResult)
+    {
+        TestOperationResult(opStr, tv1, expectedResult);
+        TestOperationResult(opStr, tv1.xyz, expectedResult.xyz);
+        TestOperationResult(opStr, tv1.xy, expectedResult.xy);
+        TestOperationResult(opStr, tv1.x, expectedResult.x);
+    }
+
+    protected void TestMathOpAllFloats2op(string opStr, float4 expectedResult)
+    {
+        TestOperationResult(opStr, tv1, tv2, expectedResult);
+        TestOperationResult(opStr, tv1.xyz, tv2.xyz, expectedResult.xyz);
+        TestOperationResult(opStr, tv1.xy, tv2.xy, expectedResult.xy);
+        TestOperationResult(opStr, tv1.x, tv2.x, expectedResult.x);
+    }
+
+    protected void TestMathOpAllFloats3op(string opStr, float4 expectedResult)
+    {
+        TestOperationResult(opStr, tv1, tv2, tv3, expectedResult);
+        TestOperationResult(opStr, tv1.xyz, tv2.xyz, tv3.xyz, expectedResult.xyz);
+        TestOperationResult(opStr, tv1.xy, tv2.xy, tv3.xy, expectedResult.xy);
+        TestOperationResult(opStr, tv1.x, tv2.x, tv3.x, expectedResult.x);
+    }
+
+    protected void TestMathOpInt1op(string opStr, int expectedResult)
+    {
+        TestOperationResult(opStr, tv1i, expectedResult);
+    }
+
+    protected void TestMathOpInt2op(string opStr, int expectedResult)
+    {
+        TestOperationResult(opStr, tv1i, tv2i, expectedResult);
     }
 
 }
