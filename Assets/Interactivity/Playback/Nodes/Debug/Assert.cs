@@ -17,7 +17,9 @@ namespace UnityGLTF.Interactivity
 
             Debug.Assert(a.GetSystemType() == b.GetSystemType(), $"The types don't match. Expected ({b.GetSystemType().ToString()}), got ({a.GetSystemType().ToString()})");
 
-            if(a is Property<int> aInt && b is Property<int> bInt)
+            if(a is Property<bool> aBool && b is Property<bool> bBool)
+                Debug.Assert(aBool.value == bBool.value, $"The result({aBool.value}) is not matching the expected value({bBool.value}).");
+            else if(a is Property<int> aInt && b is Property<int> bInt)
                 Debug.Assert(aInt.value == bInt.value, $"The result({aInt.value}) is not matching the expected value({bInt.value}).");
             else if(a is Property<float> aFloat && b is Property<float> bFloat)
                 Debug.Assert(aFloat.value == bFloat.value, $"The result({aFloat.value}) is not matching the expected value({bFloat.value}).");

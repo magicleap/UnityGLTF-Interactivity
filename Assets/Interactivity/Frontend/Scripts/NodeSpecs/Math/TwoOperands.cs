@@ -97,6 +97,32 @@ namespace UnityGLTF.Interactivity
         }
     }
 
+    public class MathTwoOperandsRetSpec<T, T1, T2, T3, T4, T5, TRes> : MathTwoOperandsSpecBase
+    {
+        public MathTwoOperandsRetSpec(string resultDescription = "Result", string op1Description = "Operand 1", string op2Description = "Operand 2") : base(resultDescription, op1Description, op2Description) {}
+
+        protected override (NodeFlow[] flows, NodeValue[] values) GenerateInputs()
+        {
+            var values = new NodeValue[]
+            {
+                new NodeValue(ConstStrings.A, _op1Description, new Type[]  { typeof(T), typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5) }),
+                new NodeValue(ConstStrings.B, _op2Description, new Type[]  { typeof(T), typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5) }),
+            };
+
+            return (null, values);
+        }
+
+        protected override (NodeFlow[] flows, NodeValue[] values) GenerateOutputs()
+        {
+            var values = new NodeValue[]
+            {
+                new NodeValue(ConstStrings.VALUE, _resultDescription, new Type[]  { typeof(TRes) }),
+            };
+
+            return (null, values);
+        }
+    }
+
     public class MathTwoOperandsSpec<T> : MathTwoOperandsSpecBase
     {
         public MathTwoOperandsSpec(string resultDescription = "Result", string op1Description = "Operand 1", string op2Description = "Operand 2") : base(resultDescription, op1Description, op2Description) {}

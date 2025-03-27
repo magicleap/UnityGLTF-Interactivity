@@ -168,7 +168,7 @@ namespace UnityGLTF.Interactivity
             /**/["math/deg"] = new MathOneOperandFloatSpec(),
             /**/["math/div"] = new MathTwoOperandsSpec(),
             /**/["math/e"] = new MathConstantSpec(),
-            /**/["math/eq"] = new MathTwoOperandsSpec<bool, int, float, float2, float3, float4>(),
+            /**/["math/eq"] = new MathTwoOperandsRetSpec<bool, int, float, float2, float3, float4, bool>(),
             /**/["math/extract2"] = new MathOneOperandRetSpec<float2, int, float>(),
             /**/["math/extract3"] = new MathOneOperandRetSpec<float3, int, float>(),
             /**/["math/extract4"] = new MathOneOperandRetSpec<float4, int, float>(),
