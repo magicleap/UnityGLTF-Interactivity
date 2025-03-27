@@ -8,6 +8,12 @@ using UnityGLTF.Interactivity;
 public class TypeNodesTests : InteractivityTestsHelpers
 {
     [Test]
+    public void TestIntToFloat()
+    {
+        TestOperationResultT("type/intToFloat", tv1i, (float)tv1i);
+    }
+
+    [Test]
     public void TestFloatToInt()
     {
         TestOperationResultT("type/floatToInt", tv1.x, (int)tv1.x);
