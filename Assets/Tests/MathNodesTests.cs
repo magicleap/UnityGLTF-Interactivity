@@ -8,6 +8,30 @@ using UnityGLTF.Interactivity;
 public class MathNodesTests : InteractivityTestsHelpers
 {
     [Test]
+    public void TestE()
+    {
+        TestOperationResult("math/e", math.E);
+    }
+
+    [Test]
+    public void TestPI()
+    {
+        TestOperationResult("math/pi", math.PI);
+    }
+
+    [Test]
+    public void TestInf()
+    {
+        TestOperationResult("math/inf", math.INFINITY);
+    }
+
+    [Test]
+    public void TestNAN()
+    {
+        TestOperationResult("math/nan", math.NAN);
+    }
+
+    [Test]
     public void TestAbs()
     {
         TestMathOpAllFloats1op("math/abs", math.abs(tv1));

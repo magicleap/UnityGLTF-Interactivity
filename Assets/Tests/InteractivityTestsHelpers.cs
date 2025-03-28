@@ -85,6 +85,11 @@ public class InteractivityTestsHelpers
         RunTestForGraph(g, null);
     }
 
+    protected void TestOperationResult<T>(string nodeStr, T expectedResult)
+    {
+        TestOperationResult(nodeStr, new T[]{}, expectedResult);
+    }
+
     protected void TestOperationResult<T, TRes>(string nodeStr, T val1, TRes expectedResult)
     {
         TestOperationResult(nodeStr, new T[]{val1}, expectedResult);
