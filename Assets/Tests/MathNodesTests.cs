@@ -118,6 +118,22 @@ public class MathNodesTests : InteractivityTestsHelpers
     }
 
     [Test]
+    public void TestSin()
+    {
+        TestMathOpAllFloats1op("math/sin", math.sin(tv1));
+        TestOperationResult("math/sin", 0.0f, 0.0f);
+        TestOperationResult("math/sin", (float)(math.PI / 2.0), 1.0f);
+    }
+
+    [Test]
+    public void TestCos()
+    {
+        TestMathOpAllFloats1op("math/cos", math.cos(tv1));
+        TestOperationResult("math/cos", 0.0f, 1.0f);
+        //TestOperationResult("math/cos", (float)(math.PI / 2.0), 0.0f); // fails because PI is not precise
+    }
+
+    [Test]
     public void TestTan()
     {
         TestMathOpAllFloats1op("math/tan", math.tan(tv1));
