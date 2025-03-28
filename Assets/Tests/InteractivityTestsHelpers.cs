@@ -85,27 +85,17 @@ public class InteractivityTestsHelpers
         RunTestForGraph(g, null);
     }
 
-    protected void TestOperationResult<T>(string nodeStr, T val1, T expectedResult)
+    protected void TestOperationResult<T, TRes>(string nodeStr, T val1, TRes expectedResult)
     {
         TestOperationResult(nodeStr, new T[]{val1}, expectedResult);
     }
 
-    protected void TestOperationResult<T>(string nodeStr, T val1, T val2, T expectedResult)
+    protected void TestOperationResult<T, TRes>(string nodeStr, T val1, T val2, TRes expectedResult)
     {
         TestOperationResult(nodeStr, new T[]{val1, val2}, expectedResult);
     }
 
-    protected void TestOperationResultT<T, TRes>(string nodeStr, T val1, TRes expectedResult)
-    {
-        TestOperationResult(nodeStr, new T[]{val1}, expectedResult);
-    }
-
-    protected void TestOperationResultT<T, TRes>(string nodeStr, T val1, T val2, TRes expectedResult)
-    {
-        TestOperationResult(nodeStr, new T[]{val1, val2}, expectedResult);
-    }
-
-    protected void TestOperationResult<T>(string nodeStr, T val1, T val2, T val3, T expectedResult)
+    protected void TestOperationResult<T, TRes>(string nodeStr, T val1, T val2, T val3, TRes expectedResult)
     {
         TestOperationResult(nodeStr, new T[]{val1, val2, val3}, expectedResult);
     }
