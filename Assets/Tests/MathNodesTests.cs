@@ -104,6 +104,20 @@ public class MathNodesTests : InteractivityTestsHelpers
     }
 
     [Test]
+    public void TestIsNan()
+    {
+        TestOperationResult("math/isnan", (float)math.acos(-2.0), true);
+        TestOperationResult("math/isnan", 10.0f, false);
+    }
+
+    [Test]
+    public void TestIsInf()
+    {
+        TestOperationResult("math/isinf", 10.0f / 0.0f, true);
+        TestOperationResult("math/isinf", 10.0f, false);
+    }
+
+    [Test]
     public void TestTan()
     {
         TestMathOpAllFloats1op("math/tan", math.tan(tv1));
