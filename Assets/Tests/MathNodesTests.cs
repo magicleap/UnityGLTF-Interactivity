@@ -344,6 +344,44 @@ public class MathNodesTests : InteractivityTestsHelpers
         TestOperationResult("math/tanh", -math.INFINITY, -1.0f);
     }
 
+    private float4 asinh(float4 x)
+    {
+        return math.log(x + math.sqrt(x * x + 1));
+    }
+
+    private float4 acosh(float4 x)
+    {
+        return math.log(x + math.sqrt(x * x - 1));
+    }
+
+    private float4 atanh(float4 x)
+    {
+        return 0.5f * math.log((1 + x) / (1 - x));
+    }
+
+    [Test]
+    public void TestASinH()
+    {
+        TestMathOpAllFloats1op("math/asinh", asinh(tv1));
+    }
+
+    [Test]
+    public void TestACosH()
+    {
+        float4 val = new float4(30.0f, 10.0f, 0.0f, 15.0f);
+        TestOperationResult("math/acosh", val, acosh(val));
+        TestOperationResult("math/acosh", 1.0f, 0.0f);
+    }
+
+    [Test]
+    public void TestATanH()
+    {
+        float4 val = new float4(30.0f, 0.3f, -0.2f, 15.0f);
+        TestMathOpAllFloats1op("math/atanh", atanh(tv1));
+        TestOperationResult("math/atanh", 1.0f, math.INFINITY);
+        TestOperationResult("math/atanh", -1.0f, -math.INFINITY);
+    }
+
     [Test]
     public void TestLength()
     {
