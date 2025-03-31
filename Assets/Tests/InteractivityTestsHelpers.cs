@@ -58,7 +58,7 @@ public class InteractivityTestsHelpers
         return importer;
     }
 
-    protected void TestOperationResult<T, TRes>(string nodeStr, T[] values, TRes expectedResult)
+    protected (Graph, Node) CreateOperationGraph<T, TRes>(string nodeStr, T[] values, TRes expectedResult)
     {
         Graph g = new Graph();
         g.AddDefaultTypes();
@@ -82,6 +82,19 @@ public class InteractivityTestsHelpers
              a.TryConnectToSocket(opNode, ConstStrings.VALUE);
         }
 
+        return (g, opNode);
+    }
+
+    protected void TestOperationResult<T, TRes>(string nodeStr, T[] values, TRes expectedResult)
+    {
+        var (g, n) = CreateOperationGraph(nodeStr, values, expectedResult);
+        RunTestForGraph(g, null);
+    }
+
+    protected void TestOperationResultWithCondition<T, TRes>(string nodeStr, T v1, T v2, bool condition, TRes expectedResult)
+    {
+        var (g, n) = CreateOperationGraph(nodeStr, new T[2] { v1, v2 }, expectedResult);
+        n.AddValue(ConstStrings.CONDITION, condition);
         RunTestForGraph(g, null);
     }
 

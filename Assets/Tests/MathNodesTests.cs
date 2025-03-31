@@ -252,6 +252,16 @@ public class MathNodesTests : InteractivityTestsHelpers
         TestOperationResult("math/isinf", 10.0f / 0.0f, true);
         TestOperationResult("math/isinf", 10.0f, false);
     }
+    
+    [Test]
+    public void TestSelect()
+    {
+        TestOperationResultWithCondition("math/select", 10.0f, 20.0f, true, 10.0f);
+        TestOperationResultWithCondition("math/select", 10.0f, 20.0f, false, 20.0f);
+
+        TestOperationResultWithCondition("math/select", "A",  "B", true, "A");
+        TestOperationResultWithCondition("math/select", "A",  "B", false, "B");
+    }
 
     [Test]
     public void TestSin()
@@ -310,6 +320,28 @@ public class MathNodesTests : InteractivityTestsHelpers
 
         TestOperationResult("math/atan2", 1.0f, 1.0f, math.PI / 4.0f);
         TestOperationResult("math/atan2", 1.0f, 0.0f, math.PI / 2.0f);
+    }
+
+    [Test]
+    public void TestSinH()
+    {
+        TestMathOpAllFloats1op("math/sinh", math.sinh(tv1));
+        TestOperationResult("math/sinh", 0.0f, 0.0f);
+    }
+
+    [Test]
+    public void TestCosH()
+    {
+        TestMathOpAllFloats1op("math/cosh", math.cosh(tv1));
+        TestOperationResult("math/cosh", 0.0f, 1.0f);
+    }
+
+    [Test]
+    public void TestTanH()
+    {
+        TestMathOpAllFloats1op("math/tanh", math.tanh(tv1));
+        TestOperationResult("math/tanh", math.INFINITY, 1.0f);
+        TestOperationResult("math/tanh", -math.INFINITY, -1.0f);
     }
 
     [Test]
