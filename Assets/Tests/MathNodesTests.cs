@@ -8,6 +8,42 @@ using UnityGLTF.Interactivity;
 public class MathNodesTests : InteractivityTestsHelpers
 {
     [Test]
+    public void TestAsr()
+    {
+        TestOperationResult("math/asr", 17, 1, 8);
+        TestOperationResult("math/asr", -19, 2, -5);
+    }
+
+    [Test]
+    public void TestLsl()
+    {
+        TestOperationResult("math/lsl", 25, 2, 100);
+        TestOperationResult("math/lsl", -23, 2, -92);
+    }
+
+    [Test]
+    public void TestClz()
+    {
+        TestOperationResult("math/clz", 32, 26);
+        TestOperationResult("math/clz", 1, 31);
+        TestOperationResult("math/clz", 0x0fff0000, 4);
+    }
+
+    [Test]
+    public void TestCtz()
+    {
+        TestOperationResult("math/ctz", 1, 0);
+        TestOperationResult("math/ctz", 16, 4);
+        TestOperationResult("math/ctz", 0x0f000000, 24);
+    }
+
+    [Test]
+    public void TestPopcnt()
+    {
+        TestOperationResult("math/popcnt", 0b0000001000100000, 2);
+    }
+
+    [Test]
     public void TestE()
     {
         TestOperationResult("math/e", math.E);
