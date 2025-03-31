@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 using UnityGLTF.Interactivity;
 
@@ -369,7 +370,7 @@ public class MathNodesTests : InteractivityTestsHelpers
     public void TestACosH()
     {
         float4 val = new float4(30.0f, 10.0f, 0.0f, 15.0f);
-        TestOperationResult("math/acosh", val, acosh(val));
+        TestOperationResultAllFloats("math/acosh", val, acosh(val));
         TestOperationResult("math/acosh", 1.0f, 0.0f);
     }
 
@@ -377,9 +378,66 @@ public class MathNodesTests : InteractivityTestsHelpers
     public void TestATanH()
     {
         float4 val = new float4(30.0f, 0.3f, -0.2f, 15.0f);
-        TestMathOpAllFloats1op("math/atanh", atanh(tv1));
+        TestOperationResultAllFloats("math/atanh", val, atanh(val));
         TestOperationResult("math/atanh", 1.0f, math.INFINITY);
         TestOperationResult("math/atanh", -1.0f, -math.INFINITY);
+    }
+
+    [Test]
+    public void TestExp()
+    {
+        TestMathOpAllFloats1op("math/exp", math.exp(tv1));
+    }
+
+    [Test]
+    public void TestLog()
+    {
+        float4 val = new float4(30.0f, 0.3f, -0.2f, 15.0f);
+        TestOperationResult("math/log", val, math.log(val));
+        TestOperationResult("math/log", -1.0f, math.NAN);
+        TestOperationResult("math/log", 0.0f, -math.INFINITY);
+        TestOperationResult("math/log", 1.0f, 0.0f);
+    }
+
+    [Test]
+    public void TestLog2()
+    {
+        float4 val = new float4(30.0f, 0.3f, -0.2f, 15.0f);
+        TestOperationResultAllFloats("math/log2", val, math.log2(val));
+        TestOperationResult("math/log2", -1.0f, math.NAN);
+        TestOperationResult("math/log2", 0.0f, -math.INFINITY);
+        TestOperationResult("math/log2", 1.0f, 0.0f);
+    }
+
+    [Test]
+    public void TestLog10()
+    {
+        float4 val = new float4(30.0f, 0.3f, -0.2f, 15.0f);
+        TestOperationResultAllFloats("math/log10", val, math.log10(val));
+        TestOperationResult("math/log10", -1.0f, math.NAN);
+        TestOperationResult("math/log10", 0.0f, -math.INFINITY);
+        TestOperationResult("math/log10", 1.0f, 0.0f);
+    }
+
+    [Test]
+    public void TestSqrt()
+    {
+        float4 val = new float4(30.0f, 0.3f, -0.2f, 15.0f);
+        TestOperationResultAllFloats("math/sqrt", val, math.sqrt(val));
+        TestOperationResult("math/sqrt", -1.0f, math.NAN);
+        TestOperationResult("math/sqrt", 0.0f, 0.0f);
+    }
+
+    [Test]
+    public void TestPow()
+    {
+        float4 val = new float4(30.0f, 0.3f, -0.2f, 15.0f);
+        float4 e = new float4(10.0f, 1.3f, -1.2f, 5.0f);
+
+        TestOperationResultAllFloats("math/pow", val, e, math.pow(val, e));
+        TestOperationResult("math/pow", -1.0f, 2.0f, 1.0f);
+        TestOperationResult("math/pow", 0.0f, 1000.0f, 0.0f);
+        TestOperationResult("math/pow", 1000.0f, 0.0f, 1.0f);
     }
 
     [Test]
