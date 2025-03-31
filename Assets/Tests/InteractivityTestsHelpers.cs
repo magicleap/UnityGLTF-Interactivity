@@ -117,28 +117,44 @@ public class InteractivityTestsHelpers
     protected bool tv2b = false;
 
 
+    protected void TestOperationResultAllFloats(string opStr, float4 v, float4 expectedResult)
+    {
+        TestOperationResult(opStr, v, expectedResult);
+        TestOperationResult(opStr, v.xyz, expectedResult.xyz);
+        TestOperationResult(opStr, v.xy, expectedResult.xy);
+        TestOperationResult(opStr, v.x, expectedResult.x);
+    }
+
+    protected void TestOperationResultAllFloats(string opStr, float4 v1, float4 v2, float4 expectedResult)
+    {
+        TestOperationResult(opStr, v1, v2, expectedResult);
+        TestOperationResult(opStr, v1.xyz, v2.xyz, expectedResult.xyz);
+        TestOperationResult(opStr, v1.xy, v2.xy, expectedResult.xy);
+        TestOperationResult(opStr, v1.x, v2.x, expectedResult.x);
+    }
+
+    protected void TestOperationResultAllFloats(string opStr, float4 v1, float4 v2, float4 v3, float4 expectedResult)
+    {
+        TestOperationResult(opStr, v1, v2, v3, expectedResult);
+        TestOperationResult(opStr, v1.xyz, v2.xyz, v3.xyz, expectedResult.xyz);
+        TestOperationResult(opStr, v1.xy, v2.xy, v3.xy, expectedResult.xy);
+        TestOperationResult(opStr, v1.x, v2.x, v3.x, expectedResult.x);
+    }
+
+
     protected void TestMathOpAllFloats1op(string opStr, float4 expectedResult)
     {
-        TestOperationResult(opStr, tv1, expectedResult);
-        TestOperationResult(opStr, tv1.xyz, expectedResult.xyz);
-        TestOperationResult(opStr, tv1.xy, expectedResult.xy);
-        TestOperationResult(opStr, tv1.x, expectedResult.x);
+        TestOperationResultAllFloats(opStr, tv1, expectedResult);
     }
 
     protected void TestMathOpAllFloats2op(string opStr, float4 expectedResult)
     {
-        TestOperationResult(opStr, tv1, tv2, expectedResult);
-        TestOperationResult(opStr, tv1.xyz, tv2.xyz, expectedResult.xyz);
-        TestOperationResult(opStr, tv1.xy, tv2.xy, expectedResult.xy);
-        TestOperationResult(opStr, tv1.x, tv2.x, expectedResult.x);
+        TestOperationResultAllFloats(opStr, tv1, tv2, expectedResult);
     }
 
     protected void TestMathOpAllFloats3op(string opStr, float4 expectedResult)
     {
-        TestOperationResult(opStr, tv1, tv2, tv3, expectedResult);
-        TestOperationResult(opStr, tv1.xyz, tv2.xyz, tv3.xyz, expectedResult.xyz);
-        TestOperationResult(opStr, tv1.xy, tv2.xy, tv3.xy, expectedResult.xy);
-        TestOperationResult(opStr, tv1.x, tv2.x, tv3.x, expectedResult.x);
+        TestOperationResultAllFloats(opStr, tv1, tv2, tv3, expectedResult);
     }
 
     protected void TestMathOpInt1op(string opStr, int expectedResult)

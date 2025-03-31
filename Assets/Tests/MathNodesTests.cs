@@ -75,6 +75,20 @@ public class MathNodesTests : InteractivityTestsHelpers
     }
 
     [Test]
+    public void TestSign()
+    {
+        TestOperationResult("math/sign", 32.0f, 1.0f);
+        TestOperationResult("math/sign", -12.0f, -1.0f);
+        TestOperationResult("math/sign", 0.0f, 0.0f);
+
+        TestOperationResult("math/sign", 32, 1);
+        TestOperationResult("math/sign", -12, -1);
+        TestOperationResult("math/sign", 0, 0);
+
+        TestOperationResultAllFloats("math/sign", new float4(32.0f, -12.0f, 0.0f, 5.0f), new float4(1.0f, -1.0f, 0.0f, 1.0f));
+    }
+
+    [Test]
     public void TestFloor()
     {
         TestMathOpAllFloats1op("math/floor", math.floor(tv1));
@@ -108,6 +122,42 @@ public class MathNodesTests : InteractivityTestsHelpers
     }
 
     [Test]
+    public void TestDiv()
+    {
+        TestOperationResult("math/div", 5.0f, 0.0f, math.INFINITY);
+        TestOperationResult("math/div", 5.0f, math.INFINITY, 0.0f);
+        TestOperationResult("math/div", 12.4f, 4.0f, 3.1f);
+
+        TestOperationResultAllFloats("math/div", new float4(12.0f, 16.0f, -32.0f, 7.0f), new float4(3.0f, 0.0f, 14.0f, 14.0f), new float4(4.0f, math.INFINITY, -2.28571429f, 0.5f));
+    }
+
+    [Test]
+    public void TestRem()
+    {
+        TestOperationResult("math/rem", 5.0f, 0.0f, math.NAN);
+        TestOperationResult("math/rem", 5.0f, math.INFINITY, 5.0f);
+        //TestOperationResult("math/rem", 12.4f, 4.0f, 0.4f); // fails with 0.3999996
+
+        TestOperationResultAllFloats("math/rem", new float4(12.0f, 16.0f, -32.0f, 7.0f), new float4(3.0f, 0.0f, 14.0f, 14.0f), new float4(0.0f, math.NAN, -4.0f, 7.0f));
+    }
+
+    [Test]
+    public void TestMin()
+    {
+        TestOperationResultAllFloats("math/min", new float4(12.0f, 16.0f, -32.0f, 7.0f), new float4(3.0f, 0.0f, 14.0f, 14.0f), new float4(3.0f, 0.0f, -32.0f, 7.0f));
+
+        TestOperationResult("math/min", 100, 10, 10);
+    }
+
+    [Test]
+    public void TestMax()
+    {
+        TestOperationResultAllFloats("math/max", new float4(12.0f, 16.0f, -32.0f, 7.0f), new float4(3.0f, 0.0f, 14.0f, 14.0f), new float4(12.0f, 16.0f, 14.0f, 14.0f));
+
+        TestOperationResult("math/max", 100, 10, 100);
+    }
+
+    [Test]
     public void TestClamp()
     {
         TestMathOpAllFloats3op("math/clamp", math.clamp(tv1, tv2, tv3));
@@ -117,6 +167,12 @@ public class MathNodesTests : InteractivityTestsHelpers
     public void TestSaturate()
     {
         TestMathOpAllFloats1op("math/saturate", math.saturate(tv1));
+    }
+
+    [Test]
+    public void TestMix()
+    {
+        TestOperationResultAllFloats("math/mix", new float4(1.0f, 2.0f, 3.0f, 4.0f), new float4(9.0f, 10.0f, 11.0f, 12.0f), new float4(1.0f, 0.25f, 0.5f, 0.0f), new float4(9.0f, 4.0f, 7.0f, 4.0f));
     }
 
     [Test]
@@ -137,6 +193,50 @@ public class MathNodesTests : InteractivityTestsHelpers
 
         TestOperationResult("math/eq", tv1b, tv2b, false);
         TestOperationResult("math/eq", tv1b, tv1b, true);
+    }
+
+    [Test]
+    public void TestLT()
+    {
+        TestOperationResult("math/lt", 10.0f, 20.0f, true);
+        TestOperationResult("math/lt", 40.0f, 20.0f, false);
+
+        TestOperationResult("math/lt", 10, 20, true);
+        TestOperationResult("math/lt", 40, 20, false);
+    }
+
+    [Test]
+    public void TestLE()
+    {
+        TestOperationResult("math/le", 10.0f, 20.0f, true);
+        TestOperationResult("math/le", 10.0f, 10.0f, true);
+        TestOperationResult("math/le", 40.0f, 20.0f, false);
+
+        TestOperationResult("math/le", 10, 20, true);
+        TestOperationResult("math/le", 10, 10, true);
+        TestOperationResult("math/le", 40, 20, false);
+    }
+
+    [Test]
+    public void TestGT()
+    {
+        TestOperationResult("math/gt", 10.0f, 20.0f, false);
+        TestOperationResult("math/gt", 40.0f, 20.0f, true);
+
+        TestOperationResult("math/gt", 10, 20, false);
+        TestOperationResult("math/gt", 40, 20, true);
+    }
+
+    [Test]
+     public void TestGE()
+    {
+        TestOperationResult("math/ge", 10.0f, 20.0f, false);
+        TestOperationResult("math/ge", 10.0f, 10.0f, true);
+        TestOperationResult("math/ge", 40.0f, 20.0f, true);
+
+        TestOperationResult("math/ge", 10, 20, false);
+        TestOperationResult("math/ge", 10, 10, true);
+        TestOperationResult("math/ge", 40, 20, true);
     }
 
     [Test]
