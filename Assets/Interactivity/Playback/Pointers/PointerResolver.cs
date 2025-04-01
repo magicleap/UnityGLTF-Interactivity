@@ -116,6 +116,7 @@ namespace UnityGLTF.Interactivity
                 var a when a.Is("activeCamera") => _activeCameraPointers.ProcessActiveCameraPointer(reader),
                 var a when a.Is("cameras") => CameraPointers.ProcessCameraPointer(reader, engineNode, _cameraPointers),
                 var a when a.Is("meshes") => MeshPointers.ProcessPointer(reader, engineNode, _meshPointers),
+                var a when a.Is("animations") => AnimationPointers.ProcessPointer(reader, engineNode, _animationPointers),
                 var a when a.Is(Pointers.ANIMATIONS_LENGTH) => _scenePointers.animationsLength,
                 var a when a.Is(Pointers.MATERIALS_LENGTH) => _scenePointers.materialsLength,
                 var a when a.Is(Pointers.MESHES_LENGTH) => _scenePointers.meshesLength,

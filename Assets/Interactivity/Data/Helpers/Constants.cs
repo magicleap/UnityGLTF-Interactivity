@@ -21,6 +21,11 @@ namespace UnityGLTF.Interactivity
         public const string SCALE = "scale";
         public const string MATRIX = "matrix";
         public const string GLOBAL_MATRIX = "globalMatrix";
+        public const string IS_PLAYING = "isPlaying";
+        public const string PLAYHEAD = "playhead";
+        public const string VIRTUAL_PLAYHEAD = "virtualPlayhead";
+        public const string MIN_TIME = "minTime";
+        public const string MAX_TIME = "maxTime";
 
     }
 

@@ -38,6 +38,7 @@ namespace UnityGLTF.Interactivity
 
             return pointer switch
             {
+                ReadOnlyPointer<bool> pBool => new Property<bool>(pBool.GetValue()),
                 ReadOnlyPointer<int> pInt => new Property<int>(pInt.GetValue()),
                 ReadOnlyPointer<float> pFloat => new Property<float>(pFloat.GetValue()),
                 ReadOnlyPointer<Color> pColor => new Property<float4>(pColor.GetValue().ToFloat4()),
@@ -48,6 +49,7 @@ namespace UnityGLTF.Interactivity
                 ReadOnlyPointer<float2x2> p => new Property<float2x2>(p.GetValue()),
                 ReadOnlyPointer<float3x3> p => new Property<float3x3>(p.GetValue()),
                 ReadOnlyPointer<float4x4> p => new Property<float4x4>(p.GetValue()),
+                Pointer<bool> pBool => new Property<bool>(pBool.GetValue()),
                 Pointer<int> pInt => new Property<int>(pInt.GetValue()),
                 Pointer<float> pFloat => new Property<float>(pFloat.GetValue()),
                 Pointer<Color> pColor => new Property<float4>(pColor.GetValue().ToFloat4()),
