@@ -157,7 +157,7 @@ namespace UnityGLTF.Interactivity
             // ["event/send"] = new EventSendSpec(),
             ["flow/branch"] = new FlowBranchSpec(),
             ["flow/for"] = new FlowForSpec(),
-            // ["flow/sequence"] = new FlowSequenceSpec(),
+            ["flow/sequence"] = new FlowSequenceSpec(),
             // ["flow/setDelay"] = new FlowSetDelaySpec(),
             // ["flow/switch"] = new FlowSwitchSpec(),
             ["pointer/interpolate"] = new PointerInterpolateSpecs(),

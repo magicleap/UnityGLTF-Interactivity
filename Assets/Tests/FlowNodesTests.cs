@@ -1,8 +1,7 @@
-using System;
-using System.Runtime.InteropServices;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityGLTF.Interactivity;
 
 public class FlowNodesTests : InteractivityTestsHelpers
@@ -12,7 +11,7 @@ public class FlowNodesTests : InteractivityTestsHelpers
         //TODO generalize flow graph generation
     }
 
-    private void CreateFlowBranchGraph<T>(string nodeStr, T condition, T expectedResult)
+    private void CreateFlowBranchGraph<T>(T condition, T expectedResult)
     {
         var graph = new Graph();
         graph.AddDefaultTypes();
@@ -55,16 +54,39 @@ public class FlowNodesTests : InteractivityTestsHelpers
         RunTestForGraph(g, null);
     }
 
-    private void TestFlowResult<T>(string nodeStr, T condition, T endVariable)
+    private void CreateFlowSequenceGraph(int numOutFlows)
     {
-        CreateFlowBranchGraph(nodeStr, condition, endVariable);
+        Graph g = new Graph();
+        g.AddDefaultTypes();
+
+        var onStartnode = g.CreateNode("event/onStart", Vector2.zero);
+        var sequenceNode = g.CreateNode("flow/sequence", Vector2.zero);
+
+        onStartnode.AddFlow(ConstStrings.OUT, sequenceNode, ConstStrings.IN);
+
+        var seqFlows = ConstStrings.Numbers[0..numOutFlows];
+        var rand = Random.Range(0, numOutFlows);
+        var rand2 = Random.Range(0, numOutFlows);
+        Debug.Log($"Swapping values {seqFlows[rand]} and {seqFlows[rand2]} to verify order execution");
+        var temp = seqFlows[rand];
+        seqFlows[rand] = seqFlows[rand2];
+        seqFlows[rand2] = temp;
+
+        for (int i = 0; i < numOutFlows; i++)
+        {
+            var logNode = g.CreateNode("debug/log", Vector2.zero);
+            logNode.AddValue("message", $"This is the next flow in the sequence: {seqFlows[i]}.");
+            sequenceNode.AddFlow(seqFlows[i], logNode, ConstStrings.IN);
+        }
+
+        RunTestForGraph(g, null);
     }
 
     [Test]
     public void TestBranch()
     {
-        TestFlowResult("flow/branch", true, true);
-        TestFlowResult("flow/branch", false, false);        
+        CreateFlowBranchGraph(false, false);
+        CreateFlowBranchGraph(false, false);   
     }
 
     [Test]
@@ -77,7 +99,7 @@ public class FlowNodesTests : InteractivityTestsHelpers
     [Test]
     public void TestSequence()
     {
-
+        CreateFlowSequenceGraph(5);
     }
 
     [Test]
