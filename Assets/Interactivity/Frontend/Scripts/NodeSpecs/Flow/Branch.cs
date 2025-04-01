@@ -1,7 +1,7 @@
 
 namespace UnityGLTF.Interactivity
 {
-    public class FlowBranchSpecs : NodeSpecifications
+    public class FlowBranchSpec : NodeSpecifications
     {
         protected override NodeConfiguration[] GenerateConfiguration()
         {
@@ -17,8 +17,8 @@ namespace UnityGLTF.Interactivity
         };
 
             var values = new NodeValue[]{
-            new NodeValue(ConstStrings.CONDITION, "Condition to evaluate.", new System.Type[] { typeof(bool) })
-        };
+                new NodeValue(ConstStrings.CONDITION, "Condition to evaluate.", new System.Type[] { typeof(bool) })
+            };
             return (flows, values);
         }
     }
