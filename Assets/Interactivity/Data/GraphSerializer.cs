@@ -27,14 +27,14 @@ namespace UnityGLTF.Interactivity
             };
         }
 
-        public string Serialize(KHR_interactivity extensionData)
+        public string Serialize(KHR_ExtensionGraph  extensionData)
         {
             return JsonConvert.SerializeObject(extensionData, _serializationSettings);
         }
 
-        public KHR_interactivity Deserialize(string json)
+        public KHR_ExtensionGraph Deserialize(string json)
         {
-            return JsonConvert.DeserializeObject<KHR_interactivity>(json, _deserializerSettings);
+            return JsonConvert.DeserializeObject<KHR_ExtensionGraph>(json, _deserializerSettings);
         }
     }
 }

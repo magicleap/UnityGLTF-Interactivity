@@ -8,7 +8,7 @@ namespace UnityGLTF.Interactivity
         public override string Description => "Exports KHR compliant interactivity graphs";
 
         private InteractivityExportContext _context;
-        public readonly KHR_interactivity extensionData;
+        public readonly KHR_ExtensionGraph extensionData;
 
         public override GLTFExportPluginContext CreateInstance(ExportContext context)
         {

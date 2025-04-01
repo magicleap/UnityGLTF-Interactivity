@@ -5,10 +5,53 @@ using System.Collections.Generic;
 
 namespace UnityGLTF.Interactivity
 {
-    public class KHR_interactivity
+    public class KHR_ExtensionGraph
     {
+        public enum GraphType
+        {
+            Interactivity,
+            Audio
+        }
         public List<Graph> graphs { get; set; } = new();
         public int defaultGraphIndex { get; set; }
+        public GraphType type { get; set; } = GraphType.Interactivity;
+    }
+
+    //public class KHR_audio_emitter
+    //{
+    //    public List<Graph> audioElementsGraphs { get; set; } = new();
+    //    public int defaultGraphIndex { get; set; }
+    //}
+
+    public class Audio
+    {
+        public string mimeType { get; set; }
+        public string bufferView { get; set; }
+        public string uri { get; set; }
+    }
+
+    public class AudioSource
+    {
+        public bool autoPlay { get; set; }
+        public float gain { get; set; }
+        public bool loop { get; set; }
+        public int audio { get; set; }
+        public string sourceName { get; set; }
+    }
+    
+    public class AudioEmitter
+    {
+        public string type { get; set; }
+        public List<int> sources { get; set; }
+        public float gain { get; set; }
+        public List<PositionAudioData> positional { get; set; }
+    }
+
+    public class PositionAudioData
+    {
+        public string distanceModel { get; set; }
+        public float minDistance { get; set; }
+        public float maxDistance { get; set; }
     }
 
     public class Declaration

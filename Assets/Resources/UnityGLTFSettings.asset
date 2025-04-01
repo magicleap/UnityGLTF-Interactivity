@@ -86,6 +86,19 @@ MonoBehaviour:
   m_Name: InteractivityExportPlugin
   m_EditorClassIdentifier: 
   enabled: 1
+--- !u!114 &-4261499892105432513
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d56f8c39d2fc834bbe88bc7574224fe, type: 3}
+  m_Name: AudioImportPlugin
+  m_EditorClassIdentifier: 
+  enabled: 1
 --- !u!114 &-3261833791508814286
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -162,6 +175,7 @@ MonoBehaviour:
   - {fileID: 3122544092073780371}
   - {fileID: 957924265715074157}
   - {fileID: -6593965159030080651}
+  - {fileID: -4261499892105432513}
   ExportPlugins:
   - {fileID: -8985567922445209820}
   - {fileID: 1419762970772820027}

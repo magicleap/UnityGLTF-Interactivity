@@ -5,15 +5,15 @@ using UnityEngine;
 
 namespace UnityGLTF.Interactivity
 {
-    public class InteractivityGraphExtension : IExtension
+    public class AudioGraphExtension : IExtension
     {
-        public const string EXTENSION_NAME = "KHR_interactivity";
+        public const string EXTENSION_NAME = "KHR_audio_emitter";
 
         public KHR_ExtensionGraph extensionData { get; private set; }
 
         private readonly GraphSerializer _serializer = new();
 
-        public InteractivityGraphExtension(KHR_ExtensionGraph extensionData = null)
+        public AudioGraphExtension(KHR_ExtensionGraph extensionData = null)
         {
             this.extensionData = extensionData;
         }

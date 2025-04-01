@@ -7,7 +7,7 @@ namespace UnityGLTF.Interactivity
 {
     public class BehaviourEngine
     {
-        public readonly Graph graph;
+        public readonly List<Graph> graph;
         public readonly Dictionary<Node, BehaviourEngineNode> engineNodes = new();
         public AnimationWrapper animationWrapper { get; private set; }
         public readonly PointerInterpolationManager pointerInterpolationManager = new();
@@ -24,14 +24,18 @@ namespace UnityGLTF.Interactivity
 
         public readonly PointerResolver pointerResolver;
 
-        public BehaviourEngine(Graph graph, GLTFSceneImporter importer)
+        public BehaviourEngine(List<Graph> graph, GLTFSceneImporter importer)
         {
             this.graph = graph;
             pointerResolver = new PointerResolver(importer);
-
-            for (int i = 0; i < graph.nodes.Count; i++)
+            
+            for (int i = 0; i < graph[0].nodes.Count; i++)
             {
-                engineNodes.Add(graph.nodes[i], NodeRegistry.CreateBehaviourEngineNode(this, graph.nodes[i]));
+                engineNodes.Add(graph[0].nodes[i], NodeRegistry.CreateBehaviourEngineNode(this, graph[0].nodes[i]));
+            }
+            // has other interactivity graphs such as an audio emitter extension.
+            if (graph.Count > 1)
+            {
             }
         }
 
@@ -75,7 +79,7 @@ namespace UnityGLTF.Interactivity
 
         public void FireCustomEvent(int eventIndex, Dictionary<string, IProperty> outValues = null)
         {
-            if (eventIndex < 0 || eventIndex >= graph.customEvents.Count)
+            if (eventIndex < 0 || eventIndex >= graph[0].customEvents.Count)
                 return; // TODO: Add error handling.
 
             onCustomEventFired?.Invoke(eventIndex, outValues);
@@ -92,7 +96,7 @@ namespace UnityGLTF.Interactivity
 
         public IProperty GetVariableProperty(int variableIndex)
         {
-            return graph.variables[variableIndex].property;
+            return graph[0].variables[variableIndex].property;
         }
 
         public bool TryGetPointer(string pointerString, BehaviourEngineNode engineNode, out IPointer pointer)

@@ -41,7 +41,7 @@ namespace UnityGLTF.Interactivity
 
         private void AddDefaultValues()
         {
-            var eventData = engine.graph.customEvents[_eventToListenFor];
+            var eventData = engine.graph[0].customEvents[_eventToListenFor];
 
             EventValue value;
 
@@ -49,7 +49,7 @@ namespace UnityGLTF.Interactivity
             {
                 value = eventData.values[i];
 
-                _outValues.Add(value.id, engine.graph.GetDefaultPropertyForType(value.type));
+                _outValues.Add(value.id, engine.graph[0].GetDefaultPropertyForType(value.type));
             }
         }
     }

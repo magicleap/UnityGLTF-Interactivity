@@ -49,7 +49,7 @@ namespace UnityGLTF.Interactivity
                 return;
 
             exporter.DeclareExtensionUsage(InteractivityGraphExtension.EXTENSION_NAME, true);
-            gltfRoot.AddExtension(InteractivityGraphExtension.EXTENSION_NAME, new InteractivityGraphExtension(wrapper.extensionData));
+            gltfRoot.AddExtension(InteractivityGraphExtension.EXTENSION_NAME, new InteractivityGraphExtension(wrapper.extensionData[0]));
         }
         public override void AfterTextureExport(GLTFSceneExporter exporter, GLTFSceneExporter.UniqueTexture texture, int index, GLTFTexture tex)
         {

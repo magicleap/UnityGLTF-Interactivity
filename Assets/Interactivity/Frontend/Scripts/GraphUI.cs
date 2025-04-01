@@ -38,7 +38,7 @@ namespace UnityGLTF.Interactivity.Frontend
             loader.onExtensionLoadComplete += OnGraphLoaded;
         }
 
-        private void OnGraphLoaded(KHR_interactivity extensionData)
+        private void OnGraphLoaded(KHR_ExtensionGraph extensionData)
         {
             // TODO: Support multiple graphs
             this.graph = extensionData.graphs[0];

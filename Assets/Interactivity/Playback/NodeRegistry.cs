@@ -20,6 +20,10 @@ namespace UnityGLTF.Interactivity
 
         private static readonly Dictionary<string, Func<BehaviourEngine, Node, BehaviourEngineNode>> nodeTypes = new()
         {
+            ["audio/start"] = (engine, node) => new AudioStart(engine, node),
+            ["audio/stop"] = (engine, node) => new AudioStop(engine, node),
+            ["audio/pause"] = (engine, node) => new AudioPause(engine, node),
+            ["audio/unpause"] = (engine, node) => new AudioUnPause(engine, node),
             ["animation/start"] = (engine, node) => new AnimationStart(engine, node),
             ["animation/stop"] = (engine, node) => new AnimationStop(engine, node),
             ["animation/stopAt"] = (engine, node) => new AnimationStopAt(engine, node),
