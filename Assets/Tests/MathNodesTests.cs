@@ -472,6 +472,43 @@ public class MathNodesTests : InteractivityTestsHelpers
     }
 
     [Test]
+    public void TestCombine2()
+    {
+        TestOperationResult("math/combine2", 1.0f, 2.0f, new float2(1.0f, 2.0f));
+    }
+
+    [Test]
+    public void TestCombine3()
+    {
+        TestOperationResult("math/combine3", 1.0f, 2.0f, 3.0f, new float3(1.0f, 2.0f, 3.0f));
+    }
+
+    [Test]
+    public void TestCombine4()
+    {
+        TestOperationResult("math/combine4", 1.0f, 2.0f, 3.0f, 4.0f, new float4(1.0f, 2.0f, 3.0f, 4.0f));
+    }
+
+    [Test]
+    public void TestCombine2x2()
+    {
+        TestOperationResult("math/combine2x2", new float[] {1.0f, 2.0f, 3.0f, 4.0f}, new float2x2(1.0f, 2.0f, 3.0f, 4.0f));
+    }
+
+    [Test]
+    public void TestCombine3x3()
+    {
+        TestOperationResult("math/combine3x3", new float[] {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f}, new float3x3(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f));
+    }
+
+    [Test]
+    public void TestCombine4x4()
+    {
+        TestOperationResult("math/combine4x4", new float[] {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f}, new float4x4(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f));
+    }
+
+
+    [Test]
     public void TestRad()
     {
         TestMathOpAllFloats1op("math/rad", math.radians(tv1));

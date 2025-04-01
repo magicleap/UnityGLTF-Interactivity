@@ -118,10 +118,17 @@ public class InteractivityTestsHelpers
         TestOperationResult(nodeStr, new T[]{val1, val2, val3}, expectedResult);
     }
 
+    protected void TestOperationResult<T, TRes>(string nodeStr, T val1, T val2, T val3, T val4, TRes expectedResult)
+    {
+        TestOperationResult(nodeStr, new T[]{val1, val2, val3, val4}, expectedResult);
+    }
+
     protected float4 tv1 = new float4(34.0f, 41.0f, 30.0f, 70.0f);
     protected float4 tv2 = new float4(30.0f, 40.0f, 50.0f, 60.0f);
 
     protected float4 tv3 = new float4(92.0f, 43.0f, 59.0f, 90.0f);
+
+    protected float4 tv4 = new float4(130.0f, 140.0f, 150.0f, 160.0f);
 
     protected int tv1i = 10;
     protected int tv2i = 20;
