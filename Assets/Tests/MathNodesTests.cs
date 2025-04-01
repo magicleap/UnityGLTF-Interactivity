@@ -507,6 +507,35 @@ public class MathNodesTests : InteractivityTestsHelpers
         TestOperationResult("math/combine4x4", new float[] {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f}, new float4x4(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f));
     }
 
+    [Test]
+    public void TestAnd()
+    {
+        TestOperationResult("math/and", true, false, false);
+        TestOperationResult("math/and", false, false, false);
+        TestOperationResult("math/and", true, true, true);
+
+        TestOperationResult("math/and", 3, 8, 3 & 8);
+    }
+
+    [Test]
+    public void TestOr()
+    {
+        TestOperationResult("math/or", true, false, true);
+        TestOperationResult("math/or", false, false, false);
+        TestOperationResult("math/or", true, true, true);
+
+        TestOperationResult("math/or", 3, 8, 3 | 8);
+    }
+
+    [Test]
+    public void TestXor()
+    {
+        TestOperationResult("math/xor", true, false, true);
+        TestOperationResult("math/xor", false, false, false);
+        TestOperationResult("math/xor", true, true, false);
+
+        TestOperationResult("math/xor", 3, 8, 3 ^ 8);
+    }
 
     [Test]
     public void TestRad()
