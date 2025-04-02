@@ -82,7 +82,7 @@ namespace UnityGLTF.Interactivity
 
         public void StartInterpolation(ref VariableInterpolateData data)
         {
-            _interpolationsInProgress.Remove(data.variable); // Stop any in-progress interpolations for this pointer.
+            _interpolationsInProgress.Remove(data.variable); // Stop any in-progress interpolations for this variable.
 
             var interpolator = GetInterpolator(data);
 
@@ -91,6 +91,11 @@ namespace UnityGLTF.Interactivity
             _interpolationsInProgress.Add(data.variable, data);
 
             Util.Log($"Starting Variable Interpolation: Start Time {data.startTime}, Duration: {data.duration}");
+        }
+
+        public bool StopInterpolation(Variable variable)
+        {
+            return _interpolationsInProgress.Remove(variable);
         }
 
         private IInterpolator GetInterpolator(in VariableInterpolateData data)

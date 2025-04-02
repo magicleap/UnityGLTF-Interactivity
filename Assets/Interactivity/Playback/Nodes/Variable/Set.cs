@@ -20,6 +20,8 @@ namespace UnityGLTF.Interactivity
 
             Util.Log($"Setting {_graphVariable.id} to {_newValue.ToString()}");
 
+            engine.variableInterpolationManager.StopInterpolation(_graphVariable);
+
             _graphVariable.property = _newValue;
 
             TryExecuteFlow(ConstStrings.OUT);

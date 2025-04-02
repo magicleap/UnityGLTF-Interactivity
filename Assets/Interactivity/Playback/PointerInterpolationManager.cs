@@ -108,6 +108,11 @@ namespace UnityGLTF.Interactivity
             Util.Log($"Starting Interpolation: Start Time {data.startTime}, Duration: {data.duration}");
         }
 
+        public bool StopInterpolation(IPointer pointer)
+        {
+            return _interpolationsInProgress.Remove(pointer); // Stop any in-progress interpolations for this pointer.
+        }
+
         private IInterpolator Processfloat3(Property<float3> property, PointerInterpolateData data)
         {
             return data.pointer switch

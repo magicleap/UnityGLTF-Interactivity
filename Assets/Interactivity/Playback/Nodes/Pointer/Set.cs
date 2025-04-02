@@ -23,6 +23,8 @@ namespace UnityGLTF.Interactivity
                 return;
             }
 
+            engine.pointerInterpolationManager.StopInterpolation(_pointer);
+
             switch (_property)
             {
                 case Property<int> prop when _pointer is Pointer<int> p:
@@ -40,9 +42,6 @@ namespace UnityGLTF.Interactivity
                 case Property<float3> prop when _pointer is Pointer<Color> p:
                     p.setter(prop.value.ToColor());
                     break;
-                //case Property<float3> prop when _pointer is Pointer<quaternion> p:
-                //    p.setter(quaternion.Euler(prop.value));
-                //    break;
                 case Property<float4> prop when _pointer is Pointer<float4> p:
                     p.setter(prop.value);
                     break;
