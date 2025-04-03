@@ -137,7 +137,11 @@ public class MathNodesTests : InteractivityTestsHelpers
     {
         TestOperationResult("math/rem", 5.0f, 0.0f, math.NAN);
         TestOperationResult("math/rem", 5.0f, math.INFINITY, 5.0f);
-        //TestOperationResult("math/rem", 12.4f, 4.0f, 0.4f); // fails with 0.3999996
+
+        using(new StdThresholdCompare(this))
+        {
+            TestOperationResult("math/rem", 12.4f, 4.0f, 0.4f);
+        }
 
         TestOperationResultAllFloats("math/rem", new float4(12.0f, 16.0f, -32.0f, 7.0f), new float4(3.0f, 0.0f, 14.0f, 14.0f), new float4(0.0f, math.NAN, -4.0f, 7.0f));
     }
@@ -277,7 +281,11 @@ public class MathNodesTests : InteractivityTestsHelpers
     {
         TestMathOpAllFloats1op("math/cos", math.cos(tv1));
         TestOperationResult("math/cos", 0.0f, 1.0f);
-        //TestOperationResult("math/cos", (float)(math.PI / 2.0), 0.0f); // fails because PI is not precise
+
+        using(new StdThresholdCompare(this))
+        {
+            TestOperationResult("math/cos", (float)(math.PI / 2.0), 0.0f);
+        }
     }
 
     [Test]
@@ -535,6 +543,27 @@ public class MathNodesTests : InteractivityTestsHelpers
         TestOperationResult("math/xor", true, true, false);
 
         TestOperationResult("math/xor", 3, 8, 3 ^ 8);
+    }
+
+    [Test]
+    public void TestRotate3d()
+    {
+        using(new StdThresholdCompare(this))
+        {
+            TestOperationResult("math/rotate3d", (n)=>
+            {
+                n.AddValue(ConstStrings.A, new float3(0.0f, 0.0f, -1.0f));
+                n.AddValue(ConstStrings.B, new float3(0.0f, 1.0f, 0.0f));
+                n.AddValue(ConstStrings.C, math.PI * 0.5f);
+            }, new float3(-1.0f, 0.0f, 0.0f));
+
+            TestOperationResult("math/rotate3d", (n)=>
+            {
+                n.AddValue(ConstStrings.A, new float3(1.0f, 0.0f, 0.0f));
+                n.AddValue(ConstStrings.B, new float3(0.0f, 1.0f, 0.0f));
+                n.AddValue(ConstStrings.C, math.PI);
+            }, new float3(-1.0f, 0.0f, 0.0f));
+        }
     }
 
     [Test]

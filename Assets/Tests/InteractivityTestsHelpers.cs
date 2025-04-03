@@ -11,6 +11,38 @@ using UnityGLTF.Loader;
 
 public class InteractivityTestsHelpers
 {
+    protected float4 tv1 = new float4(34.0f, 41.0f, 30.0f, 70.0f);
+    protected float4 tv2 = new float4(30.0f, 40.0f, 50.0f, 60.0f);
+
+    protected float4 tv3 = new float4(92.0f, 43.0f, 59.0f, 90.0f);
+
+    protected float4 tv4 = new float4(130.0f, 140.0f, 150.0f, 160.0f);
+
+    protected int tv1i = 10;
+    protected int tv2i = 20;
+
+    protected bool tv1b = true;
+    protected bool tv2b = false;
+
+    private const float _stdFloatThreshold = 0.00001f;
+
+    private float _compareThreshold = 0.0f;
+
+    protected class StdThresholdCompare : IDisposable
+    {
+        private InteractivityTestsHelpers _helper;
+        public StdThresholdCompare(InteractivityTestsHelpers h)
+        {
+            _helper = h;
+            _helper._compareThreshold = _stdFloatThreshold;
+        }
+
+        public void Dispose()
+        {
+            _helper._compareThreshold = 0.0f;
+        }
+    }
+
     protected BehaviourEngine RunTestForGraph(Graph g, GLTFSceneImporter importer, bool startPlayback = true)
     {
         BehaviourEngine eng = new BehaviourEngine(g, importer);
@@ -77,6 +109,8 @@ public class InteractivityTestsHelpers
 
         assertNode.AddValue(ConstStrings.B, expectedResult);
 
+        assertNode.AddValue(ConstStrings.C, _compareThreshold);
+
         if(assertNode.TryGetValueById(ConstStrings.A, out Value a))
         {
              a.TryConnectToSocket(opNode, ConstStrings.VALUE);
@@ -95,6 +129,13 @@ public class InteractivityTestsHelpers
     {
         var (g, n) = CreateOperationGraph(nodeStr, new T[2] { v1, v2 }, expectedResult);
         n.AddValue(ConstStrings.CONDITION, condition);
+        RunTestForGraph(g, null);
+    }
+
+    protected void TestOperationResult<T>(string nodeStr, Action<Node> addValues, T expectedResult)
+    {
+        var (g, n) = CreateOperationGraph(nodeStr, new T[] {}, expectedResult);
+        addValues?.Invoke(n);
         RunTestForGraph(g, null);
     }
 
@@ -122,20 +163,6 @@ public class InteractivityTestsHelpers
     {
         TestOperationResult(nodeStr, new T[]{val1, val2, val3, val4}, expectedResult);
     }
-
-    protected float4 tv1 = new float4(34.0f, 41.0f, 30.0f, 70.0f);
-    protected float4 tv2 = new float4(30.0f, 40.0f, 50.0f, 60.0f);
-
-    protected float4 tv3 = new float4(92.0f, 43.0f, 59.0f, 90.0f);
-
-    protected float4 tv4 = new float4(130.0f, 140.0f, 150.0f, 160.0f);
-
-    protected int tv1i = 10;
-    protected int tv2i = 20;
-
-    protected bool tv1b = true;
-    protected bool tv2b = false;
-
 
     protected void TestOperationResultAllFloats(string opStr, float4 v, float4 expectedResult)
     {

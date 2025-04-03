@@ -6,6 +6,7 @@ namespace UnityGLTF.Interactivity
 {
     public class DebugAssert : BehaviourEngineNode
     {
+        private float _threshold = 0.0f;
         public DebugAssert(BehaviourEngine engine, Node node) : base(engine, node)
         {
         }
@@ -14,6 +15,15 @@ namespace UnityGLTF.Interactivity
         {
             TryEvaluateValue(ConstStrings.A, out IProperty a);
             TryEvaluateValue(ConstStrings.B, out IProperty b);
+
+            if(TryEvaluateValue(ConstStrings.C, out IProperty c))
+            {
+                _threshold = ((Property<float>)c).value;
+            }
+            else
+            {
+                _threshold = 0.0f;
+            }
 
             Debug.Assert(a.GetSystemType() == b.GetSystemType(), $"The types don't match. Expected ({b.GetSystemType().ToString()}), got ({a.GetSystemType().ToString()})");
 
@@ -33,22 +43,22 @@ namespace UnityGLTF.Interactivity
             TryExecuteFlow(ConstStrings.OUT);
         }
 
-        private static bool EqualOrNanOrInf(float a, float b)
+        private bool EqualOrNanOrInf(float a, float b)
         {
-            return (a == b) || (math.isnan(a) && math.isnan(b)) || (math.isinf(a) && math.isinf(b));
+            return (math.abs(a - b) <= _threshold) || (math.isnan(a) && math.isnan(b)) || (math.isinf(a) && math.isinf(b));
         }
 
-        private static bool EqualOrNanOrInf(float2 a, float2 b)
+        private bool EqualOrNanOrInf(float2 a, float2 b)
         {
             return EqualOrNanOrInf(a.x, b.x) && EqualOrNanOrInf(a.y, b.y);
         }
 
-        private static bool EqualOrNanOrInf(float3 a, float3 b)
+        private bool EqualOrNanOrInf(float3 a, float3 b)
         {
             return EqualOrNanOrInf(a.x, b.x) && EqualOrNanOrInf(a.y, b.y) && EqualOrNanOrInf(a.z, b.z);
         }
 
-        private static bool EqualOrNanOrInf(float4 a, float4 b)
+        private bool EqualOrNanOrInf(float4 a, float4 b)
         {
             return EqualOrNanOrInf(a.x, b.x) && EqualOrNanOrInf(a.y, b.y) && EqualOrNanOrInf(a.z, b.z) && EqualOrNanOrInf(a.w, b.w);
         }
