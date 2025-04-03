@@ -567,6 +567,27 @@ public class MathNodesTests : InteractivityTestsHelpers
     }
 
     [Test]
+    public void TestTrunc()
+    {
+        TestOperationResultAllFloats("math/trunc", new float4(15.4f, -10.1f, 12.39f, -32.33f), new float4(15.0f, -10.0f, 12.0f, -32.0f));
+    }
+
+    [Test]
+    public void TestFract()
+    {
+        using(new StdThresholdCompare(this))
+        {
+            TestOperationResultAllFloats("math/fract", new float4(15.4f, -10.1f, 12.39f, -32.33f), new float4(0.4f, 0.9f, 0.39f, 0.67f));
+        }
+    }
+
+    [Test]
+    public void TestNeg()
+    {
+        TestOperationResultAllFloats("math/neg", new float4(15.4f, -10.1f, 12.39f, -32.33f), new float4(-15.4f, 10.1f, -12.39f, 32.33f));
+    }
+
+    [Test]
     public void TestRad()
     {
         TestMathOpAllFloats1op("math/rad", math.radians(tv1));
