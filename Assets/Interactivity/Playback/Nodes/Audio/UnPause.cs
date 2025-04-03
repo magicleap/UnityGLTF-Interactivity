@@ -5,7 +5,7 @@ namespace UnityGLTF.Interactivity
 {
     public class AudioUnPause : BehaviourEngineNode
     {
-        private int _audioIndex;
+        private int _audioSourceIdx;
         private float _speed;
         private float _startTime;
         private float _endTime;
@@ -22,22 +22,22 @@ namespace UnityGLTF.Interactivity
                 return;
             }
 
-            Util.Log($"Playing animation index {_audioIndex} with speed {_speed} and start/end times of {_startTime}/{_endTime}");
+            Util.Log($"Playing animation index {_audioSourceIdx} with speed {_speed} and start/end times of {_startTime}/{_endTime}");
 
             TryExecuteFlow(ConstStrings.OUT);
 
-            //var data = new AnimationPlayData()
-            //{
-            //    index = _animationIndex,
-            //    startTime = _startTime,
-            //    endTime = _endTime,
-            //    stopTime = _endTime,
-            //    speed = _speed,
-            //    unityStartTime = Time.time,
-            //    endDone = () => TryExecuteFlow(ConstStrings.DONE)
-            //};
+            var data = new AudioPlayData()
+            {
+                index = _audioSourceIdx,
+                //                endDone = () => TryExecuteFlow(ConstStrings.DONE)
+            };
 
-            //engine.PlayAnimation(data);
+            engine.UnPauseAudio(data);
+        }
+
+        public override bool ValidateValues(string socket)
+        {
+            return TryEvaluateValue(ConstStrings.AUDIO_SOURCE_INDEX, out _audioSourceIdx);
         }
 
         //public override bool ValidateValues(string socket)
@@ -51,36 +51,36 @@ namespace UnityGLTF.Interactivity
         //        ValidateSpeed(_speed);
         //}
 
-        //private static bool ValidateSpeed(float speed)
-        //{
-        //    return speed > 0 && speed != float.NaN && speed != float.PositiveInfinity;
-        //}
+            //private static bool ValidateSpeed(float speed)
+            //{
+            //    return speed > 0 && speed != float.NaN && speed != float.PositiveInfinity;
+            //}
 
-        //private bool ValidateAnimationIndex(int animationIndex)
-        //{
-        //    if (!TryGetReadOnlyPointer($"/{Pointers.ANIMATIONS_LENGTH}", out ReadOnlyPointer<int> animPointer))
-        //        return false;
+            //private bool ValidateAnimationIndex(int animationIndex)
+            //{
+            //    if (!TryGetReadOnlyPointer($"/{Pointers.ANIMATIONS_LENGTH}", out ReadOnlyPointer<int> animPointer))
+            //        return false;
 
-        //    var animationCount = animPointer.GetValue();
+            //    var animationCount = animPointer.GetValue();
 
-        //    if (animationIndex < 0 || animationIndex >= animationCount)
-        //        return false;
+            //    if (animationIndex < 0 || animationIndex >= animationCount)
+            //        return false;
 
-        //    return true;
-        //}
+            //    return true;
+            //}
 
-        //private static bool ValidateStartAndEndTimes(float startTime, float endTime)
-        //{
-        //    if (startTime == float.NaN || endTime == float.NaN)
-        //        return false;
+            //private static bool ValidateStartAndEndTimes(float startTime, float endTime)
+            //{
+            //    if (startTime == float.NaN || endTime == float.NaN)
+            //        return false;
 
-        //    if (startTime == float.PositiveInfinity || startTime < 0)
-        //        return false;
+            //    if (startTime == float.PositiveInfinity || startTime < 0)
+            //        return false;
 
-        //    if (startTime > endTime)
-        //        return false;
+            //    if (startTime > endTime)
+            //        return false;
 
-        //    return true;
-        //}
-    }
+            //    return true;
+            //}
+        }
 }

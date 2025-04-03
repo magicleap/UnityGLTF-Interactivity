@@ -5,11 +5,7 @@ namespace UnityGLTF.Interactivity
 {
     public class AudioPause : BehaviourEngineNode
     {
-        private int _audioIndex;
-        private float _speed;
-        private float _startTime;
-        private float _endTime;
-
+        private int _audioSourceIdx;
         public AudioPause(BehaviourEngine engine, Node node) : base(engine, node)
         {
         }
@@ -22,22 +18,23 @@ namespace UnityGLTF.Interactivity
                 return;
             }
 
-            Util.Log($"Playing animation index {_audioIndex} with speed {_speed} and start/end times of {_startTime}/{_endTime}");
+            Util.Log($"Playing animation index {_audioSourceIdx}");
 
             TryExecuteFlow(ConstStrings.OUT);
 
-            //var data = new AnimationPlayData()
-            //{
-            //    index = _animationIndex,
-            //    startTime = _startTime,
-            //    endTime = _endTime,
-            //    stopTime = _endTime,
-            //    speed = _speed,
-            //    unityStartTime = Time.time,
-            //    endDone = () => TryExecuteFlow(ConstStrings.DONE)
-            //};
+            var data = new AudioPlayData()
+            {
+                index = _audioSourceIdx,
+                //                endDone = () => TryExecuteFlow(ConstStrings.DONE)
+            };
 
-            //engine.PlayAnimation(data);
+            engine.PauseAudio(data);
+        }
+
+
+        public override bool ValidateValues(string socket)
+        {
+            return TryEvaluateValue(ConstStrings.AUDIO_SOURCE_INDEX, out _audioSourceIdx);
         }
 
         //public override bool ValidateValues(string socket)

@@ -5,11 +5,7 @@ namespace UnityGLTF.Interactivity
 {
     public class AudioStart : BehaviourEngineNode
     {
-        private int _audioIndex;
-        private float _speed;
-        private float _startTime;
-        private float _endTime;
-
+        private int _audioSourceIdx;
         public AudioStart(BehaviourEngine engine, Node node) : base(engine, node)
         {
         }
@@ -22,41 +18,27 @@ namespace UnityGLTF.Interactivity
                 return;
             }
 
-            Util.Log($"Playing animation index {_audioIndex} with speed {_speed} and start/end times of {_startTime}/{_endTime}");
+            Util.Log($"Playing audio index {_audioSourceIdx} ");
 
             TryExecuteFlow(ConstStrings.OUT);
 
             var data = new AudioPlayData()
             {
-
+                pauseTime = 0,
+                stopTime = 0,
+                index = _audioSourceIdx,
+                state = AudioWrapper.AudioState.Stopped,
             };
 
             engine.PlayAudio(data);
 
-            var data = new AnimationPlayData()
-            {
-                index = _animationIndex,
-                startTime = _startTime,
-                endTime = _endTime,
-                stopTime = _endTime,
-                speed = _speed,
-                unityStartTime = Time.time,
-                endDone = () => TryExecuteFlow(ConstStrings.DONE)
-            };
-
             //engine.PlayAnimation(data);
         }
 
-        //public override bool ValidateValues(string socket)
-        //{
-        //    return TryEvaluateValue(ConstStrings.ANIMATION, out _animationIndex) &&
-        //        TryEvaluateValue(ConstStrings.SPEED, out _speed) &&
-        //        TryEvaluateValue(ConstStrings.START_TIME, out _startTime) &&
-        //        TryEvaluateValue(ConstStrings.END_TIME, out _endTime) &&
-        //        ValidateAnimationIndex(_animationIndex) &&
-        //        ValidateStartAndEndTimes(_startTime, _endTime) &&
-        //        ValidateSpeed(_speed);
-        //}
+        public override bool ValidateValues(string socket)
+        {
+            return TryEvaluateValue(ConstStrings.AUDIO_SOURCE_INDEX, out _audioSourceIdx);
+        }
 
         //private static bool ValidateSpeed(float speed)
         //{

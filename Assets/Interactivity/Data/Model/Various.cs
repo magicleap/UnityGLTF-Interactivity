@@ -26,7 +26,7 @@ namespace UnityGLTF.Interactivity
     public class Audio
     {
         public string mimeType { get; set; }
-        public string bufferView { get; set; }
+        public int bufferView { get; set; }
         public string uri { get; set; }
     }
 

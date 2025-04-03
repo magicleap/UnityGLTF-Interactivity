@@ -2,14 +2,16 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using static UnityGLTF.Interactivity.InteractivityManager;
 
 namespace UnityGLTF.Interactivity
 {
     public class BehaviourEngine
     {
-        public readonly List<Graph> graph;
+        public readonly List<GraphData> graphData;
         public readonly Dictionary<Node, BehaviourEngineNode> engineNodes = new();
         public AnimationWrapper animationWrapper { get; private set; }
+        public AudioWrapper audioWrapper { get; private set; }
         public readonly PointerInterpolationManager pointerInterpolationManager = new();
         public readonly VariableInterpolationManager variableInterpolationManager = new();
 
@@ -24,18 +26,29 @@ namespace UnityGLTF.Interactivity
 
         public readonly PointerResolver pointerResolver;
 
-        public BehaviourEngine(List<Graph> graph, GLTFSceneImporter importer)
+        public BehaviourEngine(List<GraphData> graphData, GLTFSceneImporter importer)
         {
-            this.graph = graph;
+            this.graphData = graphData;
             pointerResolver = new PointerResolver(importer);
-            
-            for (int i = 0; i < graph[0].nodes.Count; i++)
+
+            for (int j = 0; j < graphData.Count; j++)
             {
-                engineNodes.Add(graph[0].nodes[i], NodeRegistry.CreateBehaviourEngineNode(this, graph[0].nodes[i]));
-            }
-            // has other interactivity graphs such as an audio emitter extension.
-            if (graph.Count > 1)
-            {
+                if (graphData[j].extension is KHR_ExtensionGraph extensionGraph)
+                {
+                    Graph graph = graphData[j].graph;
+                    if (extensionGraph.type == KHR_ExtensionGraph.GraphType.Interactivity)
+                    {
+                        for (int i = 0; i < graph.nodes.Count; i++)
+                        {
+                            engineNodes.Add(graph.nodes[i], NodeRegistry.CreateBehaviourEngineNode(this, graph.nodes[i]));
+                        }
+                    }
+                    // has other graphs such as an audio emitter extension.
+                    else if (extensionGraph.type == KHR_ExtensionGraph.GraphType.Audio)
+                    {
+                        // do audio specific stuff here
+                    }
+                }
             }
         }
 
@@ -79,7 +92,7 @@ namespace UnityGLTF.Interactivity
 
         public void FireCustomEvent(int eventIndex, Dictionary<string, IProperty> outValues = null)
         {
-            if (eventIndex < 0 || eventIndex >= graph[0].customEvents.Count)
+            if (eventIndex < 0 || eventIndex >= graphData[0].graph.customEvents.Count)
                 return; // TODO: Add error handling.
 
             onCustomEventFired?.Invoke(eventIndex, outValues);
@@ -96,7 +109,7 @@ namespace UnityGLTF.Interactivity
 
         public IProperty GetVariableProperty(int variableIndex)
         {
-            return graph[0].variables[variableIndex].property;
+            return graphData[0].graph.variables[variableIndex].property;
         }
 
         public bool TryGetPointer(string pointerString, BehaviourEngineNode engineNode, out IPointer pointer)
@@ -120,6 +133,43 @@ namespace UnityGLTF.Interactivity
             animationWrapper = wrapper;
             wrapper.SetData(this, animation);
             pointerResolver.RegisterAnimations(wrapper);
+        }
+
+        public void SetAudioWrapper (AudioWrapper wrapper)
+        {
+            audioWrapper =wrapper;
+            wrapper.SetData(this);
+        }
+        public void PlayAudio(AudioPlayData data)
+        {
+            if (!HasAudioWrapper())
+                return;
+
+            audioWrapper.PlayAudio(data.index);
+        }
+
+        public void StopAudio(AudioPlayData data)
+        {
+            if (!HasAudioWrapper())
+                return;
+
+            audioWrapper.StopAudio(data.index);
+        }
+
+        public void PauseAudio(AudioPlayData data)
+        {
+            if (!HasAudioWrapper())
+                return;
+
+            audioWrapper.PauseAudio(data.index);
+        }
+
+        public void UnPauseAudio(AudioPlayData data)
+        {
+            if (!HasAudioWrapper())
+                return;
+
+            audioWrapper.UnPauseAudio(data.index);
         }
 
         public void PlayAnimation(in AnimationPlayData data)
@@ -151,6 +201,17 @@ namespace UnityGLTF.Interactivity
             if (animationWrapper == null)
             {
                 Util.LogWarning("Tried to play an animation on a glb that has no animations.");
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool HasAudioWrapper()
+        {
+            if (audioWrapper == null)
+            {
+                Util.LogWarning("Tried to play an audio on a glb that has no audio.");
                 return false;
             }
 

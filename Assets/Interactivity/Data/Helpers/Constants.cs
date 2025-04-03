@@ -32,6 +32,7 @@ namespace UnityGLTF.Interactivity
         public const string CASES = "cases";
         public const string GRAPHS = "graphs";
         public const string AUDIO = "audio";
+        public const string AUDIO_SOURCE = "audioSource";
         public const string AUDIO_SOURCES = "sources";
         public const string AUDIO_EMITTERS = "emitters";
         public const string MIME_TYPE = "mimeType";
@@ -40,8 +41,9 @@ namespace UnityGLTF.Interactivity
         public const string AUTO_PLAY = "autoPlay";
         public const string GAIN = "gain";
         public const string LOOP = "loop";
-        public const string AUDIO_SRC_INDEX = "audio";
-        public const string SOURCE_NAME = "sourceName";
+        public const string MUTE = "mute";
+        public const string AUDIO_SOURCE_INDEX = "audioSourceIndex";
+        public const string SOURCE_NAME = "name";
         public const string AUDIO_TYPE = "type";
         public const string POSITIONAL = "positional";
         public const string DISTANCE_MODEL = "distanceModel";

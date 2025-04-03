@@ -32,7 +32,7 @@ namespace UnityGLTF.Interactivity
 
             try
             {
-                _graphVariable = engine.graph[0].variables[variableIndex];
+                _graphVariable = engine.graphData[0].graph.variables[variableIndex];
             }
             catch (Exception e)
             {

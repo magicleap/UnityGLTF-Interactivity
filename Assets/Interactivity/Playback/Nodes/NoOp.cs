@@ -8,7 +8,7 @@ namespace UnityGLTF.Interactivity
 
         public NoOp(BehaviourEngine engine, Node node) : base(engine, node)
         {
-            _declaration = FindDeclaration(node.type, engine.graph[0]);
+            _declaration = FindDeclaration(node.type, engine.graphData[0].graph);
         }
 
         public override IProperty GetOutputValue(string id)
@@ -17,7 +17,7 @@ namespace UnityGLTF.Interactivity
 
             var value = FindValueSocket(id);
 
-            return engine.graph[0].GetDefaultPropertyForType(value.type);
+            return engine.graphData[0].graph.GetDefaultPropertyForType(value.type);
         }
 
         private ValueSocket FindValueSocket(string id)

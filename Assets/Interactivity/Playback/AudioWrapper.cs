@@ -1,20 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Pool;
 
 namespace UnityGLTF.Interactivity
 {
-    public struct AudioPlayData
+    public class AudioPlayData
     {
         public int index;
-        public string clip;
         public UnityEngine.AudioSource source;
-        public float startTime;
-        public float endTime;
         public float stopTime;
-        public float speed;
+        public float pauseTime;
+        public AudioWrapper.AudioState state = AudioWrapper.AudioState.Stopped;
+        public Action stopDone;
+        public Action playDone;
+        public Action pauseDone;
+        public Action unpauseDone;
     }
+
 
     //public class AnimationData
     //{
@@ -30,25 +34,33 @@ namespace UnityGLTF.Interactivity
 
     public class AudioWrapper : MonoBehaviour
     {
+        public enum AudioState
+        {
+            Stopped,
+            Playing,
+            Paused,
+        };
+
         private AudioPlayData _currentAudioData;
 
         private readonly Dictionary<int, AudioPlayData> _audioSources = new();
-        private AnimationData[] _animations;
 
         private BehaviourEngine _engine;
 
-        public void AddAudioSource(UnityEngine.AudioSource source)
+        public void AddAudioSource(int index, AudioPlayData data)
         {
+            //purge old source if it is there
+            _audioSources[index] = data;
         }
 
-        public void SetData(BehaviourEngine behaviourEngine, AudioPlayData data)
+        public void SetData(BehaviourEngine behaviourEngine)
         {
             //if (_engine != null)
             //    _engine.onTick -= OnTick;
 
             _engine = behaviourEngine;
             //_engine.onTick += OnTick;
-            _currentAudioData = data;
+//            _currentAudioData = data;
         }
 
         //private void OnTick()
@@ -144,53 +156,69 @@ namespace UnityGLTF.Interactivity
         //    }
         //}
 
-        public void PlayuAudio(in AudioPlayData data)
+        public void PlayAudio(int index)
         {
-            if (data.clip != audioSource.clip)
+            if (_audioSources.ContainsKey(index))
             {
-                audioSource.clip = data.clip;
+                _audioSources[index].source.Play();
+                _audioSources[index].pauseTime = 0;
+                _audioSources[index].stopTime = 0;
+                _audioSources[index].state = AudioState.Playing;
             }
-            audioSource.Play();
-        }
-
-        internal void StopAudio(in AudioPlayData data)
-        {
-            if (data.clip != audioSource.clip)
+            else
             {
-                audioSource.clip = data.clip;
+                //?DPQ log
             }
-            audioSource.Stop();
-            _currentAudioData.stopTime = audioSource.time;
         }
 
-        internal void PauseAudio(in AudioPlayData data)
+        public void StopAudio(int index)
         {
-            if (data.clip != audioSource.clip)
+            if (_audioSources.ContainsKey(index))
             {
-                audioSource.clip = data.clip;
+                _audioSources[index].source.Stop();
+                _audioSources[index].stopTime = _audioSources[index].source.time;
+                _audioSources[index].pauseTime = 0;
+                _audioSources[index].state = AudioState.Stopped;
             }
-            audioSource.Pause();
-            _currentAudioData.stopTime = audioSource.time;
+            else { }
+//                var v = _audioSources.Where(r => ((r.Value.source == data.source) && (r.Value.index == data.source)));
+            //v.source.Pause();
+            //v.stopTime = v.source.time;
+            //v.pauseTime = 0;
+            //v.state = AudioState.Stopped;
         }
 
-        public bool UnPauseAudio(in Audio
+        public void PauseAudio(int index)
         {
-            return _animationsInProgress.ContainsKey(index);
+            //            var v = _audioSources.Find(r => ((r.clip == data.clip) && (r.source == data.source)));
+            if (_audioSources.ContainsKey(index))
+            {
+                _audioSources[index].source.Pause();
+                _audioSources[index].stopTime = 0;
+                _audioSources[index].pauseTime = _audioSources[index].source.time;
+                _audioSources[index].state = AudioState.Paused;
+            }
+            //v.source.Play();
+            //v.pauseTime = v.source.time;
+            //v.state = AudioState.Paused;
         }
 
-        public float GetAnimationMaxTime(int index)
+        public void UnPauseAudio(int index)
         {
-            return _animations[index].anim.length;
-        }
-
-        public float GetPlayhead(int index)
-        {
-            return _animations[index].playhead;
-        }
-
-        public float GetVirtualPlayhead(int index)
-        {
-            return _animations[index].virtualPlayhead;
+            var v = _audioSources.Where(r => ((r.Key == index))).FirstOrDefault();
+            if (v.Value.state == AudioState.Paused)
+            {
+                v.Value.source.UnPause();
+                v.Value.pauseTime = 0;
+                v.Value.stopTime = 0;
+            }
+            else if (v.Value.state == AudioState.Stopped)
+            {
+                v.Value.source.Play();
+                v.Value.pauseTime = 0;
+                v.Value.stopTime = 0;
+            }
+            // if playing, let keep playing.
         }
     }
 }

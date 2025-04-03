@@ -16,7 +16,7 @@ namespace UnityGLTF.Interactivity
             {
                 var audio = new Audio();
                 audio.mimeType = v[ConstStrings.MIME_TYPE]?.Value<string>();
-                audio.bufferView = v[ConstStrings.BUFFER_VIEW]?.Value<string>();
+                audio.bufferView = v[ConstStrings.BUFFER_VIEW].Value<int>();
                 audio.uri = v[ConstStrings.URI]?.Value<string>();
 
                 audioList.Add(audio);

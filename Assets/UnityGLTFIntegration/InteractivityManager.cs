@@ -1,8 +1,10 @@
 using GLTF.Schema;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.ExceptionServices;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityGLTF.Interactivity.Extensions;
 
 namespace UnityGLTF.Interactivity
@@ -55,9 +57,19 @@ namespace UnityGLTF.Interactivity
                 //// Can be used to inject a graph created from code in a hacky way for testing.
                 ////interactivityGraph.extensionData.graphs[defaultGraphIndex] = TestGraph.CreateTestGraph();
                 //var defaultGraph = interactivityGraph.extensionData.graphs[defaultGraphIndex];
-                List<Graph> graphList = new();
-                gdList.ForEach(r => graphList.Add(r.graph)); 
-                _behaviourEngine = new BehaviourEngine(graphList, importer);
+//                List<Graph> graphList = new();
+//                gdList.ForEach(r => graphList.Add(r.graph)); 
+                _behaviourEngine = new BehaviourEngine(gdList, importer);
+
+                var audio = gdList.FindAll(r => (r.graph.audioSources != null) && (r.graph.audioSources.Count > 0));
+                if (audio != null && audio.Count > 0)
+                {
+                    //found audio. add audio wrapper if it does not already exist.
+                    AudioWrapper audioWrapper = importer.SceneParent.gameObject.AddComponent<AudioWrapper>();
+                    _behaviourEngine.SetAudioWrapper(audioWrapper);
+
+                    AddAudioSources(importer, audioWrapper, audio);
+                }
             }
             catch (Exception e)
             {
@@ -87,11 +99,97 @@ namespace UnityGLTF.Interactivity
             onExtensionLoadComplete?.Invoke(extensionList[0]);
         }
 
-        private class GraphData
+
+        private void AddAudioSources(GLTFSceneImporter importer, AudioWrapper wrapper, List<GraphData> audioGraphs)
         {
-            public KHR_ExtensionGraph extension;
-            public Graph graph;
-        };
+            if (wrapper == null)
+                return;
+
+            foreach(var audioGraph in audioGraphs)
+            {
+                Graph graph = audioGraph.graph;
+
+                int idx = 0;
+
+                // each audio
+                foreach(var audio in graph.audio)
+                {
+                    if (audio.uri != null && !string.IsNullOrEmpty(audio.uri))
+                    {
+                        audio.uri = audio.uri;
+                        string path = Path.GetDirectoryName(_modelName);
+                        if (!string.IsNullOrEmpty(path))
+                        {
+                            path += Path.DirectorySeparatorChar + audio.uri;
+                        }
+                        else
+                        {
+                            path = audio.uri;
+                        }
+                        try
+                        {
+
+                            var (directory, fileName) = Helpers.GetFilePath(path);
+                            UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(directory + Path.DirectorySeparatorChar + fileName, AudioType.MPEG);
+                            www.SendWebRequest();
+
+                            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
+                            {
+                                Debug.LogError("Error: " + www.error);
+                            }
+                            else
+                            {
+                                AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
+
+                                UnityEngine.AudioSource audioSourceScene = importer.SceneParent.gameObject.AddComponent<UnityEngine.AudioSource>();
+                                audioSourceScene.clip = clip;
+                                audioSourceScene.clip.name = Path.GetFileNameWithoutExtension(fileName);
+                                audioSourceScene.volume = graph.audioSources[0].gain;
+                                audioSourceScene.minDistance = graph.audioEmitter[0].positional[0].minDistance;
+                                audioSourceScene.maxDistance = graph.audioEmitter[0].positional[0].maxDistance;
+                                audioSourceScene.loop = graph.audioSources[0].loop;
+                                audioSourceScene.Play();
+
+                                wrapper.AddAudioSource(0, new AudioPlayData() { index = 0, source = audioSourceScene });
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+
+                    }
+                    else
+                    {
+                        BufferView bv = importer.Root.BufferViews[audio.bufferView];
+                        var offset = bv.ByteOffset;
+                        var length = bv.ByteLength;
+                        var id = bv.Buffer;
+                        var buf = importer.Root.Buffers[(int)id.Id];
+
+                        GLTFBuffer v = importer.Root.Buffers[0];
+                        //                        MemoryStream ms = new MemoryStream()
+                        audio.uri = null;
+                        
+                    }
+                    idx++;
+                }
+            }
+        }
+
+        //private float[] ConvertByteToFloat(byte[] array)
+        //{
+        //    float[] floatArr = new float[array.Length / 4];
+        //    for (int i = 0; i < floatArr.Length; i++)
+        //    {
+        //        if (BitConverter.IsLittleEndian)
+        //        {
+        //            Array.Reverse(array, i * 4, 4);
+        //        }
+        //        floatArr[i] = BitConverter.ToSingle(array, i * 4) / 0x80000000;
+        //    }
+        //    return floatArr;
+        //}
 
         private List<GraphData> GetInteractivityGraphsSorted(Dictionary<string, IExtension> extensions)
         {

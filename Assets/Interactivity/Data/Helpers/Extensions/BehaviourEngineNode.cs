@@ -93,7 +93,7 @@ namespace UnityGLTF.Interactivity
             try
             {
                 index = Parser.ToInt(config.value);
-                variable = engine.graph[0].variables[index];
+                variable = engine.graphData[0].graph.variables[index];
             }
             catch (Exception e)
             {
