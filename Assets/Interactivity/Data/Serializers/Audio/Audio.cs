@@ -15,9 +15,12 @@ namespace UnityGLTF.Interactivity
             foreach (var v in jAudio)
             {
                 var audio = new Audio();
-                audio.mimeType = v[ConstStrings.MIME_TYPE]?.Value<string>();
-                audio.bufferView = v[ConstStrings.BUFFER_VIEW].Value<int>();
-                audio.uri = v[ConstStrings.URI]?.Value<string>();
+                if (v[ConstStrings.MIME_TYPE] != null)
+                    audio.mimeType = v[ConstStrings.MIME_TYPE]?.Value<string>();
+                if (v[ConstStrings.BUFFER_VIEW] != null)
+                    audio.bufferView = v[ConstStrings.BUFFER_VIEW].Value<int>();
+                if (v[ConstStrings.URI] != null)
+                    audio.uri = v[ConstStrings.URI]?.Value<string>();
 
                 audioList.Add(audio);
             }

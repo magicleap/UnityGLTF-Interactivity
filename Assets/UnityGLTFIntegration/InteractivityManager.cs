@@ -105,6 +105,8 @@ namespace UnityGLTF.Interactivity
             if (wrapper == null)
                 return;
 
+            //loop through all of the audio graphs. Could be more than one conceivably. Practically speaking though, 
+            // one model should have one audio graph with audio, emitters and sources
             foreach(var audioGraph in audioGraphs)
             {
                 Graph graph = audioGraph.graph;
@@ -128,7 +130,6 @@ namespace UnityGLTF.Interactivity
                         }
                         try
                         {
-
                             var (directory, fileName) = Helpers.GetFilePath(path);
                             UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(directory + Path.DirectorySeparatorChar + fileName, AudioType.MPEG);
                             www.SendWebRequest();
@@ -144,10 +145,20 @@ namespace UnityGLTF.Interactivity
                                 UnityEngine.AudioSource audioSourceScene = importer.SceneParent.gameObject.AddComponent<UnityEngine.AudioSource>();
                                 audioSourceScene.clip = clip;
                                 audioSourceScene.clip.name = Path.GetFileNameWithoutExtension(fileName);
-                                audioSourceScene.volume = graph.audioSources[0].gain;
-                                audioSourceScene.minDistance = graph.audioEmitter[0].positional[0].minDistance;
-                                audioSourceScene.maxDistance = graph.audioEmitter[0].positional[0].maxDistance;
-                                audioSourceScene.loop = graph.audioSources[0].loop;
+
+                                AudioSource a = GetAudioSource(idx, graph.audioSources);
+                                AudioEmitterPartial e = GetAudioEmitterPartial(idx, graph.audioEmitter);
+
+                                if (a != null)
+                                {
+                                    audioSourceScene.volume = a.gain;
+                                    audioSourceScene.loop = a.loop;
+                                }
+                                if (e != null)
+                                {
+                                    audioSourceScene.minDistance = e.positional.minDistance;
+                                    audioSourceScene.maxDistance = e.positional.maxDistance;
+                                }
                                 audioSourceScene.Play();
 
                                 wrapper.AddAudioSource(0, new AudioPlayData() { index = 0, source = audioSourceScene });
@@ -177,19 +188,37 @@ namespace UnityGLTF.Interactivity
             }
         }
 
-        //private float[] ConvertByteToFloat(byte[] array)
-        //{
-        //    float[] floatArr = new float[array.Length / 4];
-        //    for (int i = 0; i < floatArr.Length; i++)
-        //    {
-        //        if (BitConverter.IsLittleEndian)
-        //        {
-        //            Array.Reverse(array, i * 4, 4);
-        //        }
-        //        floatArr[i] = BitConverter.ToSingle(array, i * 4) / 0x80000000;
-        //    }
-        //    return floatArr;
-        //}
+        internal AudioSource GetAudioSource(int index, List<AudioSource> audioSources)
+        {
+            foreach (AudioSource audioSource in audioSources)
+            {
+                if (audioSource.audio == index)
+                {
+                    return audioSource;
+                }
+            }
+            return null;
+        }
+
+        internal AudioEmitterPartial GetAudioEmitterPartial(int index, List<AudioEmitter> audioEmitters)
+        {
+            foreach(AudioEmitter emitter in audioEmitters)
+            {
+                for(int i = 0; i < emitter.sources.Count; i++)
+                {
+                    if ((emitter.sources[i] == index) && (emitter.positional.Count == emitter.sources.Count))
+                    {
+                        return new AudioEmitterPartial() { 
+                            gain = emitter.gain, 
+                            name = emitter.name, 
+                            source = emitter.sources[i], 
+                            type = emitter.type, 
+                            positional = emitter.positional[i] };
+                    }
+                }
+            }
+            return null;
+        }
 
         private List<GraphData> GetInteractivityGraphsSorted(Dictionary<string, IExtension> extensions)
         {

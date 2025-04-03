@@ -41,10 +41,20 @@ namespace UnityGLTF.Interactivity
     
     public class AudioEmitter
     {
+        public string name { get; set; }
         public string type { get; set; }
         public List<int> sources { get; set; }
         public float gain { get; set; }
         public List<PositionAudioData> positional { get; set; }
+    }
+
+    public class AudioEmitterPartial
+    {
+        public string name { get; set;  }
+        public string type { get; set; }
+        public int source { get; set; }
+        public float gain { get; set; }
+        public PositionAudioData positional { get; set; }
     }
 
     public class PositionAudioData
