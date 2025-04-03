@@ -567,6 +567,34 @@ public class MathNodesTests : InteractivityTestsHelpers
     }
 
     [Test]
+    public void TestRotate2d()
+    {
+        using(new StdThresholdCompare(this))
+        {
+            TestOperationResult("math/rotate2d", (n)=>
+            {
+                n.AddValue(ConstStrings.A, new float2(0.0f, 1.0f));
+                n.AddValue(ConstStrings.B, math.PI * 0.5f);
+            }, new float2(-1.0f, 0.0f));
+
+            TestOperationResult("math/rotate2d", (n)=>
+            {
+                n.AddValue(ConstStrings.A, new float2(-1.0f, 0.0f));
+                n.AddValue(ConstStrings.B, math.PI * 0.5f);
+            }, new float2(0.0f, -1.0f));
+        }
+    }
+
+    [Test]
+    public void TestCbrt()
+    {
+        using(new StdThresholdCompare(this))
+        {
+            TestOperationResultAllFloats("math/cbrt", new float4(11.3f, -50.3f, 33.3f, 100.1f), new float4(2.24401703f, -3.69138487f, 3.21722482f, 4.64313551f)); 
+        }
+    }
+
+    [Test]
     public void TestTrunc()
     {
         TestOperationResultAllFloats("math/trunc", new float4(15.4f, -10.1f, 12.39f, -32.33f), new float4(15.0f, -10.0f, 12.0f, -32.0f));
