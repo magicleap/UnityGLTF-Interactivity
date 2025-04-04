@@ -24,22 +24,21 @@ public class InteractivityTestsHelpers
     protected bool tv1b = true;
     protected bool tv2b = false;
 
-    private const float _stdFloatThreshold = 0.00001f;
+    private const string _defaultTestNode = "math/supereq";
+    private string _testNode = _defaultTestNode;
 
-    private float _compareThreshold = 0.0f;
-
-    protected class StdThresholdCompare : IDisposable
+    protected class CompareFunc : IDisposable
     {
         private InteractivityTestsHelpers _helper;
-        public StdThresholdCompare(InteractivityTestsHelpers h)
+        public CompareFunc(InteractivityTestsHelpers h, string cmp)
         {
             _helper = h;
-            _helper._compareThreshold = _stdFloatThreshold;
+            _helper._testNode = cmp;
         }
 
         public void Dispose()
         {
-            _helper._compareThreshold = 0.0f;
+            _helper._testNode = _defaultTestNode;
         }
     }
 
@@ -97,6 +96,8 @@ public class InteractivityTestsHelpers
 
         var onStartNode = g.CreateNode("event/onStart", Vector2.zero);
         var assertNode = g.CreateNode("debug/assert", Vector2.zero);
+        var testNode = g.CreateNode(_testNode, Vector2.zero);
+
         onStartNode.AddFlow(ConstStrings.OUT, assertNode, ConstStrings.IN);
 
         var opNode = g.CreateNode(nodeStr, Vector2.zero);
@@ -107,14 +108,32 @@ public class InteractivityTestsHelpers
             opNode.AddValue(ConstStrings.Letters[i], values[i]);
         }
 
-        assertNode.AddValue(ConstStrings.B, expectedResult);
-
-        assertNode.AddValue(ConstStrings.C, _compareThreshold);
-
-        if(assertNode.TryGetValueById(ConstStrings.A, out Value a))
+        if(testNode.TryGetValueById(ConstStrings.A, out Value a))
         {
              a.TryConnectToSocket(opNode, ConstStrings.VALUE);
+
+            if(assertNode.TryGetValueById(ConstStrings.A, out Value aa))
+            {
+                aa.TryConnectToSocket(testNode, ConstStrings.VALUE);
+            }
+
+            assertNode.AddValue(ConstStrings.B, expectedResult);
+
+            if(assertNode.TryGetValueById(ConstStrings.C, out Value c))
+            {
+                c.TryConnectToSocket(opNode, ConstStrings.VALUE);
+            }
         }
+        testNode.AddValue(ConstStrings.B, expectedResult);
+
+        // assertNode.AddValue(ConstStrings.B, expectedResult);
+
+        // assertNode.AddValue(ConstStrings.C, _compareThreshold);
+
+        // if(assertNode.TryGetValueById(ConstStrings.A, out Value a))
+        // {
+        //      a.TryConnectToSocket(opNode, ConstStrings.VALUE);
+        // }
 
         return (g, opNode);
     }

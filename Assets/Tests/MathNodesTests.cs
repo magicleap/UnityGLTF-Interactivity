@@ -138,7 +138,7 @@ public class MathNodesTests : InteractivityTestsHelpers
         TestOperationResult("math/rem", 5.0f, 0.0f, math.NAN);
         TestOperationResult("math/rem", 5.0f, math.INFINITY, 5.0f);
 
-        using(new StdThresholdCompare(this))
+        using(new CompareFunc(this, "math/approxeq"))
         {
             TestOperationResult("math/rem", 12.4f, 4.0f, 0.4f);
         }
@@ -282,7 +282,7 @@ public class MathNodesTests : InteractivityTestsHelpers
         TestMathOpAllFloats1op("math/cos", math.cos(tv1));
         TestOperationResult("math/cos", 0.0f, 1.0f);
 
-        using(new StdThresholdCompare(this))
+        using(new CompareFunc(this, "math/approxeq"))
         {
             TestOperationResult("math/cos", (float)(math.PI / 2.0), 0.0f);
         }
@@ -548,7 +548,7 @@ public class MathNodesTests : InteractivityTestsHelpers
     [Test]
     public void TestRotate3d()
     {
-        using(new StdThresholdCompare(this))
+        using(new CompareFunc(this, "math/approxeq"))
         {
             TestOperationResult("math/rotate3d", (n)=>
             {
@@ -569,7 +569,7 @@ public class MathNodesTests : InteractivityTestsHelpers
     [Test]
     public void TestRotate2d()
     {
-        using(new StdThresholdCompare(this))
+        using(new CompareFunc(this, "math/approxeq"))
         {
             TestOperationResult("math/rotate2d", (n)=>
             {
@@ -588,7 +588,7 @@ public class MathNodesTests : InteractivityTestsHelpers
     [Test]
     public void TestCbrt()
     {
-        using(new StdThresholdCompare(this))
+        using(new CompareFunc(this, "math/approxeq"))
         {
             TestOperationResultAllFloats("math/cbrt", new float4(11.3f, -50.3f, 33.3f, 100.1f), new float4(2.24401703f, -3.69138487f, 3.21722482f, 4.64313551f)); 
         }
@@ -603,7 +603,7 @@ public class MathNodesTests : InteractivityTestsHelpers
     [Test]
     public void TestFract()
     {
-        using(new StdThresholdCompare(this))
+        using(new CompareFunc(this, "math/approxeq"))
         {
             TestOperationResultAllFloats("math/fract", new float4(15.4f, -10.1f, 12.39f, -32.33f), new float4(0.4f, 0.9f, 0.39f, 0.67f));
         }
