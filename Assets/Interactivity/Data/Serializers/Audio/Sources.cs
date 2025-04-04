@@ -14,9 +14,13 @@ namespace UnityGLTF.Interactivity
             foreach (var v in jAudioSources)
             {
                 AudioSource audioSource = new AudioSource();
-                audioSource.autoPlay = (bool)(v[ConstStrings.AUTO_PLAY]?.Value<bool>());
-                audioSource.gain = (float)(v[ConstStrings.GAIN]?.Value<float>());
-                audioSource.loop = (bool)(v[ConstStrings.LOOP]?.Value<bool>());
+                if (v[ConstStrings.AUTO_PLAY] != null)
+                    audioSource.autoPlay = (bool)(v[ConstStrings.AUTO_PLAY]?.Value<bool>());
+                if (v[ConstStrings.GAIN] != null)
+                    audioSource.gain = (float)(v[ConstStrings.GAIN]?.Value<float>());
+                if (v[ConstStrings.LOOP] != null)
+                    audioSource.loop = (bool)(v[ConstStrings.LOOP]?.Value<bool>());
+
                 audioSource.sourceName = v[ConstStrings.SOURCE_NAME]?.Value<string>();
 
                 audioSourcesList.Add(audioSource);
