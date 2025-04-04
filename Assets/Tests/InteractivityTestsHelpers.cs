@@ -126,15 +126,6 @@ public class InteractivityTestsHelpers
         }
         testNode.AddValue(ConstStrings.B, expectedResult);
 
-        // assertNode.AddValue(ConstStrings.B, expectedResult);
-
-        // assertNode.AddValue(ConstStrings.C, _compareThreshold);
-
-        // if(assertNode.TryGetValueById(ConstStrings.A, out Value a))
-        // {
-        //      a.TryConnectToSocket(opNode, ConstStrings.VALUE);
-        // }
-
         return (g, opNode);
     }
 
@@ -171,6 +162,15 @@ public class InteractivityTestsHelpers
     protected void TestOperationResult<T, TRes>(string nodeStr, T val1, T val2, TRes expectedResult)
     {
         TestOperationResult(nodeStr, new T[]{val1, val2}, expectedResult);
+    }
+
+    protected void TestOperationResult2<T1, T2, TRes>(string nodeStr, T1 val1, T2 val2, TRes expectedResult)
+    {
+        TestOperationResult(nodeStr, (n)=>
+        {
+            n.AddValue(ConstStrings.A, val1);
+            n.AddValue(ConstStrings.B, val2);
+        }, expectedResult);
     }
 
     protected void TestOperationResult<T, TRes>(string nodeStr, T val1, T val2, T val3, TRes expectedResult)

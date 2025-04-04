@@ -586,6 +586,17 @@ public class MathNodesTests : InteractivityTestsHelpers
     }
 
     [Test]
+    public void TestTransform()
+    {
+        using(new CompareFunc(this, "math/approxeq"))
+        {
+            TestOperationResult2("math/transform", new float2(10.2f, 12.1f), new float2x2(2.3f, -4.1f, 12.4f, 11.5f), new float2(-26.15f, 265.63f));
+            TestOperationResult2("math/transform", new float3(10.2f, 12.1f, 16.4f), new float3x3(2.3f, -4.1f, 12.3f, 12.4f, 11.5f, 17.1f, 1.3f, -5.0f, 19.5f), new float3(175.57f, 546.07f, 272.56f));
+            TestOperationResult2("math/transform", new float4(10.2f, 12.1f, 16.4f, 6.4f), new float4x4(2.3f, -4.1f, 12.3f, 8.3f, 12.4f, 11.5f, 17.1f, 83.0f, 1.3f, -5.0f, 19.5f, 14.1f, 4.4f, 19.1f, 72.3f, 18.2f), new float4(228.69f, 1077.27f, 362.8f, 1578.19f));
+        }
+    }
+
+    [Test]
     public void TestCbrt()
     {
         using(new CompareFunc(this, "math/approxeq"))
