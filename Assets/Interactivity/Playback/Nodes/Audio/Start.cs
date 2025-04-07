@@ -18,7 +18,7 @@ namespace UnityGLTF.Interactivity
                 return;
             }
 
-            Util.Log($"Playing audio index {_audioSourceIdx} ");
+            Util.Log($"Starting audio index {_audioSourceIdx} ");
 
             TryExecuteFlow(ConstStrings.OUT);
 
@@ -28,6 +28,7 @@ namespace UnityGLTF.Interactivity
                 stopTime = 0,
                 index = _audioSourceIdx,
                 state = AudioWrapper.AudioState.Stopped,
+                actionDone = () => TryExecuteFlow(ConstStrings.DONE)
             };
 
             engine.PlayAudio(data);

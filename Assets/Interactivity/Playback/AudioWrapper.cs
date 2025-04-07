@@ -13,10 +13,7 @@ namespace UnityGLTF.Interactivity
         public float stopTime;
         public float pauseTime;
         public AudioWrapper.AudioState state = AudioWrapper.AudioState.Stopped;
-        public Action stopDone;
-        public Action playDone;
-        public Action pauseDone;
-        public Action unpauseDone;
+        public Action actionDone;
     }
 
 

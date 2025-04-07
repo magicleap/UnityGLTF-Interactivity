@@ -19,14 +19,14 @@ namespace UnityGLTF.Interactivity
                 return;
             }
 
-            Util.Log($"Playing animation index {_audioSourceIdx}");
+            Util.Log($"Stopping animation index {_audioSourceIdx}");
 
             TryExecuteFlow(ConstStrings.OUT);
 
             var data = new AudioPlayData()
             {
                 index = _audioSourceIdx,
-                //                endDone = () => TryExecuteFlow(ConstStrings.DONE)
+                actionDone = () => TryExecuteFlow(ConstStrings.DONE)
             };
 
             engine.StopAudio(data);
