@@ -101,7 +101,6 @@ namespace UnityGLTF.Interactivity
             onExtensionLoadComplete?.Invoke(extensionList[0]);
         }
 
-
         private void AddAudioSources(GLTFSceneImporter importer, AudioWrapper wrapper, List<GraphData> audioGraphs)
         {
             if (wrapper == null)
@@ -112,16 +111,23 @@ namespace UnityGLTF.Interactivity
             foreach(var audioGraph in audioGraphs)
             {
                 Graph graph = audioGraph.graph;
+                UnityEngine.AudioSource audioSourceScene = null;
 
                 int idx = 0;
 
                 // each audio
                 foreach(var audio in graph.audio)
                 {
+                    AudioSource a = GetAudioSource(idx, graph.audioSources);
+                    AudioEmitterPartial e = GetAudioEmitterPartial(idx, graph.audioEmitter);
+
+                    string path = string.Empty;
+                    string finalFileName = String.Empty;
+                    string finalDir = String.Empty;
                     if (audio.uri != null && !string.IsNullOrEmpty(audio.uri))
                     {
                         audio.uri = audio.uri;
-                        string path = Path.GetDirectoryName(_modelName);
+                        path = Path.GetDirectoryName(_modelName);
                         if (!string.IsNullOrEmpty(path))
                         {
                             path += Path.DirectorySeparatorChar + audio.uri;
@@ -130,153 +136,162 @@ namespace UnityGLTF.Interactivity
                         {
                             path = audio.uri;
                         }
-                        try
-                        {
-                            var (directory, fileName) = Helpers.GetFilePath(path);
-                            UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(directory + Path.DirectorySeparatorChar + fileName, AudioType.MPEG);
-                            www.SendWebRequest();
-
-                            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
-                            {
-                                Debug.LogError("Error: " + www.error);
-                            }
-                            else
-                            {
-                                AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
-
-                                UnityEngine.AudioSource audioSourceScene = importer.SceneParent.gameObject.AddComponent<UnityEngine.AudioSource>();
-                                audioSourceScene.clip = clip;
-                                audioSourceScene.clip.name = Path.GetFileNameWithoutExtension(fileName);
-
-                                AudioSource a = GetAudioSource(idx, graph.audioSources);
-                                AudioEmitterPartial e = GetAudioEmitterPartial(idx, graph.audioEmitter);
-
-                                if (a != null)
-                                {
-                                    audioSourceScene.volume = a.gain;
-                                    audioSourceScene.loop = a.loop;
-                                }
-                                if (e != null)
-                                {
-                                    audioSourceScene.minDistance = e.positional.minDistance;
-                                    audioSourceScene.maxDistance = e.positional.maxDistance;
-                                }
-                                audioSourceScene.Play();
-
-                                wrapper.AddAudioSource(0, new AudioPlayData() { index = 0, source = audioSourceScene });
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-
-                        }
-
+                        var (directory, fileName) = Helpers.GetFilePath(path);
+                        finalFileName = fileName;
+                        finalDir = directory;
                     }
                     else
                     {
+                        /// get index into buffer
                         BufferView bv = importer.Root.BufferViews[audio.bufferView];
                         var offset = bv.ByteOffset;
                         var length = bv.ByteLength;
-                        var id = bv.Buffer;
-                        var buf = importer.Root.Buffers[(int)id.Id];
 
-                        GLTFBuffer v = importer.Root.Buffers[0];
+                        byte[] audioArray = GetAudioBufferArrayFromGLB(_modelName, offset, length);
+                        string tempFile =  WriteToTempFile(audioArray, length);
 
-                        UnityEngine.AudioSource audioSourceScene = importer.SceneParent.gameObject.AddComponent<UnityEngine.AudioSource>();
-
-                        AudioSource a = GetAudioSource(idx, graph.audioSources);
-                        AudioEmitterPartial e = GetAudioEmitterPartial(idx, graph.audioEmitter);
-
-                        if (a != null)
-                        {
-                            audioSourceScene.volume = a.gain;
-                            audioSourceScene.loop = a.loop;
-                        }
-                        if (e != null)
-                        {
-                            audioSourceScene.minDistance = e.positional.minDistance;
-                            audioSourceScene.maxDistance = e.positional.maxDistance;
-                        }
-
-                        var (directory, fileName) = Helpers.GetFilePath($"{_modelName}.glb");
-
-                        FileStream fs = new FileStream(directory + Path.DirectorySeparatorChar + fileName, FileMode.Open);
-                        BinaryReader br = new BinaryReader(fs);
-                        long totalLengthRead = 0;
-
-                        GLTFBinaryData.Header header = new();
-                        header.magic = br.ReadUInt32();
-                        header.version = br.ReadUInt32();
-                        header.length = br.ReadUInt32();
-                        totalLengthRead += 12;
-
-                        List<GLTFBinaryData.Chunk> chunks = new();
-
-                        while (totalLengthRead < fs.Length)
-                        {
-
-                            GLTFBinaryData.Chunk chunk = new();
-                            chunk.chunkLength = br.ReadUInt32();
-                            chunk.chunkType = br.ReadUInt32();
-                            totalLengthRead += 8;
-                            chunk.data = br.ReadBytes((int)chunk.chunkLength);
-                            totalLengthRead += (long)chunk.chunkLength;
-
-                            chunks.Add(chunk);
-                        }
-
-                        byte[] arr = new byte[length];
-                        Array.Copy(chunks[GLTF_BIN_DATA_INDEX].data, offset, arr, 0, length);
-
-                        var (directory2, fileName2) = Helpers.GetFilePath("./audio/temp.mp3");
-                        FileStream fsOut = new FileStream(directory2 + Path.DirectorySeparatorChar + fileName2, FileMode.OpenOrCreate);
-                        BinaryWriter bw = new BinaryWriter(fsOut);
-                        bw.Write(arr, 0, (int)length);
-                        bw.Flush();
-                        bw.Close();
-                        fsOut.Close();
-
-                        UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(directory2 + Path.DirectorySeparatorChar + fileName2, AudioType.MPEG);
-                        www.SendWebRequest();
-
-                        if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
-                        {
-                            Debug.LogError("Error: " + www.error);
-                        }
-                        else
-                        {
-                            AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
-                            clip.name = a.sourceName;
-                            audioSourceScene.clip = clip;
-                            audioSourceScene.Play();
-                        }
-
-                        File.Delete(directory2 + Path.DirectorySeparatorChar + fileName2);
-
-                        wrapper.AddAudioSource(0, new AudioPlayData() { index = 0, source = audioSourceScene });
+                        var (directory, fileName) = Helpers.GetFilePath(tempFile);
+                        finalFileName = fileName;
+                        finalDir = directory;
                     }
+
+                    if (!string.IsNullOrEmpty(finalFileName) && !string.IsNullOrEmpty(finalDir))
+                    {
+                        audioSourceScene = LoadAudioSourceClipFromFile(
+                            finalDir + Path.DirectorySeparatorChar + finalFileName,
+                            importer.SceneParent.gameObject);
+                        SetAudioValues(a, e, ref audioSourceScene);
+
+                        if (audioSourceScene != null)
+                            wrapper.AddAudioSource(0, new AudioPlayData() { index = 0, source = audioSourceScene });
+                        
+                        //                        audioSourceScene.clip.name = Path.GetFileNameWithoutExtension(finalFileName);
+                    }
+
+                    //else
+                    //{
+
+                    //    UnityEngine.AudioSource audioSourceScene = importer.SceneParent.gameObject.AddComponent<UnityEngine.AudioSource>();
+
+                    //    AudioSource a = GetAudioSource(idx, graph.audioSources);
+                    //    AudioEmitterPartial e = GetAudioEmitterPartial(idx, graph.audioEmitter);
+
+                    //    if (a != null)
+                    //    {
+                    //        audioSourceScene.volume = a.gain;
+                    //        audioSourceScene.loop = a.loop;
+                    //    }
+                    //    if (e != null)
+                    //    {
+                    //        audioSourceScene.minDistance = e.positional.minDistance;
+                    //        audioSourceScene.maxDistance = e.positional.maxDistance;
+                    //    }
+
+                    //    UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(directory2 + Path.DirectorySeparatorChar + fileName2, AudioType.MPEG);
+                    //    www.SendWebRequest();
+
+                    //    if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
+                    //    {
+                    //        Debug.LogError("Error: " + www.error);
+                    //    }
+                    //    else
+                    //    {
+                    //        AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
+                    //        clip.name = a.sourceName;
+                    //        audioSourceScene.clip = clip;
+                    //        audioSourceScene.Play();
+                    //    }
+
+                    //    File.Delete(directory2 + Path.DirectorySeparatorChar + fileName2);
+
+                    //    wrapper.AddAudioSource(0, new AudioPlayData() { index = 0, source = audioSourceScene });
+                    //}
                     idx++;
                 }
             }
         }
 
-        private void ParseBin(byte[] arr)
+        private const string TEMP_FILE_PATH = "./audio/temp.mp3";
+        private string WriteToTempFile(byte[] arr, uint length)
         {
+            var (directory, fileName) = Helpers.GetFilePath(TEMP_FILE_PATH);
+            FileStream fsOut = new FileStream(directory + Path.DirectorySeparatorChar + fileName, FileMode.OpenOrCreate);
+            BinaryWriter bw = new BinaryWriter(fsOut);
+            bw.Write(arr, 0, (int)length);
+            bw.Flush();
+            bw.Close();
+            fsOut.Close();
 
+            return TEMP_FILE_PATH;
         }
 
-        private float[] ConvertByteToFloat(byte[] array)
+        private byte[] GetAudioBufferArrayFromGLB(string modelName, uint offset, uint length)
         {
-            float[] floatArr = new float[array.Length / 4];
-            for (int i = 0; i < floatArr.Length; i++)
+            var (directory, fileName) = Helpers.GetFilePath($"{modelName}.glb");
+
+            FileStream fs = new FileStream(directory + Path.DirectorySeparatorChar + fileName, FileMode.Open);
+            BinaryReader br = new BinaryReader(fs);
+            long totalLengthRead = 0;
+
+            GLTFBinaryData.Header header = new();
+            header.magic = br.ReadUInt32();
+            header.version = br.ReadUInt32();
+            header.length = br.ReadUInt32();
+            totalLengthRead += 12;
+
+            List<GLTFBinaryData.Chunk> chunks = new();
+
+            while (totalLengthRead < fs.Length)
             {
-                //if (BitConverter.IsLittleEndian)
-                //{
-                //    Array.Reverse(array, i * 4, 4);
-                //}
-                floatArr[i] = BitConverter.ToSingle(array, i * 4) / 0x80000000;
+
+                GLTFBinaryData.Chunk chunk = new();
+                chunk.chunkLength = br.ReadUInt32();
+                chunk.chunkType = br.ReadUInt32();
+                totalLengthRead += 8;
+                chunk.data = br.ReadBytes((int)chunk.chunkLength);
+                totalLengthRead += (long)chunk.chunkLength;
+
+                chunks.Add(chunk);
             }
-            return floatArr;
+
+            byte[] arr = new byte[length];
+            Array.Copy(chunks[GLTF_BIN_DATA_INDEX].data, offset, arr, 0, length);
+
+            return arr;
+        }
+
+        private void SetAudioValues(AudioSource source, AudioEmitterPartial emitter, ref UnityEngine.AudioSource audioSource)
+        {
+            if (source != null)
+            {
+                audioSource.volume = source.gain;
+                audioSource.loop = source.loop;
+            }
+            if (emitter != null)
+            {
+                audioSource.minDistance = emitter.positional.minDistance;
+                audioSource.maxDistance = emitter.positional.maxDistance;
+            }
+            audioSource.clip.name = source.sourceName;
+        }
+
+        private UnityEngine.AudioSource LoadAudioSourceClipFromFile(string pathFileName, GameObject rootGO)
+        {
+            UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(pathFileName, AudioType.MPEG);
+            www.SendWebRequest();
+
+            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogError("Error: " + www.error);
+            }
+            else
+            {
+                var clip = DownloadHandlerAudioClip.GetContent(www);
+                UnityEngine.AudioSource audioSourceScene = rootGO.AddComponent<UnityEngine.AudioSource>();
+                audioSourceScene.clip = clip;
+                return audioSourceScene;
+            }
+            return null;
         }
 
         internal AudioSource GetAudioSource(int index, List<AudioSource> audioSources)
