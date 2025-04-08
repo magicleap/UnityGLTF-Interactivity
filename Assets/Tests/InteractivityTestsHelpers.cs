@@ -89,7 +89,7 @@ public class InteractivityTestsHelpers
         return importer;
     }
 
-    protected (Graph, Node) CreateOperationGraph<T, TRes>(string nodeStr, T[] values, TRes expectedResult)
+    protected (Graph, Node) CreateOperationGraph<T, TRes>(string nodeStr, T[] values, TRes expectedResult, string outputValueSocket = ConstStrings.VALUE)
     {
         Graph g = new Graph();
         g.AddDefaultTypes();
@@ -110,7 +110,7 @@ public class InteractivityTestsHelpers
 
         if(testNode.TryGetValueById(ConstStrings.A, out Value a))
         {
-             a.TryConnectToSocket(opNode, ConstStrings.VALUE);
+             a.TryConnectToSocket(opNode, outputValueSocket);
 
             if(assertNode.TryGetValueById(ConstStrings.A, out Value aa))
             {
@@ -121,12 +121,18 @@ public class InteractivityTestsHelpers
 
             if(assertNode.TryGetValueById(ConstStrings.C, out Value c))
             {
-                c.TryConnectToSocket(opNode, ConstStrings.VALUE);
+                c.TryConnectToSocket(opNode, outputValueSocket);
             }
         }
         testNode.AddValue(ConstStrings.B, expectedResult);
 
         return (g, opNode);
+    }
+
+    protected void TestOperationResultCustomOutput<T, TRes>(string nodeStr, T[] values, TRes expectedResult, string outputValueSocket = ConstStrings.VALUE)
+    {
+        var (g, n) = CreateOperationGraph(nodeStr, values, expectedResult, outputValueSocket);
+        RunTestForGraph(g, null);
     }
 
     protected void TestOperationResult<T, TRes>(string nodeStr, T[] values, TRes expectedResult)
@@ -157,6 +163,11 @@ public class InteractivityTestsHelpers
     protected void TestOperationResult<T, TRes>(string nodeStr, T val1, TRes expectedResult)
     {
         TestOperationResult(nodeStr, new T[]{val1}, expectedResult);
+    }
+
+    protected void TestOperationResultCustomOutput<T, TRes>(string nodeStr, T val1, TRes expectedResult, string outputValueSocket)
+    {
+        TestOperationResultCustomOutput(nodeStr, new T[]{val1}, expectedResult, outputValueSocket);
     }
 
     protected void TestOperationResult<T, TRes>(string nodeStr, T val1, T val2, TRes expectedResult)

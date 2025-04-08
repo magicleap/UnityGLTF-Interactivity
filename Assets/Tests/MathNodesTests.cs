@@ -516,6 +516,66 @@ public class MathNodesTests : InteractivityTestsHelpers
     }
 
     [Test]
+    public void TestExtract2()
+    {
+        var v = new float2(10.3f, -10.4f);
+        for(int i = 0; i < 2; i++)
+        {
+            TestOperationResultCustomOutput("math/extract2", v, v[i], i.ToString());
+        }
+    }
+
+    [Test]
+    public void TestExtract3()
+    {
+        var v = new float3(10.3f, -10.4f, 32.3f);
+        for(int i = 0; i < 3; i++)
+        {
+            TestOperationResultCustomOutput("math/extract3", v, v[i], i.ToString());
+        }
+    }
+
+    [Test]
+    public void TestExtract4()
+    {
+        var v = new float4(10.3f, -10.4f, 32.3f, 11.5f);
+        for(int i = 0; i < 4; i++)
+        {
+            TestOperationResultCustomOutput("math/extract4", v, v[i], i.ToString());
+        }
+    }
+
+    [Test]
+    public void TestExtract2x2()
+    {
+        var v = new float2x2(1.0f, 2.0f, 3.0f, 4.0f);
+        for(int i = 0; i < 4; i++)
+        {
+            TestOperationResultCustomOutput("math/extract2x2", v, v[i / 2][i % 2], i.ToString());
+        }
+    }
+
+    [Test]
+    public void TestExtract3x3()
+    {
+        var v = new float3x3(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f);
+        for(int i = 0; i < 9; i++)
+        {
+            TestOperationResultCustomOutput("math/extract3x3", v, v[i / 3][i % 3], i.ToString());
+        }
+    }
+
+    [Test]
+    public void TestExtract4x4()
+    {
+        var v = new float4x4(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f);
+        for(int i = 0; i < 16; i++)
+        {
+            TestOperationResultCustomOutput("math/extract4x4", v, v[i / 4][i % 4], i.ToString());
+        }
+    }
+
+    [Test]
     public void TestAnd()
     {
         TestOperationResult("math/and", true, false, false);
