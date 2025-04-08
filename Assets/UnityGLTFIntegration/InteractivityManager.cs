@@ -50,17 +50,9 @@ namespace UnityGLTF.Interactivity
             List<GraphData> gdList = GetInteractivityGraphsSorted(extensions);
             if (gdList == null || gdList.Count <= 0)
                 return;
-//            if (extensionValue is not InteractivityGraphExtension interactivityGraph)
- //               return;
 
             try
             {
-                //var defaultGraphIndex = interactivityGraph.extensionData.defaultGraphIndex;
-                //// Can be used to inject a graph created from code in a hacky way for testing.
-                ////interactivityGraph.extensionData.graphs[defaultGraphIndex] = TestGraph.CreateTestGraph();
-                //var defaultGraph = interactivityGraph.extensionData.graphs[defaultGraphIndex];
-//                List<Graph> graphList = new();
-//                gdList.ForEach(r => graphList.Add(r.graph)); 
                 _behaviourEngine = new BehaviourEngine(gdList, importer);
 
                 var audio = gdList.FindAll(r => (r.graph.audioSources != null) && (r.graph.audioSources.Count > 0));
@@ -163,49 +155,9 @@ namespace UnityGLTF.Interactivity
                         SetAudioValues(a, e, ref audioSourceScene);
 
                         if (audioSourceScene != null)
-                            wrapper.AddAudioSource(0, new AudioPlayData() { index = 0, source = audioSourceScene });
-                        
-                        //                        audioSourceScene.clip.name = Path.GetFileNameWithoutExtension(finalFileName);
+                            wrapper.AddAudioSource(0, new AudioPlayData() { index = 0, source = audioSourceScene });                        
                     }
 
-                    //else
-                    //{
-
-                    //    UnityEngine.AudioSource audioSourceScene = importer.SceneParent.gameObject.AddComponent<UnityEngine.AudioSource>();
-
-                    //    AudioSource a = GetAudioSource(idx, graph.audioSources);
-                    //    AudioEmitterPartial e = GetAudioEmitterPartial(idx, graph.audioEmitter);
-
-                    //    if (a != null)
-                    //    {
-                    //        audioSourceScene.volume = a.gain;
-                    //        audioSourceScene.loop = a.loop;
-                    //    }
-                    //    if (e != null)
-                    //    {
-                    //        audioSourceScene.minDistance = e.positional.minDistance;
-                    //        audioSourceScene.maxDistance = e.positional.maxDistance;
-                    //    }
-
-                    //    UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(directory2 + Path.DirectorySeparatorChar + fileName2, AudioType.MPEG);
-                    //    www.SendWebRequest();
-
-                    //    if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
-                    //    {
-                    //        Debug.LogError("Error: " + www.error);
-                    //    }
-                    //    else
-                    //    {
-                    //        AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
-                    //        clip.name = a.sourceName;
-                    //        audioSourceScene.clip = clip;
-                    //        audioSourceScene.Play();
-                    //    }
-
-                    //    File.Delete(directory2 + Path.DirectorySeparatorChar + fileName2);
-
-                    //    wrapper.AddAudioSource(0, new AudioPlayData() { index = 0, source = audioSourceScene });
-                    //}
                     idx++;
                 }
             }
