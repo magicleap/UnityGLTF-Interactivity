@@ -89,6 +89,89 @@ public class InteractivityTestsHelpers
         return importer;
     }
 
+    protected (Graph, Node) CreateOperationGraphExtract<T>(string nodeStr, T[] values, T expectedResult)
+    {
+        Graph g = new Graph();
+        g.AddDefaultTypes();
+
+        var onStartNode = g.CreateNode("event/onStart", Vector2.zero);
+
+        int numElems = 0;
+        string extractName = "";
+        if(typeof(T) == typeof(float2x2))
+        {
+            numElems = 4;
+            extractName = "math/extract2x2";
+        }
+        else if(typeof(T) == typeof(float3x3))
+        {
+            numElems = 9;
+            extractName = "math/extract3x3";
+        }
+        else if(typeof(T) == typeof(float4x4))
+        {
+            numElems = 16;
+            extractName = "math/extract4x4";
+        }
+
+        var opNode = g.CreateNode(nodeStr, Vector2.zero);
+        for(int i = 0; i < values.Length; i++)
+        {
+            opNode.AddValue(ConstStrings.Letters[i], values[i]);
+        }
+
+        var extractNode = g.CreateNode(extractName, Vector2.zero);
+
+        Value aval, bval, cval;
+    
+        if(extractNode.TryGetValueById(ConstStrings.A, out aval))
+        {
+            aval.TryConnectToSocket(opNode, ConstStrings.VALUE);
+        }
+
+        var extractNodeExpected = g.CreateNode(extractName, Vector2.zero);
+        extractNodeExpected.AddValue(ConstStrings.A, expectedResult);
+
+        Node prevFlowNode = onStartNode;
+
+        for(int i = 0; i < numElems; i++)
+        {
+            var indexSocket = i.ToString();
+
+            var assertNode = g.CreateNode("debug/assert", Vector2.zero);
+            prevFlowNode.AddFlow(ConstStrings.OUT, assertNode, ConstStrings.IN);
+            prevFlowNode = assertNode;
+
+            var testNode = g.CreateNode(_testNode, Vector2.zero);
+            
+            if(testNode.TryGetValueById(ConstStrings.A, out aval))
+            {
+                aval.TryConnectToSocket(extractNode, indexSocket);
+            }
+            if(testNode.TryGetValueById(ConstStrings.B, out bval))
+            {
+                bval.TryConnectToSocket(extractNodeExpected, indexSocket);
+            }
+            
+            if(assertNode.TryGetValueById(ConstStrings.A, out aval))
+            {
+                aval.TryConnectToSocket(testNode, ConstStrings.VALUE);
+            }
+
+            if(assertNode.TryGetValueById(ConstStrings.B, out bval))
+            {
+                bval.TryConnectToSocket(extractNodeExpected, indexSocket);
+            }
+
+            if(assertNode.TryGetValueById(ConstStrings.C, out cval))
+            {
+                cval.TryConnectToSocket(extractNode, indexSocket);
+            }
+        }
+
+        return (g, opNode);
+    }
+
     protected (Graph, Node) CreateOperationGraph<T, TRes>(string nodeStr, T[] values, TRes expectedResult, string outputValueSocket = ConstStrings.VALUE)
     {
         Graph g = new Graph();
@@ -108,23 +191,25 @@ public class InteractivityTestsHelpers
             opNode.AddValue(ConstStrings.Letters[i], values[i]);
         }
 
-        if(testNode.TryGetValueById(ConstStrings.A, out Value a))
         {
-             a.TryConnectToSocket(opNode, outputValueSocket);
-
-            if(assertNode.TryGetValueById(ConstStrings.A, out Value aa))
+            if(testNode.TryGetValueById(ConstStrings.A, out Value a))
             {
-                aa.TryConnectToSocket(testNode, ConstStrings.VALUE);
-            }
+                a.TryConnectToSocket(opNode, outputValueSocket);
 
-            assertNode.AddValue(ConstStrings.B, expectedResult);
+                if(assertNode.TryGetValueById(ConstStrings.A, out Value aa))
+                {
+                    aa.TryConnectToSocket(testNode, ConstStrings.VALUE);
+                }
 
-            if(assertNode.TryGetValueById(ConstStrings.C, out Value c))
-            {
-                c.TryConnectToSocket(opNode, outputValueSocket);
+                assertNode.AddValue(ConstStrings.B, expectedResult);
+
+                if(assertNode.TryGetValueById(ConstStrings.C, out Value c))
+                {
+                    c.TryConnectToSocket(opNode, outputValueSocket);
+                }
             }
+            testNode.AddValue(ConstStrings.B, expectedResult);
         }
-        testNode.AddValue(ConstStrings.B, expectedResult);
 
         return (g, opNode);
     }
@@ -152,6 +237,18 @@ public class InteractivityTestsHelpers
     {
         var (g, n) = CreateOperationGraph(nodeStr, new T[] {}, expectedResult);
         addValues?.Invoke(n);
+        RunTestForGraph(g, null);
+    }
+
+    protected void TestOperationResultMatrix<T>(string nodeStr, T mat, T expectedResult)
+    {
+        var (g, n) = CreateOperationGraphExtract(nodeStr, new T[] {mat}, expectedResult);
+        RunTestForGraph(g, null);
+    }
+
+    protected void TestOperationResultMatrix<T>(string nodeStr, T mat1, T mat2, T expectedResult)
+    {
+        var (g, n) = CreateOperationGraphExtract(nodeStr, new T[]{mat1, mat2}, expectedResult);
         RunTestForGraph(g, null);
     }
 

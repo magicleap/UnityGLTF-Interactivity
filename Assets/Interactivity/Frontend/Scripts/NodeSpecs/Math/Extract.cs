@@ -42,7 +42,7 @@ namespace UnityGLTF.Interactivity
         {
             var values = new NodeValue[]
             {
-                new NodeValue(ConstStrings.VALUE, "Input", new Type[]  { typeof(T) }),
+                new NodeValue(ConstStrings.A, "Input", new Type[]  { typeof(T) }),
             };
 
             return (null, values);

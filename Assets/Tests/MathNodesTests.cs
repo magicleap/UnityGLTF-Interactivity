@@ -576,6 +576,112 @@ public class MathNodesTests : InteractivityTestsHelpers
     }
 
     [Test]
+    public void TestTranspose()
+    {
+        {
+            var mat4 = new float4x4(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f);
+            var tmat4 = new float4x4();
+            for(int i = 0; i < 16; i++)
+            {
+                tmat4[i / 4][i % 4] = mat4[i % 4][i / 4];
+            }
+            TestOperationResultMatrix("math/transpose", mat4, tmat4);
+        }
+
+        {
+            var mat3 = new float3x3(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f);
+            var tmat3 = new float3x3();
+            for(int i = 0; i < 9; i++)
+            {
+                tmat3[i / 3][i % 3] = mat3[i % 3][i / 3];
+            }
+            TestOperationResultMatrix("math/transpose", mat3, tmat3);
+        }
+
+        {
+            var mat2 = new float2x2(1.0f, 2.0f, 3.0f, 4.0f);
+            var tmat2 = new float2x2();
+            for(int i = 0; i < 4; i++)
+            {
+                tmat2[i / 2][i % 2] = mat2[i % 2][i / 2];
+            }
+            TestOperationResultMatrix("math/transpose", mat2, tmat2);
+        }
+    }
+
+    [Test]
+    public void TestDeterminant()
+    {
+        {
+            var mat4 = new float4x4(1.0f, 2.0f, 3.0f, 41.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 151.0f, 16.0f);
+            TestOperationResult("math/determinant", mat4, 20128.0f);
+        }
+
+        {
+            var mat3 = new float3x3(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 91.0f);
+            TestOperationResult("math/determinant", mat3, -246.0f);
+        }
+
+        {
+            var mat2 = new float2x2(1.0f, 2.0f, 3.0f, 41.0f);
+            TestOperationResult("math/determinant", mat2, 35.0f);
+        }
+    }
+
+    [Test]
+    public void TestInverse()
+    {
+        using(new CompareFunc(this, "math/approxeq"))
+        {
+            var mat4 = new float4x4(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 121.0f, 13.0f, 14.0f, 151.0f, 161.0f);
+            var imat4 = new float4x4(-1.47672f, 0.4608f, 0.008567f, 0.007352f, 1.21262f, -0.18996f, -0.00796f, -0.0147f, 0.00492f, -0.0025f, -0.009781f, 0.007352f, 0.00917f, -0.018348f, 0.009174f, 0.0f);
+            TestOperationResultMatrix("math/inverse", mat4, imat4);
+        }
+
+        using(new CompareFunc(this, "math/approxeq"))
+        {
+            var mat3 = new float3x3(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 91.0f);
+            var imat3 = new float3x3(-1.65447f, 0.64227f, 0.0122f, 1.30894f, -0.28455f, -0.0244f, 0.0122f, -0.0244f, 0.0122f);
+            TestOperationResultMatrix("math/inverse", mat3, imat3);
+        }
+
+        using(new CompareFunc(this, "math/approxeq"))
+        {
+            var mat2 = new float2x2(1.0f, 2.0f, 3.0f, 41.0f);
+            var imat2 = new float2x2(1.17142f, -0.05714f, -0.08571f, 0.02857f);
+            TestOperationResultMatrix("math/inverse", mat2, imat2);
+        }
+    }
+
+    [Test]
+    public void TestMatMul()
+    {
+        using(new CompareFunc(this, "math/approxeq"))
+        {
+            var mat41 = new float4x4(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f);
+            var mat42 = new float4x4(1.0f, 2.0f, 3.0f, 4.0f, 4.0f, 3.0f, 2.0f, 1.0f, 5.0f, 6.0f, 7.0f, 8.0f, 8.0f, 7.0f, 6.0f, 5.0f);
+            var matres = new float4x4(56.0f, 54.0f, 52.0f, 50.0f, 128.0f, 126.0f, 124.0f, 122.0f, 200.0f, 198.0f, 196.0f, 194.0f, 272.0f, 270.0f, 268.0f, 266.0f);
+            TestOperationResultMatrix("math/matmul", mat41, mat42, matres);
+        }
+
+        using(new CompareFunc(this, "math/approxeq"))
+        {
+            var mat31 = new float3x3(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f);
+            var mat32 = new float3x3(1.0f, 2.0f, 3.0f, 3.0f, 2.0f, 1.0f, 6.0f, 4.0f, 5.0f);
+            var matres = new float3x3(25.0f, 18.0f, 20.0f, 55.0f, 42.0f, 47.0f, 85.0f, 66.0f, 74.0f);
+            TestOperationResultMatrix("math/matmul", mat31, mat32, matres);
+        }
+
+        using(new CompareFunc(this, "math/approxeq"))
+        {
+            var mat21 = new float2x2(1.0f, 2.0f, 3.0f, 4.0f);
+            var mat22 = new float2x2(1.0f, 2.0f, 2.0f, 1.0f);
+            var matres = new float2x2(5.0f, 4.0f, 11.0f, 10.0f);
+            TestOperationResultMatrix("math/matmul", mat21, mat22, matres);
+        }
+    }
+
+    [Test]
     public void TestAnd()
     {
         TestOperationResult("math/and", true, false, false);
