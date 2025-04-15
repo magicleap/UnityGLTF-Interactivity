@@ -43,11 +43,7 @@ namespace UnityGLTF.Interactivity
                             engineNodes.Add(graph.nodes[i], NodeRegistry.CreateBehaviourEngineNode(this, graph.nodes[i]));
                         }
                     }
-                    // has other graphs such as an audio emitter extension.
-                    else if (extensionGraph.type == KHR_ExtensionGraph.GraphType.Audio)
-                    {
-                        // do audio specific stuff here
-                    }
+
                 }
             }
         }

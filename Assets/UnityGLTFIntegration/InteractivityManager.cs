@@ -1,8 +1,10 @@
 using GLTF.Schema;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.ExceptionServices;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityGLTF.Interactivity.Extensions;
@@ -38,6 +40,22 @@ namespace UnityGLTF.Interactivity
             _ = _loader.LoadModelAsync($"{_modelName}.glb", OnLoadComplete, _loadTimeout);
         }
 
+        private bool _loadedAudioFile = false;
+        private UnityEngine.AudioSource _loadingAudioSource = null;
+        private AudioWrapper _audioWrapper = null;
+
+        private void Update()
+        {
+            if (_loadedAudioFile && _loadingAudioSource != null)
+            {
+                if (_loadingAudioSource.playOnAwake)
+                    _loadingAudioSource.Play();
+                _audioWrapper.AddAudioSource(0, new AudioPlayData() { index = 0, source = _loadingAudioSource });
+                _loadingAudioSource = null;
+                _loadedAudioFile = false;
+            }
+        }
+
         private void OnLoadComplete(GameObject obj, ExceptionDispatchInfo exceptionDispatchInfo, GLTFSceneImporter importer)
         {
             onModelLoadComplete?.Invoke();
@@ -54,16 +72,33 @@ namespace UnityGLTF.Interactivity
             try
             {
                 _behaviourEngine = new BehaviourEngine(gdList, importer);
-
-                var audio = gdList.FindAll(r => (r.graph.audioSources != null) && (r.graph.audioSources.Count > 0));
-                if (audio != null && audio.Count > 0)
+                
+                foreach(var graph in gdList)
                 {
-                    //found audio. add audio wrapper if it does not already exist.
-                    AudioWrapper audioWrapper = importer.SceneParent.gameObject.AddComponent<AudioWrapper>();
-                    _behaviourEngine.SetAudioWrapper(audioWrapper);
-
-                    AddAudioSources(importer, audioWrapper, audio);
+                    _audioWrapper = importer.SceneParent.gameObject.GetComponent<AudioWrapper>();
+                    if (_audioWrapper == null)
+                    {
+                        _audioWrapper = importer.SceneParent.gameObject.AddComponent<AudioWrapper>();
+                        _behaviourEngine.SetAudioWrapper(_audioWrapper);
+                    }
+                    switch (graph.extension.type)
+                    {
+                        case KHR_ExtensionGraph.GraphType.KHR_Audio:
+                            var audioSrcs = gdList.FindAll(r => (r.graph.audioSources != null) && (r.graph.audioSources.Count > 0));
+                            if (audioSrcs != null && audioSrcs.Count > 0)          
+                                AddAudioSources(importer, audioSrcs);
+                            break;
+                        case KHR_ExtensionGraph.GraphType.GOOG_Audio:
+                            audioSrcs = gdList.FindAll(r => (r.graph.audio != null) && (r.graph.audio.Count > 0));
+                            if (graph.graph.audio != null && graph.graph.audio.Count > 0)
+                                AddGOOGAudioSource(importer, audioSrcs);
+                            break;
+                        default:
+                            break;
+                    }
                 }
+
+
             }
             catch (Exception e)
             {
@@ -93,9 +128,75 @@ namespace UnityGLTF.Interactivity
             onExtensionLoadComplete?.Invoke(extensionList[0]);
         }
 
-        private void AddAudioSources(GLTFSceneImporter importer, AudioWrapper wrapper, List<GraphData> audioGraphs)
+        // dpq - need to genercize this with the method below.        
+        private void AddGOOGAudioSource(GLTFSceneImporter importer, List<GraphData> audioGraphs)
         {
-            if (wrapper == null)
+            if (_audioWrapper == null)
+                return;
+
+            //loop through all of the audio graphs. Could be more than one conceivably. Practically speaking though, 
+            // one model should have one audio graph with audio, emitters and sources
+            foreach (var audioGraph in audioGraphs)
+            {
+                Graph graph = audioGraph.graph;
+
+                int idx = 0;
+
+                // each audio
+                foreach (var audio in graph.audio)
+                {
+                    AudioEmitterPartial e = GetAudioEmitterPartial<GOOG_AudioType>(new GOOG_AudioType(), idx, graph.audioEmitter);
+
+                    string path = string.Empty;
+                    string finalFileName = String.Empty;
+                    string finalDir = String.Empty;
+                    if (audio.uri != null && !string.IsNullOrEmpty(audio.uri))
+                    {
+                        audio.uri = audio.uri;
+                        path = Path.GetDirectoryName(_modelName);
+                        if (!string.IsNullOrEmpty(path))
+                        {
+                            path += Path.DirectorySeparatorChar + audio.uri;
+                        }
+                        else
+                        {
+                            path = audio.uri;
+                        }
+                        var (directory, fileName) = Helpers.GetFilePath(path);
+                        finalFileName = fileName;
+                        finalDir = directory;
+                    }
+                    else
+                    {
+                        /// get index into buffer
+                        BufferView bv = importer.Root.BufferViews[audio.bufferView];
+                        var offset = bv.ByteOffset;
+                        var length = bv.ByteLength;
+
+                        byte[] audioArray = GetAudioBufferArrayFromGLB(_modelName, offset, length);
+                        string tempFile = WriteToTempFile(audioArray, length);
+
+                        var (directory, fileName) = Helpers.GetFilePath(tempFile);
+                        finalFileName = fileName;
+                        finalDir = directory;
+                    }
+
+                    if (!string.IsNullOrEmpty(finalFileName) && !string.IsNullOrEmpty(finalDir))
+                    {
+                        if (_loadingAudioSource == null)
+                            _loadingAudioSource = importer.SceneParent.gameObject.AddComponent<UnityEngine.AudioSource>();
+                        SetGOOGAudioValues(audio, e, ref _loadingAudioSource);
+                        StartCoroutine(LoadAudioSourceClipFromFile(finalDir + Path.DirectorySeparatorChar + finalFileName, Path.GetFileNameWithoutExtension(audio.uri)));
+                    }
+
+                    idx++;
+                }
+            }
+        }
+
+        private void AddAudioSources(GLTFSceneImporter importer, List<GraphData> audioGraphs)
+        {
+            if (_audioWrapper == null)
                 return;
 
             //loop through all of the audio graphs. Could be more than one conceivably. Practically speaking though, 
@@ -111,7 +212,7 @@ namespace UnityGLTF.Interactivity
                 foreach(var audio in graph.audio)
                 {
                     AudioSource a = GetAudioSource(idx, graph.audioSources);
-                    AudioEmitterPartial e = GetAudioEmitterPartial(idx, graph.audioEmitter);
+                    AudioEmitterPartial e = GetAudioEmitterPartial<KHR_AudioType>(new KHR_AudioType(), idx, graph.audioEmitter);
 
                     string path = string.Empty;
                     string finalFileName = String.Empty;
@@ -149,13 +250,12 @@ namespace UnityGLTF.Interactivity
 
                     if (!string.IsNullOrEmpty(finalFileName) && !string.IsNullOrEmpty(finalDir))
                     {
-                        audioSourceScene = LoadAudioSourceClipFromFile(
-                            finalDir + Path.DirectorySeparatorChar + finalFileName,
-                            importer.SceneParent.gameObject);
-                        SetAudioValues(a, e, ref audioSourceScene);
+                        if (_loadingAudioSource == null)
+                            _loadingAudioSource = importer.SceneParent.gameObject.AddComponent<UnityEngine.AudioSource>();
+                        SetAudioValues(a, e, ref _loadingAudioSource);
 
-                        if (audioSourceScene != null)
-                            wrapper.AddAudioSource(0, new AudioPlayData() { index = 0, source = audioSourceScene });                        
+                        StartCoroutine(LoadAudioSourceClipFromFile(finalDir + Path.DirectorySeparatorChar + finalFileName, a.sourceName));
+
                     }
 
                     idx++;
@@ -212,6 +312,18 @@ namespace UnityGLTF.Interactivity
             return arr;
         }
 
+        private void SetGOOGAudioValues(Audio source, AudioEmitterPartial emitter, ref UnityEngine.AudioSource audioSource)
+        {
+            if (emitter != null)
+            {
+                audioSource.volume = emitter.gain;
+                audioSource.loop = emitter.loop;
+                audioSource.playOnAwake = emitter.autoPlay;
+            }
+            //string fileName = Path.GetFileNameWithoutExtension(source.uri);
+            //audioSource.clip.name = fileName;
+        }
+
         private void SetAudioValues(AudioSource source, AudioEmitterPartial emitter, ref UnityEngine.AudioSource audioSource)
         {
             if (source != null)
@@ -224,13 +336,14 @@ namespace UnityGLTF.Interactivity
                 audioSource.minDistance = emitter.positional.minDistance;
                 audioSource.maxDistance = emitter.positional.maxDistance;
             }
-            audioSource.clip.name = source.sourceName;
+//            audioSource.clip.name = source.sourceName;
         }
 
-        private UnityEngine.AudioSource LoadAudioSourceClipFromFile(string pathFileName, GameObject rootGO)
+        private IEnumerator LoadAudioSourceClipFromFile(string pathFileName, string clipName)
         {
             UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(pathFileName, AudioType.MPEG);
-            www.SendWebRequest();
+            var download = www.SendWebRequest();
+            yield return null;
 
             if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
             {
@@ -239,11 +352,12 @@ namespace UnityGLTF.Interactivity
             else
             {
                 var clip = DownloadHandlerAudioClip.GetContent(www);
-                UnityEngine.AudioSource audioSourceScene = rootGO.AddComponent<UnityEngine.AudioSource>();
-                audioSourceScene.clip = clip;
-                return audioSourceScene;
+                _loadingAudioSource.clip = clip;
+                _loadingAudioSource.clip.name = clipName;
+                _loadedAudioFile = true;
+                yield return _loadingAudioSource;
             }
-            return null;
+            yield return null;
         }
 
         internal AudioSource GetAudioSource(int index, List<AudioSource> audioSources)
@@ -258,21 +372,36 @@ namespace UnityGLTF.Interactivity
             return null;
         }
 
-        internal AudioEmitterPartial GetAudioEmitterPartial(int index, List<AudioEmitter> audioEmitters)
+        internal AudioEmitterPartial GetAudioEmitterPartial<T>(T t, int index, List<AudioEmitter> audioEmitters)
         {
-            foreach(AudioEmitter emitter in audioEmitters)
-            {
-                for(int i = 0; i < emitter.sources.Count; i++)
+                foreach (AudioEmitter emitter in audioEmitters)
                 {
-                    if ((emitter.sources[i] == index) && (emitter.positional.Count == emitter.sources.Count))
+                if (t is KHR_AudioType)
+                {
+                    for (int i = 0; i < emitter.sources.Count; i++)
                     {
-                        return new AudioEmitterPartial() { 
-                            gain = emitter.gain, 
-                            name = emitter.name, 
-                            source = emitter.sources[i], 
-                            type = emitter.type, 
-                            positional = emitter.positional[i] };
+                        if ((emitter.sources[i] == index) && (emitter.positional.Count == emitter.sources.Count))
+                        {
+                            return new AudioEmitterPartial()
+                            {
+                                gain = emitter.gain,
+                                name = emitter.name,
+                                source = emitter.sources[i],
+                                type = emitter.type,
+                                positional = emitter.positional[i]
+                            };
+                        }
                     }
+                }
+                else if (t is GOOG_AudioType)
+                {
+                    return new AudioEmitterPartial()
+                    {
+                        gain = emitter.gain,
+                        audio = emitter.audio,
+                        autoPlay = emitter.autoPlay,
+                        loop = emitter.loop
+                    };
                 }
             }
             return null;
@@ -286,8 +415,11 @@ namespace UnityGLTF.Interactivity
             if (!extensions.TryGetValue(InteractivityGraphExtension.EXTENSION_NAME, out IExtension interactivityExtensionValue))
                 return null;
             extensionValues.Add(interactivityExtensionValue);
-            if (extensions.TryGetValue(AudioGraphExtension.EXTENSION_NAME, out IExtension audioExtensionValue))
+            if (extensions.TryGetValue(AudioGraphExtension<KHR_AudioType>.KHR_EXTENSION_NAME, out IExtension audioExtensionValue))
                 extensionValues.Add(audioExtensionValue);
+            else if (extensions.TryGetValue(AudioGraphExtension<KHR_AudioType>.GOOG_EXTENSION_NAME, out IExtension GOOGaudioExtensionValue))
+                extensionValues.Add(GOOGaudioExtensionValue);
+
 
             bool found = false;
             foreach(var v in extensionValues)
@@ -299,9 +431,13 @@ namespace UnityGLTF.Interactivity
                         var defaultGraphIndex = interactivityGraph.extensionData.defaultGraphIndex;
                         graphs.Add(new GraphData() { extension = interactivityGraph.extensionData, graph = interactivityGraph.extensionData.graphs[defaultGraphIndex] });
                         break;
-                    case AudioGraphExtension audioGraph:
-                        var audioGraphIndex = audioGraph.extensionData.defaultGraphIndex;
-                        graphs.Add(new GraphData() { extension = audioGraph.extensionData, graph = audioGraph.extensionData.graphs[audioGraphIndex] });
+                    case AudioGraphExtension<GOOG_AudioType> GOOGaudioGraph:
+                        var audioGraphIndex = GOOGaudioGraph.extensionData.defaultGraphIndex;
+                        graphs.Add(new GraphData() { extension = GOOGaudioGraph.extensionData, graph = GOOGaudioGraph.extensionData.graphs[audioGraphIndex] });
+                        break;
+                    case AudioGraphExtension<KHR_AudioType> KHRaudioGraph:
+                        var KHRaudioGraphIndex = KHRaudioGraph.extensionData.defaultGraphIndex;
+                        graphs.Add(new GraphData() { extension = KHRaudioGraph.extensionData, graph = KHRaudioGraph.extensionData.graphs[KHRaudioGraphIndex] });
                         break;
                     default:
                         Debug.LogError($"{this.name} : Undefined InteractivityGraph type");

@@ -10,18 +10,15 @@ namespace UnityGLTF.Interactivity
         public enum GraphType
         {
             Interactivity,
-            Audio
+            KHR_Audio, 
+            GOOG_Audio
         }
         public List<Graph> graphs { get; set; } = new();
         public int defaultGraphIndex { get; set; }
         public GraphType type { get; set; } = GraphType.Interactivity;
     }
 
-    //public class KHR_audio_emitter
-    //{
-    //    public List<Graph> audioElementsGraphs { get; set; } = new();
-    //    public int defaultGraphIndex { get; set; }
-    //}
+
 
     public class Audio
     {
@@ -41,10 +38,14 @@ namespace UnityGLTF.Interactivity
     
     public class AudioEmitter
     {
+        public int audio { get; set; }
+        public float gain { get; set; }
+        public bool autoPlay { get; set; }
+        public bool loop { get; set; }
         public string name { get; set; }
         public string type { get; set; }
+        // for KHR types only
         public List<int> sources { get; set; }
-        public float gain { get; set; }
         public List<PositionAudioData> positional { get; set; }
     }
 
@@ -53,7 +54,10 @@ namespace UnityGLTF.Interactivity
         public string name { get; set;  }
         public string type { get; set; }
         public int source { get; set; }
+        public int audio { get; set; }
         public float gain { get; set; }
+        public bool autoPlay { get; set; }
+        public bool loop { get; set; }
         public PositionAudioData positional { get; set; }
     }
 

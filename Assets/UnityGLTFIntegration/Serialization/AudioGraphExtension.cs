@@ -5,16 +5,19 @@ using UnityEngine;
 
 namespace UnityGLTF.Interactivity
 {
-    public class AudioGraphExtension : IExtension
+    public class AudioGraphExtension<T> : IExtension
     {
-        public const string EXTENSION_NAME = "KHR_audio_emitter";
+        public const string KHR_EXTENSION_NAME = "KHR_audio_emitter";
+        public const string GOOG_EXTENSION_NAME = "GOOG_audio_emitter";
 
         public KHR_ExtensionGraph extensionData { get; private set; }
 
         private readonly GraphSerializer _serializer = new();
 
-        public AudioGraphExtension(KHR_ExtensionGraph extensionData = null)
+        private T _t;
+        public AudioGraphExtension(T t,  KHR_ExtensionGraph extensionData = null)
         {
+            _t = t;
             this.extensionData = extensionData;
         }
 
@@ -25,10 +28,8 @@ namespace UnityGLTF.Interactivity
 
         public void Deserialize(JProperty extensionToken)
         {
-            if (!extensionToken.Name.Equals(EXTENSION_NAME))
-                return;
-
-            extensionData = _serializer.Deserialize(extensionToken.Value.ToString());
+            if (extensionToken.Name.Equals(KHR_EXTENSION_NAME) || extensionToken.Name.Equals(GOOG_EXTENSION_NAME))
+                extensionData = _serializer.Deserialize(extensionToken.Value.ToString());
         }
 
         public JProperty Serialize()
@@ -38,8 +39,10 @@ namespace UnityGLTF.Interactivity
                 var json = _serializer.Serialize(extensionData);
 
                 JObject jobject = JObject.Parse(json);
-
-                return new JProperty(EXTENSION_NAME, jobject);
+                if (_t is KHR_AudioType)
+                    return new JProperty(KHR_EXTENSION_NAME, jobject);
+                else if (_t is GOOG_EXTENSION_NAME)
+                    return new JProperty(GOOG_EXTENSION_NAME, jobject);
             }
             catch (Exception ex)
             {

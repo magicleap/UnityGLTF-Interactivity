@@ -58,11 +58,16 @@ namespace UnityGLTF.Interactivity
             }
             else if (jObj[ConstStrings.AUDIO] != null || jObj[ConstStrings.AUDIO_SOURCES] != null || jObj[ConstStrings.AUDIO_EMITTERS] != null)
             {
+                bool isValid = true;
                 var audioGraph = jObj[ConstStrings.AUDIO];
                 var audioSourceGraph = jObj[ConstStrings.AUDIO_SOURCES];
                 var audioEmitterGraph = jObj[ConstStrings.AUDIO_EMITTERS];
 
-                interactivity.type = KHR_ExtensionGraph.GraphType.Audio;
+                if (audioSourceGraph != null)
+                    interactivity.type = KHR_ExtensionGraph.GraphType.KHR_Audio;
+                else
+                    interactivity.type = KHR_ExtensionGraph.GraphType.GOOG_Audio;
+
                 var graph = new Graph();
 
                 if (audioGraph != null && audioGraph.HasValues)
@@ -75,10 +80,14 @@ namespace UnityGLTF.Interactivity
                 }
                 if (audioEmitterGraph != null && audioEmitterGraph.HasValues)
                 {
-                    GenerateAudioEmittersGraph(jObj, ref graph);
+                    if (interactivity.type == KHR_ExtensionGraph.GraphType.KHR_Audio)
+                        GenerateAudioEmittersGraph(jObj, ref graph);
+                    else if (interactivity.type == KHR_ExtensionGraph.GraphType.GOOG_Audio)
+                        isValid = GenerateGOOGAudioEmittersGraph(jObj, ref graph);
                 }
 
-                interactivity.graphs.Add(graph);
+                if (isValid)
+                    interactivity.graphs.Add(graph);
                 //foreach (JObject jGraph in audioGraph)
                 //{
                 //    interactivity.graphs.Add(GenerateAudioGraph(jGraph, ref graph));
@@ -125,9 +134,19 @@ namespace UnityGLTF.Interactivity
             graph.audioSources = sources; 
         }
 
+        private static bool GenerateGOOGAudioEmittersGraph(JObject jObj, ref Graph graph)
+        {
+            var emitters = AudioEmittersDeserializer.GetAudioEmitters<GOOG_AudioType>(new GOOG_AudioType(), jObj);
+            if (emitters == null)
+                return false;
+
+            graph.audioEmitter = emitters;
+            return true;
+        }
+
         private static void GenerateAudioEmittersGraph(JObject jObj, ref Graph graph)
         {
-            var emitters = AudioEmittersDeserializer.GetAudioEmitters(jObj);
+            var emitters = AudioEmittersDeserializer.GetAudioEmitters<KHR_AudioType>(new KHR_AudioType(), jObj);
 
             graph.audioEmitter = emitters;
         }
