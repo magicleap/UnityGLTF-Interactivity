@@ -139,12 +139,12 @@ namespace UnityGLTF.Interactivity.Tests
             g.AddEvent("done"); // 2
             g.AddEvent("cancel"); // 3
 
-            var onStartnode = g.CreateNode("event/onStart");
-            var setDelayNode = g.CreateNode("flow/setDelay");
-            var outSendNode = g.CreateNode("event/send");
-            var errSendNode = g.CreateNode("event/send");
-            var doneSendNode = g.CreateNode("event/send");
-            var cancelReceiveNode = g.CreateNode("event/receive");
+            var onStartnode = g.CreateNode("event/onStart"); // 0
+            var setDelayNode = g.CreateNode("flow/setDelay"); // 1
+            var outSendNode = g.CreateNode("event/send"); // 2
+            var errSendNode = g.CreateNode("event/send"); // 3
+            var doneSendNode = g.CreateNode("event/send"); // 4
+            var cancelReceiveNode = g.CreateNode("event/receive"); // 5
 
             outSendNode.AddConfiguration(ConstStrings.EVENT, 0);
             errSendNode.AddConfiguration(ConstStrings.EVENT, 1);
@@ -157,7 +157,6 @@ namespace UnityGLTF.Interactivity.Tests
             setDelayNode.AddFlow(ConstStrings.OUT, outSendNode, ConstStrings.IN);
             setDelayNode.AddFlow(ConstStrings.ERR, errSendNode, ConstStrings.IN);
             setDelayNode.AddFlow(ConstStrings.DONE, doneSendNode, ConstStrings.IN);
-
 
             setDelayNode.AddValue(ConstStrings.DURATION, duration);
 
@@ -188,30 +187,36 @@ namespace UnityGLTF.Interactivity.Tests
         public IEnumerator TestSetDelay()
         {
             const float DURATION = 0.75f;
+            const float MAX_ERROR = 0.01f;
+            const float EXTRA_EXECUTION_TIME = 0.25f;
             var g = CreateSetDelayGraph(DURATION);
 
             var startTime = Time.time;
             var endTime = Time.time + DURATION;
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-            Debug.Log("Test started");
+            var finishExecutionTime = endTime + EXTRA_EXECUTION_TIME;
 
-            while(Time.time < endTime)
+            var outFlowExecuted = false;
+            var doneFlowExecuted = false;
+
+            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
+
+            while (Time.time < finishExecutionTime)
             {
                 eng.Tick();
                 yield return null;
             }
-            Debug.Log("Test finished");
 
+            Assert.IsTrue(outFlowExecuted);
+            Assert.IsTrue(doneFlowExecuted);
 
             void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
             {
-                Debug.Log($"Event index {eventIndex}");
-
                 switch(eventIndex)
                 {
                     case 0:
-                        Debug.Log($"Out triggered at {Time.time}");
-                        UnityEngine.Assertions.Assert.AreApproximatelyEqual(Time.time, startTime);
+                        Debug.Log($"Out triggered at {Time.time}, should be very close to {startTime}");
+                        outFlowExecuted = true;
+                        UnityEngine.Assertions.Assert.AreApproximatelyEqual(Time.time, startTime, MAX_ERROR);
                         return;
 
                     case 1:
@@ -219,8 +224,117 @@ namespace UnityGLTF.Interactivity.Tests
                         return;
 
                     case 2:
-                        Debug.Log($"Done triggered at {Time.time}");
-                        UnityEngine.Assertions.Assert.AreApproximatelyEqual(Time.time, startTime + DURATION, 0.01f);
+                        Debug.Log($"Done triggered at {Time.time}, should be very close to {endTime}");
+                        doneFlowExecuted = true;
+                        UnityEngine.Assertions.Assert.AreApproximatelyEqual(Time.time, endTime, MAX_ERROR);
+                        return;
+                }
+            }
+        }
+
+
+        [Test]
+        public void TestSetDelayInvalidDurationNaN()
+        {
+            TestSetDelayInvalidDuration(float.NaN);
+        }
+
+        [Test]
+        public void TestSetDelayInvalidDurationNegative()
+        {
+            TestSetDelayInvalidDuration(-1f);
+        }
+
+        [Test]
+        public void TestSetDelayInvalidDurationInfinite()
+        {
+            TestSetDelayInvalidDuration(float.PositiveInfinity);
+        }
+
+        private void TestSetDelayInvalidDuration(float duration)
+        {
+            var g = CreateSetDelayGraph(duration);
+
+            var startTime = Time.time;
+
+            var errFlowExecuted = false;
+
+            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
+
+            Assert.IsTrue(errFlowExecuted);
+
+            void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
+            {
+                switch (eventIndex)
+                {
+                    case 0:
+                        Assert.Fail("Should never get the out flow triggered in this test.");
+                        return;
+
+                    case 1:
+                        errFlowExecuted = true;
+                        Debug.Log($"Error flow triggered as duration is {duration} which is invalid.");
+                        return;
+
+                    case 2:
+                        Assert.Fail("Should never get the done flow triggered in this test.");
+                        return;
+                }
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator TestSetDelayCancelWithEventReceive()
+        {
+            const float DURATION = 0.75f;
+            const float CANCEL_TIME = 0.35f;
+            const float MAX_ERROR = 0.01f;
+            const float EXTRA_EXECUTION_TIME = 0.25f;
+            var g = CreateSetDelayGraph(DURATION);
+
+            var startTime = Time.time;
+            var endTime = Time.time + DURATION;
+            var finishExecutionTime = endTime + EXTRA_EXECUTION_TIME;
+
+            var outFlowExecuted = false;
+
+            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
+
+            var hasCancelled = false;
+
+            while (Time.time < finishExecutionTime)
+            {
+                if (!hasCancelled && Time.time > CANCEL_TIME)
+                {
+                    eng.FireCustomEvent(3);
+                    hasCancelled = true;
+                }
+
+                eng.Tick();
+                yield return null;
+            }
+
+            var setDelayEngineNode = eng.engineNodes[g.nodes[1]];
+            var lastDelayIndex = (Property<int>)setDelayEngineNode.GetOutputValue(ConstStrings.LAST_DELAY_INDEX);
+            Assert.AreEqual(-1, lastDelayIndex.value);
+            Assert.IsTrue(outFlowExecuted);
+
+            void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
+            {
+                switch (eventIndex)
+                {
+                    case 0:
+                        Debug.Log($"Out triggered at {Time.time}, should be very close to {startTime}");
+                        outFlowExecuted = true;
+                        UnityEngine.Assertions.Assert.AreApproximatelyEqual(Time.time, startTime, MAX_ERROR);
+                        return;
+
+                    case 1:
+                        Assert.Fail("Should never get the err flow triggered in this test.");
+                        return;
+
+                    case 2:
+                        Assert.Fail("Should never get the done flow triggered in this test.");
                         return;
                 }
             }
