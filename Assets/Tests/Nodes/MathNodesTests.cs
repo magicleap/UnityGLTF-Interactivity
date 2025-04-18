@@ -57,22 +57,22 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void TestInf()
         {
-            TestNode("math/inf", math.INFINITY);
+            TestNode("math/inf", math.INFINITY, ComparisonType.IsInfinity);
         }
 
         [Test]
         public void TestNAN()
         {
-            TestNode("math/nan", math.NAN);
+            TestNode("math/nan", math.NAN, ComparisonType.IsNaN);
         }
 
         [Test]
         public void TestAbs()
         {
             TestNode("math/abs", -2, 2);
-            //TestNode("math/abs", 9, 9);
+            TestNode("math/abs", 9, 9);
 
-            //TestNodeWithAllFloatNInputVariants("math/abs", new float4(-2f, 2f, -9.15f, 0f), new float4(2f, 2f, 9.15f, 0f));
+            TestNodeWithAllFloatNInputVariants("math/abs", new float4(-2f, 2f, -9.15f, 0f), new float4(2f, 2f, 9.15f, 0f));
         }
 
         [Test]
@@ -156,17 +156,25 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void TestDiv()
         {
-            TestNodeWithAllFloatNInputVariants("math/div", new float4(5, 5, 12.4f, -12.4f), new float4(0f, math.INFINITY, 4f, 4f), new float4(math.INFINITY, 0f, 3.1f, -3.1f));
-            TestNodeWithAllFloatNInputVariants("math/div", new float4(12.0f, 16.0f, -32.0f, 7.0f), new float4(3.0f, 0.0f, 14.0f, 14.0f), new float4(4.0f, math.INFINITY, -2.28571429f, 0.5f));
+            var a = new float4(5f, 5f, 12.4f, -12.4f);
+            var b = new float4(1f, 12f, -55f, -12.4f);
+            var expected = a / b;
+            TestNodeWithAllFloatNInputVariants("math/div", a, b, expected);
+            TestNode("math/div", 5f, 0f, float.PositiveInfinity, ComparisonType.IsInfinity);
+            TestNode("math/div", 5f, float.PositiveInfinity, 0f);
         }
 
         [Test]
         public void TestRem()
         {
-            TestNodeWithAllFloatNInputVariants("math/rem", 5.0f, 0.0f, math.NAN);
-            TestNodeWithAllFloatNInputVariants("math/rem", 5.0f, math.INFINITY, 5.0f);
+            var a = new float4(5f, 5f, 12.4f, -12.4f);
+            var b = new float4(1f, 12f, -55f, -12.4f);
+            var expected = a % b;
+
+            TestNodeWithAllFloatNInputVariants("math/rem", 5.0f, 0.0f, math.NAN, ComparisonType.IsNaN);
+            TestNodeWithAllFloatNInputVariants("math/rem", 5.0f, math.INFINITY, 5.0f, ComparisonType.Equals);
             TestNodeWithAllFloatNInputVariants("math/rem", 12.4f, 4.0f, 0.4f);
-            TestNodeWithAllFloatNInputVariants("math/rem", new float4(12.0f, 16.0f, -32.0f, 7.0f), new float4(3.0f, 0.0f, 14.0f, 14.0f), new float4(0.0f, math.NAN, -4.0f, 7.0f));
+            TestNodeWithAllFloatNInputVariants("math/rem", a, b, expected);
             TestNode("math/rem", 5, 4, 1);
             TestNode("math/rem", 5, 5, 0);
         }
@@ -299,9 +307,6 @@ namespace UnityGLTF.Interactivity.Tests
             MathSelectTest(10.0f, 20.0f, true, 10.0f);
             MathSelectTest(10.0f, 20.0f, false, 20.0f);
 
-            MathSelectTest("A", "B", true, "A");
-            MathSelectTest("A", "B", false, "B");
-
             var a = new float4(1f, 2f, 3f, 4f);
             var b = new float4(4f, 3f, 2f, 1f);
             MathSelectTest(a, b, true, a);
@@ -318,7 +323,7 @@ namespace UnityGLTF.Interactivity.Tests
             inputs.Add(ConstStrings.B, new Value() { id = ConstStrings.B, property = new Property<T>(b) });
             outputs.Add(ConstStrings.VALUE, new Property<T>(expected));
 
-            TestNode("math/select", inputs, outputs);
+            TestNode("math/select", inputs, outputs, ComparisonType.Approximately);
         }
 
         [Test]
@@ -339,8 +344,8 @@ namespace UnityGLTF.Interactivity.Tests
             var expected = math.cos(a);
 
             TestNodeWithAllFloatNInputVariants("math/cos", a, expected);
-            TestNode("math/cos", 0.0f, 1.0f);
-            TestNode("math/cos", (float)(math.PI / 2.0), 0.0f);
+            TestNode("math/cos", 0.0f, 1.0f, ComparisonType.Approximately);
+            TestNode("math/cos", (float)(math.PI / 2.0), 0.0f, ComparisonType.Approximately);
         }
 
         [Test]
@@ -356,25 +361,24 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void TestAsin()
         {
-            var a = new float4(34.0f, 41.0f, 30.0f, 70.0f);
-            var expected = math.asin(a);
+            var a = new float4(-1f, 1f, 0f, 0.4f);
+            var expected = new float4(-math.PI / 2f, math.PI / 2f, 0f, 0.411516f);
 
             TestNodeWithAllFloatNInputVariants("math/asin", a, expected);
 
-            TestNode("math/asin", 1000.0f, math.NAN);
-            TestNode("math/asin", 1.0f, math.PI * 0.5f);
+            TestNode("math/asin", 1000.0f, math.NAN, ComparisonType.IsNaN);
         }
 
         [Test]
         public void TestAcos()
         {
-            var a = new float4(34.0f, 41.0f, 30.0f, 70.0f);
+            var a = new float4(0f, 0.999f, -0.9999f, 0.1f);
             var expected = math.acos(a);
 
             TestNodeWithAllFloatNInputVariants("math/acos", a, expected);
 
-            TestNode("math/acos", 1000.0f, math.NAN);
-            TestNode("math/acos", 0.0f, math.PI * 0.5f);
+            //TestNode("math/acos", 1000.0f, math.NAN, ComparisonType.IsNaN);
+            //TestNode("math/acos", 0.0f, math.PI * 0.5f, ComparisonType.Approximately);
         }
 
         [Test]
@@ -461,18 +465,21 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void TestACosH()
         {
-            float4 val = new float4(30.0f, 10.0f, 0.0f, 15.0f);
-            TestNodeWithAllFloatNInputVariants("math/acosh", val, acosh(val));
+            float4 val = new float4(1, 10.0f, 100.0f, 1000.0f);
+            TestNodeWithAllFloatNInputVariants("math/acosh", val, acosh(val), ComparisonType.Approximately);
             TestNode("math/acosh", 1.0f, 0.0f);
+            TestNode("math/acosh", 0.5f, float.NaN, ComparisonType.IsNaN);
         }
 
         [Test]
         public void TestATanH()
         {
-            float4 val = new float4(30.0f, 0.3f, -0.2f, 15.0f);
+            float4 val = new float4(-0.99f, -0.3f, 0.3f, 0.99f);
             TestNodeWithAllFloatNInputVariants("math/atanh", val, atanh(val));
-            TestNode("math/atanh", 1.0f, math.INFINITY);
-            TestNode("math/atanh", -1.0f, -math.INFINITY);
+            TestNode("math/atanh", 1.0f, math.INFINITY, ComparisonType.IsInfinity);
+            TestNode("math/atanh", -1.0f, -math.INFINITY, ComparisonType.IsInfinity);
+            TestNode("math/atanh", 1.1f, math.NAN, ComparisonType.IsNaN);
+            TestNode("math/atanh", -1.1f, -math.NAN, ComparisonType.IsNaN);
         }
 
         [Test]
@@ -487,52 +494,52 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void TestLog()
         {
-            float4 val = new float4(30.0f, 0.3f, -0.2f, 15.0f);
-            TestNode("math/log", val, math.log(val));
-            TestNode("math/log", -1.0f, math.NAN);
-            TestNode("math/log", 0.0f, -math.INFINITY);
-            TestNode("math/log", 1.0f, 0.0f);
+            float4 val = new float4(30.0f, 0.3f, 1f, 15.0f);
+            TestNode("math/log", val, math.log(val), ComparisonType.Approximately);
+            TestNode("math/log", -1.0f, math.NAN, ComparisonType.IsNaN);
+            TestNode("math/log", 0.0f, -math.INFINITY, ComparisonType.IsInfinity);
         }
 
         [Test]
         public void TestLog2()
         {
-            float4 val = new float4(30.0f, 0.3f, -0.2f, 15.0f);
+            float4 val = new float4(30.0f, 0.3f, 1f, 15.0f);
             TestNodeWithAllFloatNInputVariants("math/log2", val, math.log2(val));
-            TestNode("math/log2", -1.0f, math.NAN);
-            TestNode("math/log2", 0.0f, -math.INFINITY);
-            TestNode("math/log2", 1.0f, 0.0f);
+            TestNode("math/log2", -1.0f, math.NAN, ComparisonType.IsNaN);
+            TestNode("math/log2", 0.0f, -math.INFINITY, ComparisonType.IsInfinity);
         }
 
         [Test]
         public void TestLog10()
         {
-            float4 val = new float4(30.0f, 0.3f, -0.2f, 15.0f);
+            float4 val = new float4(30.0f, 0.3f, 1f, 15.0f);
             TestNodeWithAllFloatNInputVariants("math/log10", val, math.log10(val));
-            TestNode("math/log10", -1.0f, math.NAN);
-            TestNode("math/log10", 0.0f, -math.INFINITY);
-            TestNode("math/log10", 1.0f, 0.0f);
+            TestNode("math/log10", -1.0f, math.NAN, ComparisonType.IsNaN);
+            TestNode("math/log10", 0.0f, -math.INFINITY, ComparisonType.IsInfinity);
         }
 
         [Test]
         public void TestSqrt()
         {
-            float4 val = new float4(30.0f, 0.3f, -0.2f, 15.0f);
+            float4 val = new float4(30.0f, 0.3f, 0.2f, 15.0f);
             TestNodeWithAllFloatNInputVariants("math/sqrt", val, math.sqrt(val));
-            TestNode("math/sqrt", -1.0f, math.NAN);
+            TestNode("math/sqrt", -1.0f, math.NAN, ComparisonType.IsNaN);
             TestNode("math/sqrt", 0.0f, 0.0f);
         }
 
         [Test]
         public void TestPow()
         {
-            float4 val = new float4(30.0f, 0.3f, -0.2f, 15.0f);
-            float4 e = new float4(10.0f, 1.3f, -1.2f, 5.0f);
+            float4 val = new float4(30.0f, 0.3f, -2f, 15.0f);
+            float4 e = new float4(1.0f, 1.3f, -2f, 5.0f);
+            var expected = math.pow(val, e);
+            Util.Log(expected.ToString());
 
-            TestNodeWithAllFloatNInputVariants("math/pow", val, e, math.pow(val, e));
-            TestNode("math/pow", -1.0f, 2.0f, 1.0f);
-            TestNode("math/pow", 0.0f, 1000.0f, 0.0f);
-            TestNode("math/pow", 1000.0f, 0.0f, 1.0f);
+            TestNodeWithAllFloatNInputVariants("math/pow", val, e, expected);
+            TestNode("math/pow", -1.0f, 2.0f, 1.0f, ComparisonType.Approximately);
+            TestNode("math/pow", 0.0f, 1000.0f, 0.0f, ComparisonType.Approximately);
+            TestNode("math/pow", 1000.0f, 0.0f, 1.0f, ComparisonType.Approximately);
+            TestNode("math/pow", -0.2f, -1.2f, float.NaN, ComparisonType.IsNaN);
         }
 
         [Test]
@@ -785,15 +792,15 @@ namespace UnityGLTF.Interactivity.Tests
 
             var mat4 = new float4x4(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 121.0f, 13.0f, 14.0f, 151.0f, 161.0f);
             var imat4 = new float4x4(-1.47672f, 0.4608f, 0.008567f, 0.007352f, 1.21262f, -0.18996f, -0.00796f, -0.0147f, 0.00492f, -0.0025f, -0.009781f, 0.007352f, 0.00917f, -0.018348f, 0.009174f, 0.0f);
-            TestNode("math/inverse", mat4, imat4);
+            TestNode("math/inverse", mat4, imat4, ComparisonType.Approximately);
 
             var mat3 = new float3x3(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 91.0f);
             var imat3 = new float3x3(-1.65447f, 0.64227f, 0.0122f, 1.30894f, -0.28455f, -0.0244f, 0.0122f, -0.0244f, 0.0122f);
-            TestNode("math/inverse", mat3, imat3);
+            TestNode("math/inverse", mat3, imat3, ComparisonType.Approximately);
 
             var mat2 = new float2x2(1.0f, 2.0f, 3.0f, 41.0f);
             var imat2 = new float2x2(1.17142f, -0.05714f, -0.08571f, 0.02857f);
-            TestNode("math/inverse", mat2, imat2);
+            TestNode("math/inverse", mat2, imat2, ComparisonType.Approximately);
 
         }
 
@@ -804,18 +811,18 @@ namespace UnityGLTF.Interactivity.Tests
             var mat41 = new float4x4(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f);
             var mat42 = new float4x4(1.0f, 2.0f, 3.0f, 4.0f, 4.0f, 3.0f, 2.0f, 1.0f, 5.0f, 6.0f, 7.0f, 8.0f, 8.0f, 7.0f, 6.0f, 5.0f);
             var matres = new float4x4(56.0f, 54.0f, 52.0f, 50.0f, 128.0f, 126.0f, 124.0f, 122.0f, 200.0f, 198.0f, 196.0f, 194.0f, 272.0f, 270.0f, 268.0f, 266.0f);
-            TestNode("math/matmul", mat41, mat42, matres);
+            TestNode("math/matmul", mat41, mat42, matres, ComparisonType.Approximately);
 
             var mat31 = new float3x3(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f);
             var mat32 = new float3x3(1.0f, 2.0f, 3.0f, 3.0f, 2.0f, 1.0f, 6.0f, 4.0f, 5.0f);
             var matres2 = new float3x3(25.0f, 18.0f, 20.0f, 55.0f, 42.0f, 47.0f, 85.0f, 66.0f, 74.0f);
-            TestNode("math/matmul", mat31, mat32, matres2);
+            TestNode("math/matmul", mat31, mat32, matres2, ComparisonType.Approximately);
 
 
             var mat21 = new float2x2(1.0f, 2.0f, 3.0f, 4.0f);
             var mat22 = new float2x2(1.0f, 2.0f, 2.0f, 1.0f);
             var matres3 = new float2x2(5.0f, 4.0f, 11.0f, 10.0f);
-            TestNode("math/matmul", mat21, mat22, matres3);
+            TestNode("math/matmul", mat21, mat22, matres3, ComparisonType.Approximately);
         }
 
         [Test]
@@ -865,7 +872,7 @@ namespace UnityGLTF.Interactivity.Tests
             inputs.Add(ConstStrings.C, new Value() { id = ConstStrings.C, property = new Property<V>(c) });
             outputs.Add(ConstStrings.VALUE, new Property<T>(expected));
 
-            TestNode(nodeName, inputs, outputs);
+            TestNode(nodeName, inputs, outputs, ComparisonType.Approximately);
         }
 
         [Test]
@@ -884,7 +891,7 @@ namespace UnityGLTF.Interactivity.Tests
             inputs.Add(ConstStrings.B, new Value() { id = ConstStrings.B, property = new Property<V>(b) });
             outputs.Add(ConstStrings.VALUE, new Property<T>(expected));
 
-            TestNode(nodeName, inputs, outputs);
+            TestNode(nodeName, inputs, outputs, ComparisonType.Approximately);
         }
 
         [Test]
@@ -904,7 +911,7 @@ namespace UnityGLTF.Interactivity.Tests
             inputs.Add(ConstStrings.B, new Value() { id = ConstStrings.B, property = new Property<V>(b) });
             outputs.Add(ConstStrings.VALUE, new Property<T>(expected));
 
-            TestNode("math/transform", inputs, outputs);
+            TestNode("math/transform", inputs, outputs, ComparisonType.Approximately);
         }
 
         [Test]

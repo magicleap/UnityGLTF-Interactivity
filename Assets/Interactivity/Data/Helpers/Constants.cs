@@ -31,6 +31,10 @@ namespace UnityGLTF.Interactivity
 
     public static class ConstStrings
     {
+        public const string EXPECTED = "expected";
+        public const string ACTUAL = "actual";
+
+        public const string MESSAGE = "message";
         public const string NODE_INDEX = "nodeIndex";
         public const string DEFAULT = "default";
         public const string SELECTION = "selection";

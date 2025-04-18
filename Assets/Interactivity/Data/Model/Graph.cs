@@ -56,6 +56,9 @@ namespace UnityGLTF.Interactivity
 
         public Customevent AddEvent(string id, List<EventValue> eventValues = null)
         {
+            if (eventValues == null)
+                eventValues = new();
+
             var e = new Customevent()
             {
                 id = id,
@@ -131,8 +134,10 @@ namespace UnityGLTF.Interactivity
                 new InteractivityType() { signature = "float2" },
                 new InteractivityType() { signature = "float3" },
                 new InteractivityType() { signature = "float4" },
+                new InteractivityType() { signature = "float2x2" },
+                new InteractivityType() { signature = "float3x3" },
                 new InteractivityType() { signature = "float4x4" },
-                new InteractivityType() { signature = "custom", extensions = new TypeExtensions() { AMZN_interactivity_string = new() } },
+                new InteractivityType() { signature = "string" },
             };
         }
 

@@ -21,26 +21,8 @@ namespace UnityGLTF.Interactivity
 
         public Value AddValue<T>(string id, T value)
         {
-            for (int i = 0; i < values.Count; i++)
-            {
-                if (!values[i].id.Equals(id))
-                    continue;
-
-                values[i].property = new Property<T>(value);
-                return values[i];
-            }
-
-            var v = new Value()
-            {
-                id = id,
-                property = new Property<T>(value)
-            };
-
-            values.Add(v);
-
-            Util.Log($"Added value {id} with payload {value}");
-
-            return v;
+            // Explicit cast required for this overload to work.
+            return AddValue(id, (IProperty)new Property<T>(value));
         }
 
         public Value AddValue(string id, Value value)
@@ -60,6 +42,31 @@ namespace UnityGLTF.Interactivity
 
             return value;
         }
+
+        public Value AddValue(string id, IProperty value)
+        {
+            for (int i = 0; i < values.Count; i++)
+            {
+                if (!values[i].id.Equals(id))
+                    continue;
+
+                values[i].property = value;
+                return values[i];
+            }
+
+            var v = new Value()
+            {
+                id = id,
+                property = value
+            };
+
+            values.Add(v);
+
+            Util.Log($"Added value {id} with payload {value}");
+
+            return v;
+        }
+
 
         public bool TryGetValueById(string id, out Value value)
         {

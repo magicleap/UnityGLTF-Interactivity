@@ -17,7 +17,7 @@ namespace UnityGLTF.Interactivity
             {
                 Property<int> aProp => new Property<int>(~aProp.value),
                 Property<bool> aProp => new Property<bool>(!aProp.value),
-                _ => throw new InvalidOperationException("No supported type found or input types did not match."),
+                _ => throw new InvalidOperationException($"No supported type found for input A: {a.GetTypeSignature()}."),
             };
         }
     }

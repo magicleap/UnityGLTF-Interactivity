@@ -1,18 +1,33 @@
-using System;
-using Unity.Mathematics;
-
 namespace UnityGLTF.Interactivity
 {
     public class DebugLogSpec : NodeSpecifications
     {
+        protected override NodeConfiguration[] GenerateConfiguration()
+        {
+            return new NodeConfiguration[]
+            {
+                new NodeConfiguration(ConstStrings.MESSAGE, "Message to log.", typeof(string)),
+            };
+        }
+
         protected override (NodeFlow[] flows, NodeValue[] values) GenerateInputs()
         {
-            var values = new NodeValue[]
+            var flows = new NodeFlow[]
             {
-                new NodeValue("message", "Argument to print.", new Type[]  { typeof(float), typeof(int), typeof(float2), typeof(float3), typeof(float4) }),
+                new NodeFlow(ConstStrings.IN, "The in flow.")
             };
 
-            return (null, values);
+            return (flows, null);
+        }
+
+        protected override (NodeFlow[] flows, NodeValue[] values) GenerateOutputs()
+        {
+            var flows = new NodeFlow[]
+            {
+                new NodeFlow(ConstStrings.OUT, "The flow to trigger after sending this event."),
+            };
+
+            return (flows, null);
         }
     }
 }

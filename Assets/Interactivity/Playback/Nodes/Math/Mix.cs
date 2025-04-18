@@ -22,7 +22,7 @@ namespace UnityGLTF.Interactivity
                 Property<float2> aProp when b is Property<float2> bProp && c is Property<float2> cProp => new Property<float2>(math.lerp(aProp.value, bProp.value, cProp.value)),
                 Property<float3> aProp when b is Property<float3> bProp && c is Property<float3> cProp => new Property<float3>(math.lerp(aProp.value, bProp.value, cProp.value)),
                 Property<float4> aProp when b is Property<float4> bProp && c is Property<float4> cProp => new Property<float4>(math.lerp(aProp.value, bProp.value, cProp.value)),
-                _ => throw new InvalidOperationException("No supported type found or input types did not match."),
+                _ => throw new InvalidOperationException($"No supported type found for input A: {a.GetTypeSignature()} or input type did not match B: {b.GetTypeSignature()}."),
             };
         }
     }
