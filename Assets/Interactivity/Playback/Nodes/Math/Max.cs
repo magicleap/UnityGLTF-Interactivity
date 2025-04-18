@@ -22,7 +22,7 @@ namespace UnityGLTF.Interactivity
                 Property<float2> aProp when b is Property<float2> bProp => new Property<float2>(math.max(aProp.value, bProp.value)),
                 Property<float3> aProp when b is Property<float3> bProp => new Property<float3>(math.max(aProp.value, bProp.value)),
                 Property<float4> aProp when b is Property<float4> bProp => new Property<float4>(math.max(aProp.value, bProp.value)),
-                _ => throw new InvalidOperationException("No supported type found or input types did not match."),
+                _ => throw new InvalidOperationException($"No supported type found for input A: {a.GetTypeSignature()} or input type did not match B: {b.GetTypeSignature()}."),
             };
         }
     }

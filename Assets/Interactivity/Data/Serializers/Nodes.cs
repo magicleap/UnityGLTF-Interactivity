@@ -229,7 +229,10 @@ namespace UnityGLTF.Interactivity
                     writer.WriteValue(p.value.c3.w);
                     type = typeIndexByType[typeof(float4x4)];
                     break;
-
+                case Property<string> p:
+                    writer.WriteValue(p.value);
+                    type = typeIndexByType[typeof(string)];
+                    break;
                 default:
                     throw new NotImplementedException();
             }
