@@ -162,6 +162,8 @@ namespace UnityGLTF.Interactivity
             // ["event/onTick"] = new EventOnTickSpec(),
             ["event/receive"] = new EventReceiveSpec(),
             ["flow/branch"] = new FlowBranchSpec(),
+            ["flow/cancelDelay"] = new FlowCancelDelaySpec(),
+            ["flow/doN"] = new FlowDoNSpec(),
             ["flow/for"] = new FlowForSpec(),
             ["flow/sequence"] = new FlowSequenceSpec(),
             ["flow/setDelay"] = new FlowSetDelaySpec(),

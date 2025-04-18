@@ -13,8 +13,6 @@ namespace UnityGLTF.Interactivity
 
         protected override void Execute(string socket, ValidationResult validationResult)
         {
-            Util.Log($"Incrementing executed times to {_currentCount + 1} for an output that can be run {_nTimes} times");
-
             switch (socket)
             {
                 case ConstStrings.RESET:
@@ -24,6 +22,7 @@ namespace UnityGLTF.Interactivity
                     if (_currentCount < _nTimes)
                     {
                         _currentCount++;
+                        Util.Log($"Incrementing currentCount to {_currentCount} for an output that can be run {_nTimes} times");
                         TryExecuteFlow(ConstStrings.OUT);
                     }
                     break;

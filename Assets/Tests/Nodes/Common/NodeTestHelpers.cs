@@ -138,7 +138,7 @@ namespace UnityGLTF.Interactivity.Tests
             return (g, opNode);
         }
 
-        protected static (Graph, Node) CreateOperationGraph<T, TRes>(string nodeStr, T[] values, TRes expectedResult, string outputValueSocket = ConstStrings.VALUE)
+        protected static (Graph, Node) CreateOperationGraph<T, TRes>(string nodeStr, T[] values, TRes expectedResult)
         {
             Graph g = CreateGraphForTest();
 

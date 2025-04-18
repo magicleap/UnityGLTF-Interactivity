@@ -67,6 +67,7 @@ namespace UnityGLTF.Interactivity
         public const string STOP_TIME = "stopTime";
         public const string END_TIME = "endTime";
         public const string CANCEL = "cancel";
+        public const string CURRENT_COUNT = "currentCount";
 
         public const string VARIABLES = "variables";
         public const string VARIABLE = "variable";
