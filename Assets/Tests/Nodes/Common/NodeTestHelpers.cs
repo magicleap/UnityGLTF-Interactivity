@@ -117,9 +117,6 @@ namespace UnityGLTF.Interactivity.Tests
         {
             Graph g = CreateGraphForTest();
 
-            g.AddEvent("Pass");
-            g.AddEvent("Fail");
-
             var opNode = g.CreateNode(nodeStr);
             var subGraph = subGraphs[(int)subGraphType];
 
@@ -246,8 +243,8 @@ namespace UnityGLTF.Interactivity.Tests
             var fail = g.CreateNode("event/send");
             var failLog = g.CreateNode("debug/log");
 
-            pass.AddConfiguration(ConstStrings.EVENT, 0);
-            fail.AddConfiguration(ConstStrings.EVENT, 1);
+            fail.AddConfiguration(ConstStrings.EVENT, 0);
+            pass.AddConfiguration(ConstStrings.EVENT, 1);
 
             failLog.AddConfiguration(ConstStrings.MESSAGE, $"Output {outSocket}" + ", Expected: {expected}, Actual: {actual}");
             (var subIn, var subOut) = subGraph.CreateSubGraph(g);
@@ -276,7 +273,7 @@ namespace UnityGLTF.Interactivity.Tests
 
             void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
             {
-                if(eventIndex == 1) Assert.Fail("Fail event was triggered by this test.");
+                if(eventIndex == 0) Assert.Fail("Fail event was triggered by this test.");
             }
         }
 
@@ -357,7 +354,8 @@ namespace UnityGLTF.Interactivity.Tests
         {
             var graph = new Graph();
             graph.AddDefaultTypes();
-
+            graph.AddEvent("Completed");
+            graph.AddEvent("Failed");
             return graph;
         }
     }

@@ -11,10 +11,14 @@ namespace UnityGLTF.Interactivity.Tests
 {
     public class FlowNodesTests : NodeTestHelpers
     {
+        void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
+        {
+            Assert.AreNotEqual(0, eventIndex); // Event 0 is always 'Failed'.
+        }
+
         private void CreateFlowBranchGraph(bool outputSocketFromBranchNode)
         {
             var g = CreateGraphForTest();
-            g.AddEvent("Assertion");
 
             var onStartNode = g.CreateNode("event/onStart");
             var branchNode = g.CreateNode("flow/branch");
@@ -22,10 +26,7 @@ namespace UnityGLTF.Interactivity.Tests
             var successNode = g.CreateNode("event/send");
 
             failNode.AddConfiguration(ConstStrings.EVENT, 0);
-            successNode.AddConfiguration(ConstStrings.EVENT, 0);
-
-            failNode.AddValue(ConstStrings.VALUE, false);
-            successNode.AddValue(ConstStrings.VALUE, true);
+            successNode.AddConfiguration(ConstStrings.EVENT, 1);
 
             onStartNode.AddFlow(ConstStrings.OUT, branchNode, ConstStrings.IN);
 
@@ -34,17 +35,7 @@ namespace UnityGLTF.Interactivity.Tests
 
             branchNode.AddValue(ConstStrings.CONDITION, outputSocketFromBranchNode);
 
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
-            {
-                if (eventIndex != 0)
-                    return;
-
-                var success = (Property<bool>)outValues[ConstStrings.VALUE];
-
-                Assert.IsTrue(success.value);
-            }
+            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);        
         }
 
         private Graph CreateDoNGraph(int n)
@@ -64,7 +55,6 @@ namespace UnityGLTF.Interactivity.Tests
             var currentCountValue = outSendNode.AddValue(ConstStrings.CURRENT_COUNT, 0);
             currentCountValue.TryConnectToSocket(doNNode, ConstStrings.CURRENT_COUNT);
 
-            g.AddEvent("Assertion");
             g.AddEvent("TriggerDoN");
             g.AddEvent("Reset");
 
