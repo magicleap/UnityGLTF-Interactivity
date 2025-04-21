@@ -47,11 +47,11 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void TestFloatToBool()
         {
-            TestNode("type/intToBool", 1f, true);
-            TestNode("type/intToBool", 0f, false);
-            TestNode("type/intToBool", -155f, true);
-            TestNode("type/intToBool", float.PositiveInfinity, true);
-            TestNode("type/intToBool", float.NaN, true);
+            TestNode("type/floatToBool", 1f, true);
+            TestNode("type/floatToBool", 0f, false);
+            TestNode("type/floatToBool", -155f, true);
+            TestNode("type/floatToBool", float.PositiveInfinity, true);
+            TestNode("type/floatToBool", float.NaN, true);
         }
     }
 }
