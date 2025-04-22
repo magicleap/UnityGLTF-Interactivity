@@ -254,12 +254,12 @@ namespace UnityGLTF.Interactivity.Tests
 
             if (subGraph.hasBValue) subIn.AddValue(ConstStrings.B, expected);
 
-            onStart.AddFlow(ConstStrings.OUT, subOut, ConstStrings.IN);
+            onStart.AddFlow(subOut, ConstStrings.OUT, ConstStrings.IN);
 
-            subOut.AddFlow(ConstStrings.TRUE, pass, ConstStrings.IN);
-            subOut.AddFlow(ConstStrings.FALSE, failLog, ConstStrings.IN);
+            subOut.AddFlow(pass, ConstStrings.TRUE, ConstStrings.IN);
+            subOut.AddFlow(failLog, ConstStrings.FALSE, ConstStrings.IN);
 
-            failLog.AddFlow(ConstStrings.OUT, fail, ConstStrings.IN);
+            failLog.AddFlow(fail, ConstStrings.OUT, ConstStrings.IN);
             failLog.AddValue(ConstStrings.EXPECTED, expected);
             var failLogActualValue = failLog.AddValue(ConstStrings.ACTUAL, 0);
             failLogActualValue.TryConnectToSocket(outNode, outSocket);

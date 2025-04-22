@@ -14,7 +14,7 @@ namespace UnityGLTF.Interactivity.Tests
             var onStartNode = graph.CreateNode("event/onStart", new Vector2(0f, 500f * i));
             var pointerSetNode = graph.CreateNode("pointer/set", new Vector2(500f, 500f * i));
 
-            onStartNode.AddFlow(ConstStrings.OUT, pointerSetNode, ConstStrings.IN);
+            onStartNode.AddFlow(pointerSetNode, ConstStrings.OUT, ConstStrings.IN);
             pointerSetNode.AddValue("nodeIndex", 0);
             pointerSetNode.AddConfiguration("type", new JArray(type));
             pointerSetNode.AddConfiguration("pointer", new JArray(pointer));
@@ -44,7 +44,7 @@ namespace UnityGLTF.Interactivity.Tests
             var onStartNode = graph.CreateNode("event/onStart", Vector2.zero);
             var pointerSetNode = graph.CreateNode("pointer/set", Vector2.zero);
 
-            onStartNode.AddFlow(ConstStrings.OUT, pointerSetNode, ConstStrings.IN);
+            onStartNode.AddFlow(pointerSetNode, ConstStrings.OUT, ConstStrings.IN);
             pointerSetNode.AddValue("nodeIndex", 0);
             pointerSetNode.AddConfiguration("type", new JArray(type));
             pointerSetNode.AddConfiguration("pointer", new JArray(pointer));

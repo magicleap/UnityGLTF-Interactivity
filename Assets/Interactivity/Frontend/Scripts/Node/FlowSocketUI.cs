@@ -15,7 +15,7 @@ namespace UnityGLTF.Interactivity.Frontend
             var i = input as FlowSocketUI;
             var o = output as FlowSocketUI;
 
-            output.nodeUI.node.AddFlow(o.flow.id, i.nodeUI.node, i.flow.id);
+            output.nodeUI.node.AddFlow(i.nodeUI.node, o.flow.id, i.flow.id);
         }
     }
 }
