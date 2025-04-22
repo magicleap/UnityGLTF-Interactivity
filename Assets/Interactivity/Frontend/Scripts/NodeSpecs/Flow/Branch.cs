@@ -3,13 +3,6 @@ namespace UnityGLTF.Interactivity
 {
     public class FlowBranchSpec : NodeSpecifications
     {
-        protected override NodeConfiguration[] GenerateConfiguration()
-        {
-            return new NodeConfiguration[]{
-                new NodeConfiguration(ConstStrings.CONDITION, "Condition to evaluate flow path with.", typeof(bool)),
-            };
-        }
-
         protected override (NodeFlow[] flows, NodeValue[] values) GenerateInputs()
         {
             var flows = new NodeFlow[]{

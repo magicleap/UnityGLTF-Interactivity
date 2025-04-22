@@ -267,6 +267,8 @@ namespace UnityGLTF.Interactivity
             ["math/transpose"] = new MathOneOperandSpec<float2x2, float3x3, float4x4>(),
             ["math/trunc"] = new MathOneOperandFloatSpec(),
             ["math/xor"] = new MathTwoOperandsSpec<int, bool>(),
+            ["variable/get"] = new VariableGetSpec(),
+            ["variable/set"] = new VariableSetSpec(),
         };
     }
 }

@@ -2,6 +2,7 @@ using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.TestTools;
@@ -13,7 +14,15 @@ namespace UnityGLTF.Interactivity.Tests
     {
         void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
         {
-            Assert.AreNotEqual(0, eventIndex); // Event 0 is always 'Failed'.
+            switch(eventIndex)
+            {
+                case 0:
+                    Assert.Fail("Failure case was triggered by this test.");
+                    break;
+                case 1:
+                    _testSuccessful = true;
+                    break;
+            }
         }
 
         private void CreateFlowBranchGraph(bool outputSocketFromBranchNode)
@@ -28,90 +37,218 @@ namespace UnityGLTF.Interactivity.Tests
             failNode.AddConfiguration(ConstStrings.EVENT, 0);
             successNode.AddConfiguration(ConstStrings.EVENT, 1);
 
-            onStartNode.AddFlow(ConstStrings.OUT, branchNode, ConstStrings.IN);
+            onStartNode.AddFlow(ConstStrings.OUT, branchNode);
 
-            branchNode.AddFlow(ConstStrings.TRUE, outputSocketFromBranchNode ? successNode : failNode, ConstStrings.IN);
-            branchNode.AddFlow(ConstStrings.FALSE, outputSocketFromBranchNode ? failNode : successNode, ConstStrings.IN);
+            branchNode.AddFlow(ConstStrings.TRUE, outputSocketFromBranchNode ? successNode : failNode);
+            branchNode.AddFlow(ConstStrings.FALSE, outputSocketFromBranchNode ? failNode : successNode);
 
             branchNode.AddValue(ConstStrings.CONDITION, outputSocketFromBranchNode);
 
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);        
+            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
+
+            Assert.IsTrue(_testSuccessful);
         }
 
-        private Graph CreateDoNGraph(int n)
+        private Graph CreateDoNResetGraph(int n, int resetAfter)
         {
+            const int COUNTER_VARIABLE_INITIAL_VALUE = 0;
+            const string TOTAL_COUNT = "totalCount";
+            var expectedTotalCount = 2 * resetAfter;
             Graph g = CreateGraphForTest();
 
-            var receiveNode = g.CreateNode("event/receive");
-            var resetReceiveNode = g.CreateNode("event/receive");
-            var doNNode = g.CreateNode("flow/doN");
-            var outSendNode = g.CreateNode("event/send");
+            var resetVariable = g.AddVariable("hasResetOnce", false);
 
-            receiveNode.AddFlow(ConstStrings.OUT, doNNode, ConstStrings.IN);
-            resetReceiveNode.AddFlow(ConstStrings.OUT, doNNode, ConstStrings.RESET);
-            doNNode.AddFlow(ConstStrings.OUT, outSendNode, ConstStrings.IN);
+            var start = g.CreateNode("event/onStart");
+            var startTrigger = g.CreateNode("event/send");
+            var triggerReceive = g.CreateNode("event/receive");
+            var resetReceive = g.CreateNode("event/receive");
+            var doNNode = g.CreateNode("flow/doN");
+            var triggerSend = g.CreateNode("event/send");
+            var resetSend = g.CreateNode("event/send");
+            var failSend = g.CreateNode("event/send");
+            var failTotalSend = g.CreateNode("event/send");
+            var completeSend = g.CreateNode("event/send");
+            var eq = g.CreateNode("math/eq");
+            var currentCountGet = g.CreateNode("variable/get");
+            var loopBodyBranch = g.CreateNode("flow/branch");
+            var resetBranch = g.CreateNode("flow/branch");
+            var resetSet = g.CreateNode("variable/set");
+            var loopEq = g.CreateNode("math/eq");
+            var resetGet = g.CreateNode("variable/get");
+            var resetOrFinishBranch = g.CreateNode("flow/branch");
+            var resetTrigger = g.CreateNode("event/send");
+            var resetCounterVariable = g.CreateNode("variable/set");
+            var totalCountGet = g.CreateNode("variable/get");
+            var totalCountBranch = g.CreateNode("flow/branch");
+            var totalCountEq = g.CreateNode("math/eq");
+            var completedFailLog = g.CreateNode("debug/log");
+
+            completedFailLog.AddConfiguration(ConstStrings.MESSAGE, "Completed with Total Iterations Expected: {expected}, Actual: {actual}");
+            completedFailLog.AddValue(ConstStrings.EXPECTED, expectedTotalCount);
+
+            completedFailLog.AddConnectedValue(ConstStrings.ACTUAL, totalCountGet);
+
+            resetSet.AddConfiguration(ConstStrings.VARIABLE, g.IndexOfVariable(resetVariable));
+            resetGet.AddConfiguration(ConstStrings.VARIABLE, g.IndexOfVariable(resetVariable));
+
+            Node varSet = CreateVariableIncrementSubgraph(g, ConstStrings.CURRENT_COUNT, COUNTER_VARIABLE_INITIAL_VALUE);
+            Node totalCountSet = CreateVariableIncrementSubgraph(g, TOTAL_COUNT, COUNTER_VARIABLE_INITIAL_VALUE);
+
+            currentCountGet.AddConfiguration(ConstStrings.VARIABLE, g.IndexOfVariable(ConstStrings.CURRENT_COUNT));
+            resetCounterVariable.AddConfiguration(ConstStrings.VARIABLE, g.IndexOfVariable(ConstStrings.CURRENT_COUNT));
+            totalCountGet.AddConfiguration(ConstStrings.VARIABLE, g.IndexOfVariable(TOTAL_COUNT));
+
+            triggerReceive.AddFlow(ConstStrings.OUT, doNNode);
+            resetReceive.AddFlow(ConstStrings.OUT, doNNode, ConstStrings.RESET);
+            doNNode.AddFlow(ConstStrings.OUT, totalCountSet);
+            totalCountSet.AddFlow(ConstStrings.OUT, varSet);
+
+            varSet.AddFlow(ConstStrings.OUT, loopBodyBranch);
 
             doNNode.AddValue(ConstStrings.N, n);
-            var currentCountValue = outSendNode.AddValue(ConstStrings.CURRENT_COUNT, 0);
-            currentCountValue.TryConnectToSocket(doNNode, ConstStrings.CURRENT_COUNT);
+            eq.AddConnectedValue(ConstStrings.A, doNNode, ConstStrings.CURRENT_COUNT);
+            eq.AddConnectedValue(ConstStrings.B, currentCountGet);
+
+            loopBodyBranch.AddConnectedValue(ConstStrings.CONDITION, eq);
+
+            loopBodyBranch.AddFlow(ConstStrings.TRUE, resetBranch);
+            loopBodyBranch.AddFlow(ConstStrings.FALSE, failSend);
+            resetBranch.AddFlow(ConstStrings.TRUE, resetOrFinishBranch);
+            resetBranch.AddFlow(ConstStrings.FALSE, triggerSend);
+
+            resetBranch.AddConnectedValue(ConstStrings.CONDITION, loopEq);
+
+            loopEq.AddConnectedValue(ConstStrings.A, doNNode, ConstStrings.CURRENT_COUNT);
+            loopEq.AddValue(ConstStrings.B, resetAfter);
+
+            resetOrFinishBranch.AddConnectedValue(ConstStrings.CONDITION, resetGet);
+
+            resetOrFinishBranch.AddFlow(ConstStrings.TRUE, totalCountBranch);
+            resetOrFinishBranch.AddFlow(ConstStrings.FALSE, resetSet);
+
+            totalCountBranch.AddConnectedValue(ConstStrings.CONDITION, totalCountEq);
+            totalCountBranch.AddFlow(ConstStrings.TRUE, completeSend);
+            totalCountBranch.AddFlow(ConstStrings.FALSE, completedFailLog);
+            completedFailLog.AddFlow(ConstStrings.OUT, failTotalSend);
+            resetSet.AddFlow(ConstStrings.OUT, resetCounterVariable);
+            resetSet.AddValue(ConstStrings.VALUE, true);
+
+            resetCounterVariable.AddValue(ConstStrings.VALUE, COUNTER_VARIABLE_INITIAL_VALUE);
+            resetCounterVariable.AddFlow(ConstStrings.OUT, resetSend);
+            resetSend.AddFlow(ConstStrings.OUT, resetTrigger);
+
+            totalCountEq.AddConnectedValue(ConstStrings.A, totalCountGet);
+            totalCountEq.AddValue(ConstStrings.B, expectedTotalCount);
 
             g.AddEvent("TriggerDoN");
             g.AddEvent("Reset");
 
-            outSendNode.AddConfiguration(ConstStrings.EVENT, 0);
-            receiveNode.AddConfiguration(ConstStrings.EVENT, 1);
-            resetReceiveNode.AddConfiguration(ConstStrings.EVENT, 2);
+            start.AddFlow(ConstStrings.OUT, startTrigger);
+
+            startTrigger.AddConfiguration(ConstStrings.EVENT, 2);
+            failSend.AddConfiguration(ConstStrings.EVENT, 0);
+            failTotalSend.AddConfiguration(ConstStrings.EVENT, 0);
+            completeSend.AddConfiguration(ConstStrings.EVENT, 1);
+            triggerSend.AddConfiguration(ConstStrings.EVENT, 2);
+            triggerReceive.AddConfiguration(ConstStrings.EVENT, 2);
+            resetTrigger.AddConfiguration(ConstStrings.EVENT, 2);
+            resetReceive.AddConfiguration(ConstStrings.EVENT, 3);
+            resetSend.AddConfiguration(ConstStrings.EVENT, 3);
+
+            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
+            var extension = new KHR_interactivity()
+            {
+                graphs = new List<Graph>() { g },
+                defaultGraphIndex = 0
+            };
+            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
+
+            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
 
             return g;
         }
 
-        private void CreateFlowForGraph(int startIndex, int endIndex, int index = 0)
+        private void TestFlowForGraph(int startIndex, int endIndex, int initialIndex)
         {
             Graph g = CreateGraphForTest();
 
             var onStartnode = g.CreateNode("event/onStart");
             var forNode = g.CreateNode("flow/for");
+            var loopBodyBranch = g.CreateNode("flow/branch");
+            var completedBranch = g.CreateNode("flow/branch");
             var loopBodySend = g.CreateNode("event/send");
             var completedSend = g.CreateNode("event/send");
+            var successSend = g.CreateNode("event/send");
+            var loopBodyGet = g.CreateNode("variable/get");
+            var loopBodyEq = g.CreateNode("math/eq");
+            var completedEq = g.CreateNode("math/eq");
+            var loopFailLog = g.CreateNode("debug/log");
+            var completedFailLog = g.CreateNode("debug/log");
+            Node varSet = CreateVariableIncrementSubgraph(g, ConstStrings.INDEX, startIndex - 1);
 
-            onStartnode.AddFlow(ConstStrings.OUT, forNode, ConstStrings.IN);
-            forNode.AddFlow(ConstStrings.LOOP_BODY, loopBodySend, ConstStrings.IN);
-            forNode.AddFlow(ConstStrings.COMPLETED, completedSend, ConstStrings.IN);
+            loopFailLog.AddConfiguration(ConstStrings.MESSAGE, "Loop Body with Index Expected: {expected}, Actual: {actual}");
+            completedFailLog.AddConfiguration(ConstStrings.MESSAGE, "Completed with Index Expected: {expected}, Actual: {actual}");
 
-            forNode.AddConfiguration(ConstStrings.INITIAL_INDEX, new JArray(index));
+            loopBodyGet.AddConfiguration(ConstStrings.VARIABLE, 0);
+
+            loopBodySend.AddConfiguration(ConstStrings.EVENT, 0);
+            completedSend.AddConfiguration(ConstStrings.EVENT, 0);
+            successSend.AddConfiguration(ConstStrings.EVENT, 1);
+
+            onStartnode.AddFlow(ConstStrings.OUT, forNode);
+            forNode.AddFlow(ConstStrings.LOOP_BODY, varSet);
+            forNode.AddFlow(ConstStrings.COMPLETED, completedBranch);
+
+            forNode.AddConfiguration(ConstStrings.INITIAL_INDEX, initialIndex);
             forNode.AddValue(ConstStrings.START_INDEX, startIndex);
             forNode.AddValue(ConstStrings.END_INDEX, endIndex);
 
-            var loopBodyIndexValue = loopBodySend.AddValue(ConstStrings.VALUE, 0);
-            loopBodyIndexValue.TryConnectToSocket(forNode, ConstStrings.INDEX);
+            varSet.AddFlow(ConstStrings.OUT, loopBodyBranch);
+            loopBodyBranch.AddConnectedValue(ConstStrings.CONDITION, loopBodyEq);
 
-            var completedIndexValue = loopBodySend.AddValue(ConstStrings.VALUE, 0);
-            loopBodyIndexValue.TryConnectToSocket(forNode, ConstStrings.INDEX);
+            loopBodyEq.AddConnectedValue(ConstStrings.A, forNode, ConstStrings.INDEX);
+            loopBodyEq.AddConnectedValue(ConstStrings.B, loopBodyGet);
 
-            g.AddEvent("Assertion");
-            g.AddEvent("CompletedAssertion");
+            loopBodyBranch.AddFlow(ConstStrings.FALSE, loopFailLog);
+            completedBranch.AddFlow(ConstStrings.FALSE, completedFailLog);
+            completedBranch.AddFlow(ConstStrings.TRUE, successSend);
 
-            loopBodySend.AddConfiguration(ConstStrings.EVENT, 0);
-            completedSend.AddConfiguration(ConstStrings.EVENT, 1);
+            loopFailLog.AddFlow(ConstStrings.OUT, loopBodySend);
+            completedFailLog.AddFlow(ConstStrings.OUT, completedSend);
 
-            var counter = index;
+            loopFailLog.AddConnectedValue(ConstStrings.EXPECTED, loopBodyGet);
+            loopFailLog.AddConnectedValue(ConstStrings.ACTUAL, forNode, ConstStrings.INDEX);
+
+            completedFailLog.AddValue(ConstStrings.EXPECTED, endIndex);
+            completedFailLog.AddConnectedValue(ConstStrings.ACTUAL, forNode, ConstStrings.INDEX);
+
+            completedBranch.AddConnectedValue(ConstStrings.CONDITION, completedEq);
+
+            completedEq.AddValue(ConstStrings.A, endIndex);
+            completedEq.AddConnectedValue(ConstStrings.B, forNode, ConstStrings.INDEX);
 
             var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
 
-            void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
-            {
-                if (eventIndex == 0)
-                {
-                    var index = (Property<int>)outValues[ConstStrings.VALUE];
+            Assert.IsTrue(_testSuccessful);
+        }
 
-                    Assert.AreEqual(index.value, counter);
-                    counter++;
-                }
-                else
-                {
-                    Assert.AreEqual(endIndex, counter);
-                }
-            }
+        private static Node CreateVariableIncrementSubgraph(Graph g, string variableName, int initialValue)
+        {
+            var variable = g.AddVariable(variableName, initialValue);
+            var variableIndex = g.IndexOfVariable(variable);
+
+            var varSet = g.CreateNode("variable/set");
+            var varSetGet = g.CreateNode("variable/get");
+            var add = g.CreateNode("math/add");
+
+            varSet.AddConfiguration(ConstStrings.VARIABLE, variableIndex);
+            varSetGet.AddConfiguration(ConstStrings.VARIABLE, variableIndex);
+
+            varSet.AddConnectedValue(ConstStrings.VALUE, add);
+
+            add.AddValue(ConstStrings.B, 1);
+            add.AddConnectedValue(ConstStrings.A, varSetGet);
+            return varSet;
         }
 
         private void CreateFlowSequenceGraph(int numOutFlows)
@@ -123,14 +260,14 @@ namespace UnityGLTF.Interactivity.Tests
 
             var sendNodes = new Node[numOutFlows];
 
-            onStartnode.AddFlow(ConstStrings.OUT, sequenceNode, ConstStrings.IN);
+            onStartnode.AddFlow(ConstStrings.OUT, sequenceNode);
 
             for (int i = 0; i < sendNodes.Length; i++)
             {
                 sendNodes[i] = g.CreateNode("event/send");
                 sendNodes[i].AddValue(ConstStrings.VALUE, i);
                 sendNodes[i].AddConfiguration(ConstStrings.EVENT, 0);
-                sequenceNode.AddFlow(ConstStrings.Numbers[i], sendNodes[i], ConstStrings.IN);
+                sequenceNode.AddFlow(ConstStrings.Numbers[i], sendNodes[i]);
             }
 
             g.AddEvent("Result");
@@ -166,11 +303,11 @@ namespace UnityGLTF.Interactivity.Tests
             errSendNode.AddConfiguration(ConstStrings.EVENT, 1);
             doneSendNode.AddConfiguration(ConstStrings.EVENT, 2);
 
-            onStartnode.AddFlow(ConstStrings.OUT, setDelayNode, ConstStrings.IN);
+            onStartnode.AddFlow(ConstStrings.OUT, setDelayNode);
 
-            setDelayNode.AddFlow(ConstStrings.OUT, outSendNode, ConstStrings.IN);
-            setDelayNode.AddFlow(ConstStrings.ERR, errSendNode, ConstStrings.IN);
-            setDelayNode.AddFlow(ConstStrings.DONE, doneSendNode, ConstStrings.IN);
+            setDelayNode.AddFlow(ConstStrings.OUT, outSendNode);
+            setDelayNode.AddFlow(ConstStrings.ERR, errSendNode);
+            setDelayNode.AddFlow(ConstStrings.DONE, doneSendNode);
 
             setDelayNode.AddValue(ConstStrings.DURATION, duration);
 
@@ -187,78 +324,20 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void TestDoN()
         {
-            DoNTest(5);
+            CreateDoNGraph(5);
         }
 
         [Test]
-        public void TestDoNZeroIterations()
+        public void TestDoNWithReset()
         {
-            DoNTest(0);
-        }
-
-        [Test]
-        public void TestDoNNegativeIterations()
-        {
-            DoNTestNegative(-1);
-        }
-
-        private void DoNTest(int n)
-        {
-            var g = CreateDoNGraph(n);
-            var counter = 0;
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            for (int i = 0; i < n; i++)
-            {
-                eng.FireCustomEvent(1); // DoN once to get counter up
-            }
-            Assert.AreEqual(n, counter);
-            eng.FireCustomEvent(1); // This should do nothing.
-            Assert.AreEqual(n, counter);
-            eng.FireCustomEvent(2); // This should reset.
-            counter = 0;
-            for (int i = 0; i < n; i++)
-            {
-                eng.FireCustomEvent(1); // Should make the counter go up again.
-            }
-            Assert.AreEqual(n, counter);
-
-            void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
-            {
-                if (eventIndex != 0)
-                    return;
-
-                counter++; // Increment here since in the DoN node spec currentCount is incremented by 1 BEFORE "out" flow is triggered.
-
-                var index = (Property<int>)outValues[ConstStrings.CURRENT_COUNT];
-
-                Assert.AreEqual(index.value, counter);
-            }
-        }
-
-        private void DoNTestNegative(int n)
-        {
-            var g = CreateDoNGraph(n);
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            eng.FireCustomEvent(1);
-            eng.FireCustomEvent(1);
-            eng.FireCustomEvent(2);
-            eng.FireCustomEvent(1); // Should make the counter go up again.
-
-            void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
-            {
-                Assert.AreNotEqual(0, eventIndex); // Should never fire the "out" flow.
-            }
+            CreateDoNResetGraph(5, 3);
         }
 
         [Test]
         public void TestFor()
         {
-            CreateFlowForGraph(0, 6, 3);
-            CreateFlowForGraph(0, 4);
+            TestFlowForGraph(0, 6, 3);
+            TestFlowForGraph(0, 4, 0);
         }
 
         [Test]
@@ -447,7 +526,7 @@ namespace UnityGLTF.Interactivity.Tests
             g.AddEvent("cancel"); // 3
             var cancelReceiveNode = g.CreateNode("event/receive");
             cancelReceiveNode.AddConfiguration(ConstStrings.EVENT, 3);
-            cancelReceiveNode.AddFlow(ConstStrings.OUT, cancelDelayNode, ConstStrings.IN);
+            cancelReceiveNode.AddFlow(ConstStrings.OUT, cancelDelayNode);
 
             var startTime = Time.time;
             var endTime = Time.time + DURATION;

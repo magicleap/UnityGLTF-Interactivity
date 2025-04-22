@@ -171,5 +171,27 @@ namespace UnityGLTF.Interactivity
         {
             return Helpers.GetDefaultProperty(typeIndex, systemTypes);
         }
+
+        public int IndexOfVariable(string variableName)
+        {
+            for (int i = 0; i < variables.Count; i++)
+            {
+                if (variables[i].id.Equals(variableName))
+                    return i;
+            }
+
+            return -1;
+        }
+
+        public int IndexOfVariable(Variable variable)
+        {
+            for (int i = 0; i < variables.Count; i++)
+            {
+                if (variables[i] == variable)
+                    return i;
+            }
+
+            return -1;
+        }
     }
 }

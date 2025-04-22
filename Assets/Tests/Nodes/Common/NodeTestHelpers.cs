@@ -14,6 +14,14 @@ namespace UnityGLTF.Interactivity.Tests
 {
     public class NodeTestHelpers
     {
+        protected bool _testSuccessful = false;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _testSuccessful = false;
+        }
+
         public static readonly ISubGraph[] subGraphs = new ISubGraph[]
         {
             new ApproximatelySubGraph(0.001f),
@@ -126,14 +134,6 @@ namespace UnityGLTF.Interactivity.Tests
             }
 
             GenerateGraphByExpectedValueType(expectedResults, g, opNode, subGraph);
-
-            //GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            //var extension = new KHR_interactivity()
-            //{
-            //    graphs = new List<Graph>() { g },
-            //    defaultGraphIndex = 0
-            //};
-            //File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph_{expectedResults[ConstStrings.VALUE].GetTypeSignature()}.json", serializer.Serialize(extension));
 
             return (g, opNode);
         }
@@ -354,8 +354,8 @@ namespace UnityGLTF.Interactivity.Tests
         {
             var graph = new Graph();
             graph.AddDefaultTypes();
-            graph.AddEvent("Completed");
             graph.AddEvent("Failed");
+            graph.AddEvent("Completed");
             return graph;
         }
     }
