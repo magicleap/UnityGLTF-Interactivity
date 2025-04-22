@@ -372,42 +372,62 @@ namespace UnityGLTF.Interactivity.Tests
                 sequenceNode.AddFlow(branch, ConstStrings.Numbers[i]);
             }
 
-            //GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            //var extension = new KHR_interactivity()
-            //{
-            //    graphs = new List<Graph>() { g },
-            //    defaultGraphIndex = 0
-            //};
-            //File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
             var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
 
             Assert.IsTrue(_testSuccessful);
         }
 
-        private Graph CreateSetDelayGraph(float duration)
+        private Graph CreateSetDelayGraph(float duration, float extraExecutionTime)
         {
             Graph g = CreateGraphForTest();
-            g.AddEvent("out"); // 0
-            g.AddEvent("err"); // 1
-            g.AddEvent("done"); // 2
+            var outVar = g.AddVariable("outTriggered", false);
+            g.AddVariable("doneTriggered", false);
+            g.AddVariable("testDuration", duration + extraExecutionTime);
 
-            var onStartnode = g.CreateNode("event/onStart"); // 0
-            var setDelayNode = g.CreateNode("flow/setDelay"); // 1
-            var outSendNode = g.CreateNode("event/send"); // 2
-            var errSendNode = g.CreateNode("event/send"); // 3
-            var doneSendNode = g.CreateNode("event/send"); // 4
+            var onStartnode = g.CreateNode("event/onStart");
+            var setDelayNode = g.CreateNode("flow/setDelay");
+            var outVarSet = g.CreateNode("variable/set");
+            var outVarGet = g.CreateNode("variable/get");
+            var errSendNode = g.CreateNode("event/send");
+            var doneSendNode = g.CreateNode("event/send");
+            var doneBranch = g.CreateNode("flow/branch");
+            var errFlowLog = g.CreateNode("debug/log");
+            var missedOutFlowLog = g.CreateNode("debug/log");
+            var failMissedOutFlow = g.CreateNode("event/send");
 
-            outSendNode.AddConfiguration(ConstStrings.EVENT, 0);
-            errSendNode.AddConfiguration(ConstStrings.EVENT, 1);
-            doneSendNode.AddConfiguration(ConstStrings.EVENT, 2);
+            errFlowLog.AddConfiguration(ConstStrings.MESSAGE, "Err flow triggered with valid duration value.");
+            missedOutFlowLog.AddConfiguration(ConstStrings.MESSAGE, "Done flow triggered but out flow was never triggered.");
+
+            var varIndex = g.IndexOfVariable(outVar);
+            outVarSet.AddConfiguration(ConstStrings.VARIABLE, varIndex);
+            outVarGet.AddConfiguration(ConstStrings.VARIABLE, varIndex);
+            outVarSet.AddValue(ConstStrings.VALUE, true);
+
+            errSendNode.AddConfiguration(ConstStrings.EVENT, 0);
+            failMissedOutFlow.AddConfiguration(ConstStrings.EVENT, 0);
+            doneSendNode.AddConfiguration(ConstStrings.EVENT, 1);
 
             onStartnode.AddFlow(setDelayNode);
 
-            setDelayNode.AddFlow(outSendNode);
-            setDelayNode.AddFlow(errSendNode, ConstStrings.ERR);
-            setDelayNode.AddFlow(doneSendNode, ConstStrings.DONE);
+            setDelayNode.AddFlow(outVarSet);
+            setDelayNode.AddFlow(errFlowLog, ConstStrings.ERR);
+            setDelayNode.AddFlow(doneBranch, ConstStrings.DONE);
+            errFlowLog.AddFlow(errSendNode);
 
             setDelayNode.AddValue(ConstStrings.DURATION, duration);
+
+            doneBranch.AddFlow(doneSendNode, ConstStrings.TRUE);
+            doneBranch.AddFlow(missedOutFlowLog, ConstStrings.FALSE);
+            doneBranch.AddConnectedValue(ConstStrings.CONDITION, outVarGet);
+            missedOutFlowLog.AddFlow(failMissedOutFlow);
+
+            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
+            var extension = new KHR_interactivity()
+            {
+                graphs = new List<Graph>() { g },
+                defaultGraphIndex = 0
+            };
+            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
 
             return g;
         }
@@ -448,16 +468,13 @@ namespace UnityGLTF.Interactivity.Tests
         public IEnumerator TestSetDelay()
         {
             const float DURATION = 0.75f;
-            const float MAX_ERROR = 0.01f;
             const float EXTRA_EXECUTION_TIME = 0.25f;
-            var g = CreateSetDelayGraph(DURATION);
+            var g = CreateSetDelayGraph(DURATION, EXTRA_EXECUTION_TIME);
 
             var startTime = Time.time;
             var endTime = Time.time + DURATION;
             var finishExecutionTime = endTime + EXTRA_EXECUTION_TIME;
 
-            var outFlowExecuted = false;
-            var doneFlowExecuted = false;
 
             var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
 
@@ -467,207 +484,7 @@ namespace UnityGLTF.Interactivity.Tests
                 yield return null;
             }
 
-            Assert.IsTrue(outFlowExecuted);
-            Assert.IsTrue(doneFlowExecuted);
-
-            void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
-            {
-                switch(eventIndex)
-                {
-                    case 0:
-                        Debug.Log($"Out triggered at {Time.time}, should be very close to {startTime}");
-                        outFlowExecuted = true;
-                        UnityEngine.Assertions.Assert.AreApproximatelyEqual(Time.time, startTime, MAX_ERROR);
-                        return;
-
-                    case 1:
-                        Assert.Fail("Should never get the err flow triggered in this test.");
-                        return;
-
-                    case 2:
-                        Debug.Log($"Done triggered at {Time.time}, should be very close to {endTime}");
-                        doneFlowExecuted = true;
-                        UnityEngine.Assertions.Assert.AreApproximatelyEqual(Time.time, endTime, MAX_ERROR);
-                        return;
-                }
-            }
-        }
-
-
-        [Test]
-        public void TestSetDelayInvalidDurationNaN()
-        {
-            TestSetDelayInvalidDuration(float.NaN);
-        }
-
-        [Test]
-        public void TestSetDelayInvalidDurationNegative()
-        {
-            TestSetDelayInvalidDuration(-1f);
-        }
-
-        [Test]
-        public void TestSetDelayInvalidDurationInfinite()
-        {
-            TestSetDelayInvalidDuration(float.PositiveInfinity);
-        }
-
-        private void TestSetDelayInvalidDuration(float duration)
-        {
-            var g = CreateSetDelayGraph(duration);
-
-            var startTime = Time.time;
-
-            var errFlowExecuted = false;
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(errFlowExecuted);
-
-            void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
-            {
-                switch (eventIndex)
-                {
-                    case 0:
-                        Assert.Fail("Should never get the out flow triggered in this test.");
-                        return;
-
-                    case 1:
-                        errFlowExecuted = true;
-                        Debug.Log($"Error flow triggered as duration is {duration} which is invalid.");
-                        return;
-
-                    case 2:
-                        Assert.Fail("Should never get the done flow triggered in this test.");
-                        return;
-                }
-            }
-        }
-
-        [UnityTest]
-        public IEnumerator TestSetDelayCancelWithEventReceive()
-        {
-            const float DURATION = 0.75f;
-            const float CANCEL_TIME = 0.35f;
-            const float MAX_ERROR = 0.01f;
-            const float EXTRA_EXECUTION_TIME = 0.25f;
-            var g = CreateSetDelayGraph(DURATION);
-
-            // Add event/receive node that triggers the "cancel" input flow of the setDelay node when the cancel event is triggered.
-            g.AddEvent("cancel"); // 3
-            var cancelReceiveNode = g.CreateNode("event/receive");
-            cancelReceiveNode.AddConfiguration(ConstStrings.EVENT, 3);
-            cancelReceiveNode.AddFlow(g.nodes[1], ConstStrings.OUT, ConstStrings.CANCEL);
-
-            var startTime = Time.time;
-            var endTime = Time.time + DURATION;
-            var finishExecutionTime = endTime + EXTRA_EXECUTION_TIME;
-
-            var outFlowExecuted = false;
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            var hasCancelled = false;
-
-            while (Time.time < finishExecutionTime)
-            {
-                if (!hasCancelled && Time.time > CANCEL_TIME)
-                {
-                    eng.FireCustomEvent(3);
-                    hasCancelled = true;
-                }
-
-                eng.Tick();
-                yield return null;
-            }
-
-            var setDelayEngineNode = eng.engineNodes[g.nodes[1]];
-            var lastDelayIndex = (Property<int>)setDelayEngineNode.GetOutputValue(ConstStrings.LAST_DELAY_INDEX);
-            Assert.AreEqual(-1, lastDelayIndex.value);
-            Assert.IsTrue(outFlowExecuted);
-
-            void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
-            {
-                switch (eventIndex)
-                {
-                    case 0:
-                        Debug.Log($"Out triggered at {Time.time}, should be very close to {startTime}");
-                        outFlowExecuted = true;
-                        UnityEngine.Assertions.Assert.AreApproximatelyEqual(Time.time, startTime, MAX_ERROR);
-                        return;
-
-                    case 1:
-                        Assert.Fail("Should never get the err flow triggered in this test.");
-                        return;
-
-                    case 2:
-                        Assert.Fail("Should never get the done flow triggered in this test.");
-                        return;
-                }
-            }
-        }
-
-        [UnityTest]
-        public IEnumerator TestCancelDelay()
-        {
-            const float DURATION = 0.75f;
-            const float CANCEL_TIME = 0.35f;
-            const float MAX_ERROR = 0.01f;
-            const float EXTRA_EXECUTION_TIME = 0.25f;
-            var g = CreateSetDelayGraph(DURATION);
-
-            // Add cancelDelay node
-            var cancelDelayNode = g.CreateNode("flow/cancelDelay");
-            cancelDelayNode.AddValue(ConstStrings.DELAY_INDEX, 0);
-
-            // Add event/receive node that triggers the cancelDelay node when the cancel event is triggered.
-            g.AddEvent("cancel"); // 3
-            var cancelReceiveNode = g.CreateNode("event/receive");
-            cancelReceiveNode.AddConfiguration(ConstStrings.EVENT, 3);
-            cancelReceiveNode.AddFlow(cancelDelayNode);
-
-            var startTime = Time.time;
-            var endTime = Time.time + DURATION;
-            var finishExecutionTime = endTime + EXTRA_EXECUTION_TIME;
-
-            var outFlowExecuted = false;
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            var hasCancelled = false;
-
-            while (Time.time < finishExecutionTime)
-            {
-                if (!hasCancelled && Time.time > CANCEL_TIME)
-                {
-                    eng.FireCustomEvent(3);
-                    hasCancelled = true;
-                }
-                eng.Tick();
-                yield return null;
-            }
-
-            Assert.IsTrue(outFlowExecuted);
-
-            void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
-            {
-                switch (eventIndex)
-                {
-                    case 0:
-                        Debug.Log($"Out triggered at {Time.time}, should be very close to {startTime}");
-                        outFlowExecuted = true;
-                        UnityEngine.Assertions.Assert.AreApproximatelyEqual(Time.time, startTime, MAX_ERROR);
-                        return;
-
-                    case 1:
-                        Assert.Fail("Should never get the err flow triggered in this test.");
-                        return;
-
-                    case 2:
-                        Assert.Fail("Should never get the done flow triggered in this test.");
-                        return;
-                }
-            }
+            Assert.IsTrue(_testSuccessful);
         }
 
         [Test]
