@@ -29,6 +29,12 @@ namespace UnityGLTF.Interactivity
 
         public Variable AddVariable(string id, IProperty initialValue)
         {
+            for (int i = 0; i < variables.Count; i++)
+            {
+                if (variables[i].id.Equals(id))
+                    return variables[i];
+            }
+
             var variable = new Variable()
             {
                 id = id,

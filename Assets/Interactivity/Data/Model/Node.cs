@@ -114,7 +114,7 @@ namespace UnityGLTF.Interactivity
             return false;
         }
 
-        public Flow AddFlow(string fromSocket, Node toNode, string toSocket = ConstStrings.IN)
+        public Flow AddFlow(Node toNode, string fromSocket = ConstStrings.OUT, string toSocket = ConstStrings.IN)
         {
             for (int i = 0; i < flows.Count; i++)
             {

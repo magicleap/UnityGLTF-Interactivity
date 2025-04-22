@@ -23,7 +23,7 @@ namespace UnityGLTF.Interactivity.Tests
             var onStartNode = graph.CreateNode("event/onStart", Vector2.zero);
             var pointerIntNode = graph.CreateNode("pointer/interpolate", Vector2.zero);
 
-            onStartNode.AddFlow(ConstStrings.OUT, pointerIntNode, ConstStrings.IN);
+            onStartNode.AddFlow(pointerIntNode, ConstStrings.OUT, ConstStrings.IN);
             pointerIntNode.AddValue("nodeIndex", nodeIndex);
             pointerIntNode.AddConfiguration("type", new JArray("float"));
             pointerIntNode.AddConfiguration("pointer", new JArray(pointer));
@@ -46,7 +46,7 @@ namespace UnityGLTF.Interactivity.Tests
             var onStartNode = graph.CreateNode("event/onStart", Vector2.zero);
             var pointerSetNode = graph.CreateNode("pointer/set", Vector2.zero);
 
-            onStartNode.AddFlow(ConstStrings.OUT, pointerSetNode, ConstStrings.IN);
+            onStartNode.AddFlow(pointerSetNode, ConstStrings.OUT, ConstStrings.IN);
             pointerSetNode.AddValue("nodeIndex", 0);
             pointerSetNode.AddConfiguration("type", new JArray(type));
 
@@ -64,7 +64,7 @@ namespace UnityGLTF.Interactivity.Tests
 
             var onStartNode = graph.CreateNode("event/onStart", Vector2.zero);
             var assertNode = graph.CreateNode("debug/assert", Vector2.zero);
-            onStartNode.AddFlow(ConstStrings.OUT, assertNode, ConstStrings.IN);
+            onStartNode.AddFlow(assertNode, ConstStrings.OUT, ConstStrings.IN);
 
 
             var pointerGetNode = graph.CreateNode("pointer/get", Vector2.zero);
