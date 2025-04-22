@@ -44,6 +44,10 @@ namespace UnityGLTF.Interactivity
         private UnityEngine.AudioSource _loadingAudioSource = null;
         private AudioWrapper _audioWrapper = null;
 
+        private bool _loadedVideoFile = false;
+        private UnityEngine.Video.VideoPlayer _loadedVideoPlayer = null;
+        private VideoWrapper _videoWrapper = null;
+
         private void Update()
         {
             if (_loadedAudioFile && _loadingAudioSource != null)
@@ -53,6 +57,14 @@ namespace UnityGLTF.Interactivity
                 _audioWrapper.AddAudioSource(0, new AudioPlayData() { index = 0, source = _loadingAudioSource });
                 _loadingAudioSource = null;
                 _loadedAudioFile = false;
+            }
+            if (_loadedVideoFile && _loadedVideoPlayer != null)
+            {
+                if (_loadedVideoPlayer.playOnAwake)
+                    _loadedVideoPlayer.Play();
+                _videoWrapper.AddVideoSource(0, new VideoPlayerData() { index = 0, player = _loadedVideoPlayer });
+                _loadedVideoPlayer = null;
+                _loadedVideoFile = false;
             }
         }
 
@@ -81,6 +93,12 @@ namespace UnityGLTF.Interactivity
                         _audioWrapper = importer.SceneParent.gameObject.AddComponent<AudioWrapper>();
                         _behaviourEngine.SetAudioWrapper(_audioWrapper);
                     }
+                    _videoWrapper = importer.SceneParent.gameObject.GetComponent<VideoWrapper>();
+                    if (_videoWrapper == null)
+                    {
+                        _videoWrapper = importer.SceneParent.gameObject.AddComponent<VideoWrapper>();
+                        _behaviourEngine.SetVideoWrapper(_videoWrapper);
+                    }
                     switch (graph.extension.type)
                     {
                         case KHR_ExtensionGraph.GraphType.KHR_Audio:
@@ -92,6 +110,11 @@ namespace UnityGLTF.Interactivity
                             audioSrcs = gdList.FindAll(r => (r.graph.audio != null) && (r.graph.audio.Count > 0));
                             if (graph.graph.audio != null && graph.graph.audio.Count > 0)
                                 AddGOOGAudioSource(importer, audioSrcs);
+                            break;
+                        case KHR_ExtensionGraph.GraphType.GOOG_Video:
+                            var videoSrcs = gdList.FindAll(r => (r.graph.videoSource != null) && (r.graph.videoSource.Count> 0));
+                            if (videoSrcs != null && videoSrcs.Count > 0)
+                                AddGOOGVideoSource(importer, videoSrcs);
                             break;
                         default:
                             break;
@@ -126,6 +149,78 @@ namespace UnityGLTF.Interactivity
             };
 
             onExtensionLoadComplete?.Invoke(extensionList[0]);
+        }
+
+        public void AddGOOGVideoSource(GLTFSceneImporter importer, List<GraphData> videoGraphs)
+        {
+            if (_videoWrapper == null)
+                return;
+
+            //loop through all of the audio graphs. Could be more than one conceivably. Practically speaking though, 
+            // one model should have one audio graph with audio, emitters and sources
+            foreach (var videoGraph in videoGraphs)
+            {
+                Graph graph = videoGraph.graph;
+
+                int idx = 0;
+
+                // each audio
+                foreach (var video in graph.videoSource)
+                {
+                    VideoData e = GetVideoData(idx, graph.videoData);
+
+                    if (e == null)
+                    {
+                        return;
+                    }
+
+                    string path = string.Empty;
+                    string finalFileName = String.Empty;
+                    string finalDir = String.Empty;
+                    if (video.uri != null && !string.IsNullOrEmpty(video.uri))
+                    {
+                        video.uri = video.uri;
+                        path = Path.GetDirectoryName(_modelName);
+                        if (!string.IsNullOrEmpty(path))
+                        {
+                            path += Path.DirectorySeparatorChar + video.uri;
+                        }
+                        else
+                        {
+                            path = video.uri;
+                        }
+                        var (directory, fileName) = Helpers.GetFilePath(path);
+                        finalFileName = fileName;
+                        finalDir = directory;
+                    }
+                    else
+                    {
+                        /// get index into buffer
+                        BufferView bv = importer.Root.BufferViews[video.bufferView];
+                        var offset = bv.ByteOffset;
+                        var length = bv.ByteLength;
+
+                        byte[] videoArray = GetBufferArrayFromGLB(_modelName, offset, length);
+                        string tempFile = WriteVideoToTempFile(videoArray, length);
+
+                        var (directory, fileName) = Helpers.GetFilePath(tempFile);
+                        finalFileName = fileName;
+                        finalDir = directory;
+                    }
+
+                    if (!string.IsNullOrEmpty(finalFileName) && !string.IsNullOrEmpty(finalDir))
+                    {
+                        if (_loadedVideoPlayer == null)
+                            _loadedVideoPlayer = importer.SceneParent.gameObject.AddComponent<UnityEngine.Video.VideoPlayer>();
+                        SetGOOGVideoValues(video, e, ref _loadedVideoPlayer);
+                        _loadedVideoPlayer.url = video.uri;
+                        _loadedVideoFile = true;
+//                        StartCoroutine(LoadVideoSourceClipFromFile(_loadedVideoPlayerfinalDir + Path.DirectorySeparatorChar + finalFileName, Path.GetFileNameWithoutExtension(video.uri)));
+                    }
+
+                    idx++;
+                }
+            }
         }
 
         // dpq - need to genercize this with the method below.        
@@ -173,8 +268,8 @@ namespace UnityGLTF.Interactivity
                         var offset = bv.ByteOffset;
                         var length = bv.ByteLength;
 
-                        byte[] audioArray = GetAudioBufferArrayFromGLB(_modelName, offset, length);
-                        string tempFile = WriteToTempFile(audioArray, length);
+                        byte[] audioArray = GetBufferArrayFromGLB(_modelName, offset, length);
+                        string tempFile = WriteAudioToTempFile(audioArray, length);
 
                         var (directory, fileName) = Helpers.GetFilePath(tempFile);
                         finalFileName = fileName;
@@ -240,8 +335,8 @@ namespace UnityGLTF.Interactivity
                         var offset = bv.ByteOffset;
                         var length = bv.ByteLength;
 
-                        byte[] audioArray = GetAudioBufferArrayFromGLB(_modelName, offset, length);
-                        string tempFile =  WriteToTempFile(audioArray, length);
+                        byte[] audioArray = GetBufferArrayFromGLB(_modelName, offset, length);
+                        string tempFile =  WriteAudioToTempFile(audioArray, length);
 
                         var (directory, fileName) = Helpers.GetFilePath(tempFile);
                         finalFileName = fileName;
@@ -263,10 +358,12 @@ namespace UnityGLTF.Interactivity
             }
         }
 
-        private const string TEMP_FILE_PATH = "./audio/temp.mp3";
-        private string WriteToTempFile(byte[] arr, uint length)
+        private const string AUDIO_TEMP_FILE_PATH = "./audio/temp.mp3";
+        private const string VIDEO_TEMP_FILE_PATH = "./audio/temp.mp4";
+
+        private string WriteVideoToTempFile(byte[] arr, uint length)
         {
-            var (directory, fileName) = Helpers.GetFilePath(TEMP_FILE_PATH);
+            var (directory, fileName) = Helpers.GetFilePath(VIDEO_TEMP_FILE_PATH);
             FileStream fsOut = new FileStream(directory + Path.DirectorySeparatorChar + fileName, FileMode.OpenOrCreate);
             BinaryWriter bw = new BinaryWriter(fsOut);
             bw.Write(arr, 0, (int)length);
@@ -274,10 +371,23 @@ namespace UnityGLTF.Interactivity
             bw.Close();
             fsOut.Close();
 
-            return TEMP_FILE_PATH;
+            return VIDEO_TEMP_FILE_PATH;
         }
 
-        private byte[] GetAudioBufferArrayFromGLB(string modelName, uint offset, uint length)
+        private string WriteAudioToTempFile(byte[] arr, uint length)
+        {
+            var (directory, fileName) = Helpers.GetFilePath(AUDIO_TEMP_FILE_PATH);
+            FileStream fsOut = new FileStream(directory + Path.DirectorySeparatorChar + fileName, FileMode.OpenOrCreate);
+            BinaryWriter bw = new BinaryWriter(fsOut);
+            bw.Write(arr, 0, (int)length);
+            bw.Flush();
+            bw.Close();
+            fsOut.Close();
+
+            return AUDIO_TEMP_FILE_PATH;
+        }
+
+        private byte[] GetBufferArrayFromGLB(string modelName, uint offset, uint length)
         {
             var (directory, fileName) = Helpers.GetFilePath($"{modelName}.glb");
 
@@ -312,6 +422,16 @@ namespace UnityGLTF.Interactivity
             return arr;
         }
 
+        private void SetGOOGVideoValues(VideoSource source, VideoData data, ref UnityEngine.Video.VideoPlayer videoPlayer)
+        {
+            if (data != null)
+            {
+                videoPlayer.playOnAwake = data.autoPlay;
+                videoPlayer.isLooping = data.loop;
+                videoPlayer.playbackSpeed = data.speed;
+            }
+        }
+
         private void SetGOOGAudioValues(Audio source, AudioEmitterPartial emitter, ref UnityEngine.AudioSource audioSource)
         {
             if (emitter != null)
@@ -338,6 +458,12 @@ namespace UnityGLTF.Interactivity
             }
 //            audioSource.clip.name = source.sourceName;
         }
+
+        //private IEnumerator LoadVideoSourceClipFromFile(string pathFileName, string clipName)
+        //{
+        //    UnityWebRequest www = UnityEngine.Video.VideoPlayer.
+
+        //}
 
         private IEnumerator LoadAudioSourceClipFromFile(string pathFileName, string clipName)
         {
@@ -371,11 +497,31 @@ namespace UnityGLTF.Interactivity
             }
             return null;
         }
+        
+        // in case we ever have an array of video[]
+        internal VideoData GetVideoData(int idx, List<VideoData> videoDatas)
+        {
+            foreach(VideoData videoData in videoDatas)
+            {
+                if (videoData.video == idx)
+                {
+                    return new VideoData()
+                    {
+                        autoPlay = videoData.autoPlay,
+                        loop = videoData.loop,
+                        name = videoData.name,
+                        speed = videoData.speed,
+                        video = videoData.video
+                    };
+                }
+            }
+            return null;
+        }
 
         internal AudioEmitterPartial GetAudioEmitterPartial<T>(T t, int index, List<AudioEmitter> audioEmitters)
         {
-                foreach (AudioEmitter emitter in audioEmitters)
-                {
+            foreach (AudioEmitter emitter in audioEmitters)
+            {
                 if (t is KHR_AudioType)
                 {
                     for (int i = 0; i < emitter.sources.Count; i++)
@@ -415,11 +561,13 @@ namespace UnityGLTF.Interactivity
             if (!extensions.TryGetValue(InteractivityGraphExtension.EXTENSION_NAME, out IExtension interactivityExtensionValue))
                 return null;
             extensionValues.Add(interactivityExtensionValue);
+            if (extensions.TryGetValue(VideoGraphExtension.GOOG_EXTENSION_NAME, out IExtension videoExtensionValue))
+                extensionValues.Add(videoExtensionValue);
             if (extensions.TryGetValue(AudioGraphExtension<KHR_AudioType>.KHR_EXTENSION_NAME, out IExtension audioExtensionValue))
                 extensionValues.Add(audioExtensionValue);
             else if (extensions.TryGetValue(AudioGraphExtension<KHR_AudioType>.GOOG_EXTENSION_NAME, out IExtension GOOGaudioExtensionValue))
                 extensionValues.Add(GOOGaudioExtensionValue);
-
+            
 
             bool found = false;
             foreach(var v in extensionValues)
@@ -438,6 +586,10 @@ namespace UnityGLTF.Interactivity
                     case AudioGraphExtension<KHR_AudioType> KHRaudioGraph:
                         var KHRaudioGraphIndex = KHRaudioGraph.extensionData.defaultGraphIndex;
                         graphs.Add(new GraphData() { extension = KHRaudioGraph.extensionData, graph = KHRaudioGraph.extensionData.graphs[KHRaudioGraphIndex] });
+                        break;
+                    case VideoGraphExtension GOOGvideoGraph:
+                        var videoGraphIndex = GOOGvideoGraph.extensionData.defaultGraphIndex;
+                        graphs.Add(new GraphData() { extension = GOOGvideoGraph.extensionData, graph = GOOGvideoGraph.extensionData.graphs[videoGraphIndex] });
                         break;
                     default:
                         Debug.LogError($"{this.name} : Undefined InteractivityGraph type");

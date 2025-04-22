@@ -56,6 +56,26 @@ namespace UnityGLTF.Interactivity
                 interactivity.defaultGraphIndex = jObj[ConstStrings.GRAPH].Value<int>();
                 interactivity.type = KHR_ExtensionGraph.GraphType.Interactivity;
             }
+            else if (jObj[ConstStrings.VIDEO_DATA] != null && jObj[ConstStrings.VIDEO_SOURCE] != null)
+            {
+                var videoData = jObj[ConstStrings.VIDEO_DATA];
+                var videoSource = jObj[ConstStrings.VIDEO_SOURCE];
+
+                interactivity.type = KHR_ExtensionGraph.GraphType.GOOG_Video;
+
+                var graph = new Graph();
+
+                if (videoData != null && videoData.HasValues)
+                {
+                    GenerateVideoDataGraph(jObj, ref graph);
+                }
+                if (videoSource != null && videoSource.HasValues)
+                {
+                    GenerateVideoSourceGraph(jObj, ref graph);
+                }
+
+                interactivity.graphs.Add(graph);
+            }
             else if (jObj[ConstStrings.AUDIO] != null || jObj[ConstStrings.AUDIO_SOURCES] != null || jObj[ConstStrings.AUDIO_EMITTERS] != null)
             {
                 bool isValid = true;
@@ -132,6 +152,20 @@ namespace UnityGLTF.Interactivity
             var sources = AudioSourceDeserializer.GetAudioSources(jObj);
 
             graph.audioSources = sources; 
+        }
+
+        private static void GenerateVideoSourceGraph(JObject jObj, ref Graph graph)
+        {
+            var sources = VideoSourceDeserializer.GetVideoSources(jObj);
+
+            graph.videoSource = sources;
+        }
+
+        private static void GenerateVideoDataGraph(JObject jObj, ref Graph graph)
+        {
+            var datas = VideoDataDeserializer.GetVideoData(jObj);
+
+            graph.videoData = datas;
         }
 
         private static bool GenerateGOOGAudioEmittersGraph(JObject jObj, ref Graph graph)

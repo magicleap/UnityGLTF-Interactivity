@@ -12,6 +12,7 @@ namespace UnityGLTF.Interactivity
         public readonly Dictionary<Node, BehaviourEngineNode> engineNodes = new();
         public AnimationWrapper animationWrapper { get; private set; }
         public AudioWrapper audioWrapper { get; private set; }
+        public VideoWrapper videoWrapper { get; private set; }
         public readonly PointerInterpolationManager pointerInterpolationManager = new();
         public readonly VariableInterpolationManager variableInterpolationManager = new();
 
@@ -131,11 +132,50 @@ namespace UnityGLTF.Interactivity
             pointerResolver.RegisterAnimations(wrapper);
         }
 
+        public void SetVideoWrapper(VideoWrapper wrapper)
+        {
+            videoWrapper = wrapper;
+            wrapper.SetData(this);
+        }
+
+        public void PlayVideo(VideoPlayerData data)
+        {
+            if (!HasVideoWrapper())
+                return;
+
+            videoWrapper.PlayVideo(data.index);
+        }
+
+        public void StopVideo(VideoPlayerData data)
+        {
+            if (!HasVideoWrapper())
+                return;
+
+            videoWrapper.StopVideo(data.index);
+        }
+
+        public void PauseVideo(VideoPlayerData data)
+        {
+            if (!HasVideoWrapper())
+                return;
+
+            videoWrapper.PauseVideo(data.index);
+        }
+
+        public void UnPauseVideo(VideoPlayerData data)
+        {
+            if (!HasVideoWrapper())
+                return;
+
+            videoWrapper.UnPauseVideo(data.index);
+        }
+
         public void SetAudioWrapper (AudioWrapper wrapper)
         {
             audioWrapper =wrapper;
             wrapper.SetData(this);
         }
+
         public void PlayAudio(AudioPlayData data)
         {
             if (!HasAudioWrapper())
@@ -208,6 +248,17 @@ namespace UnityGLTF.Interactivity
             if (audioWrapper == null)
             {
                 Util.LogWarning("Tried to play an audio on a glb that has no audio.");
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool HasVideoWrapper()
+        {
+            if (videoWrapper == null)
+            {
+                Util.LogWarning("Tried to play an video on a glb that has no video.");
                 return false;
             }
 

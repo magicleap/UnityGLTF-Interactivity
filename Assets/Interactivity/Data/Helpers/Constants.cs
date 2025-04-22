@@ -35,8 +35,11 @@ namespace UnityGLTF.Interactivity
         public const string AUDIO_SOURCE = "audioSource";
         public const string AUDIO_SOURCES = "sources";
         public const string AUDIO_EMITTERS = "emitters";
+        public const string VIDEO_SOURCE = "videoSource";
+        public const string VIDEO_DATA = "videoData";
         public const string MIME_TYPE = "mimeType";
         public const string BUFFER_VIEW = "bufferView";
+        public const string VIDEO = "video";
         public const string URI = "uri";
         public const string AUTO_PLAY = "autoPlay";
         public const string GAIN = "gain";

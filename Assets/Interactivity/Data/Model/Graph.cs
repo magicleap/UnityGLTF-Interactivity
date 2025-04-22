@@ -15,6 +15,9 @@ namespace UnityGLTF.Interactivity
         public List<InteractivityType> types { get; set; } = new();
         public List<Declaration> declarations { get; set; } = new();
 
+        public List<VideoData> videoData { get; set; } = new();
+        public List<VideoSource> videoSource { get; set; } = new();
+
         public List<Audio> audio { get; set; } = new();
         public List<AudioSource> audioSources { get; set; } = new();
         public List<AudioEmitter> audioEmitter { get; set; } = new();

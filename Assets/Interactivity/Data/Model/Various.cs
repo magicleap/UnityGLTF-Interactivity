@@ -11,7 +11,8 @@ namespace UnityGLTF.Interactivity
         {
             Interactivity,
             KHR_Audio, 
-            GOOG_Audio
+            GOOG_Audio,
+            GOOG_Video
         }
         public List<Graph> graphs { get; set; } = new();
         public int defaultGraphIndex { get; set; }
@@ -66,6 +67,22 @@ namespace UnityGLTF.Interactivity
         public string distanceModel { get; set; }
         public float minDistance { get; set; }
         public float maxDistance { get; set; }
+    }
+
+    public class VideoSource
+    {
+        public string mimeType { get; set; }
+        public int bufferView { get; set; }
+        public string uri { get; set; }
+    }
+
+    public class VideoData
+    {
+        public string name { get; set; }
+        public bool autoPlay { get; set; }
+        public bool loop { get; set; }
+        public float speed { get; set; }
+        public int video { get; set; }
     }
 
     public class Declaration
