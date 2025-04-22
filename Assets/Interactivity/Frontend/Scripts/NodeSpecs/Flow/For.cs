@@ -6,9 +6,7 @@ namespace UnityGLTF.Interactivity
         protected override NodeConfiguration[] GenerateConfiguration()
         {
             return new NodeConfiguration[]{
-                new NodeConfiguration(ConstStrings.INDEX, "Initial index.", typeof(int)),
-                new NodeConfiguration(ConstStrings.START_INDEX, "Index to start at.", typeof(int)),
-                new NodeConfiguration(ConstStrings.END_INDEX, "Index to end at.", typeof(int)),
+                new NodeConfiguration(ConstStrings.INITIAL_INDEX, "Initial index.", typeof(int))
             };
         }
 

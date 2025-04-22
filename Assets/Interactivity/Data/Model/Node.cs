@@ -19,6 +19,15 @@ namespace UnityGLTF.Interactivity
 
         public event Action onRemovedFromGraph;
 
+        public Value AddConnectedValue(string inputName, Node outputNode, string outputName = ConstStrings.VALUE)
+        {
+            var value = AddValue(inputName, 0);
+            if (!value.TryConnectToSocket(outputNode, outputName))
+                throw new InvalidOperationException($"Cannot connect {inputName} from node {type} to {outputName} from node {outputNode.type}");
+
+            return value;
+        }
+
         public Value AddValue<T>(string id, T value)
         {
             // Explicit cast required for this overload to work.
@@ -105,7 +114,7 @@ namespace UnityGLTF.Interactivity
             return false;
         }
 
-        public Flow AddFlow(string fromSocket, Node toNode, string toSocket)
+        public Flow AddFlow(string fromSocket, Node toNode, string toSocket = ConstStrings.IN)
         {
             for (int i = 0; i < flows.Count; i++)
             {

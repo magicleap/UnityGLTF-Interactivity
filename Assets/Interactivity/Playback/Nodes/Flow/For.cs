@@ -27,11 +27,12 @@ namespace UnityGLTF.Interactivity
         {
             Util.Log($"Starting a loop with start index {_startIndex} and end index {_endIndex} from initial value {_index}");
 
-            for (int i = _index < _startIndex ? _startIndex : _index; i < _endIndex; i++)
+            _index = _startIndex;
+
+            while(_index < _endIndex)
             {
-                _index = i;
                 TryExecuteFlow(ConstStrings.LOOP_BODY);
-                Util.Log($"Loop is on iteration {i} and the index reads as {_index}");
+                _index++;
             }
 
             TryExecuteFlow(ConstStrings.COMPLETED);

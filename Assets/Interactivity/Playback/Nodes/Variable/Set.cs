@@ -18,7 +18,7 @@ namespace UnityGLTF.Interactivity
             if (validationResult != ValidationResult.Valid)
                 throw new InvalidOperationException();
 
-            Util.Log($"Setting {_graphVariable.id} to {_newValue.ToString()}");
+            Util.Log($"Setting Variable {_graphVariable.id} to {_newValue.ToString()}");
 
             engine.variableInterpolationManager.StopInterpolation(_graphVariable);
 
