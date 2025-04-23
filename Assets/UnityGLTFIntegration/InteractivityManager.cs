@@ -34,10 +34,23 @@ namespace UnityGLTF.Interactivity
 
         private const int GLTF_BIN_DATA_INDEX = 1;
 
+        private RenderTexture _rt;
+        private GameObject _quad;
+
+        private Vector3 _lastQuadPosition = Vector3.zero;
+
         private void Start()
         {
             _loader = new();
             _ = _loader.LoadModelAsync($"{_modelName}.glb", OnLoadComplete, _loadTimeout);
+
+            _rt = Resources.Load<RenderTexture>("Video");
+            _quad = this.GetComponentInChildren<MeshRenderer>().gameObject;
+            _quad.SetActive(false);
+            _lastQuadPosition = new Vector3(0f, 0f, 3.0f);
+
+            Camera.main.transform.position = new Vector3(0, 0, 0);
+            Camera.main.transform.rotation = Quaternion.Euler(0, 0, 0);
         }
 
         private bool _loadedAudioFile = false;
@@ -213,11 +226,20 @@ namespace UnityGLTF.Interactivity
                         if (_loadedVideoPlayer == null)
                             _loadedVideoPlayer = importer.SceneParent.gameObject.AddComponent<UnityEngine.Video.VideoPlayer>();
                         SetGOOGVideoValues(video, e, ref _loadedVideoPlayer);
-                        _loadedVideoPlayer.url = video.uri;
+                        string path1 = finalDir + Path.DirectorySeparatorChar + finalFileName; // Application.streamingAssetsPath + Path.DirectorySeparatorChar + video.uri;
+                        _loadedVideoPlayer.url = path1;
                         _loadedVideoFile = true;
-//                        StartCoroutine(LoadVideoSourceClipFromFile(_loadedVideoPlayerfinalDir + Path.DirectorySeparatorChar + finalFileName, Path.GetFileNameWithoutExtension(video.uri)));
-                    }
 
+                        // duplicate quad and assign movie
+                        GameObject newQuad = Instantiate(_quad, this.transform);
+                        _lastQuadPosition += new Vector3(.1f, .1f, 0);
+                        newQuad.SetActive(true);
+                        newQuad.transform.position += _lastQuadPosition;
+                        RenderTexture newRT = Instantiate(_rt);
+                        newQuad.GetComponent<Renderer>().material.mainTexture = _rt;
+                        _loadedVideoPlayer.targetTexture = _rt;
+                        _loadedVideoPlayer.Play();
+                    }
                     idx++;
                 }
             }
@@ -299,7 +321,6 @@ namespace UnityGLTF.Interactivity
             foreach(var audioGraph in audioGraphs)
             {
                 Graph graph = audioGraph.graph;
-                UnityEngine.AudioSource audioSourceScene = null;
 
                 int idx = 0;
 

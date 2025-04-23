@@ -21,6 +21,19 @@ MonoBehaviour:
   KHR_materials_clearcoat: 1
   KHR_materials_emissive_strength: 1
   KHR_materials_sheen: 1
+--- !u!114 &-8543371731889697240
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af2f377237b2bb34ba0fd59c39a5fb06, type: 3}
+  m_Name: VideoImportPlugin
+  m_EditorClassIdentifier: 
+  enabled: 1
 --- !u!114 &-7336456458251540425
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -176,6 +189,7 @@ MonoBehaviour:
   - {fileID: 957924265715074157}
   - {fileID: -6593965159030080651}
   - {fileID: 8765328962524949644}
+  - {fileID: -8543371731889697240}
   ExportPlugins:
   - {fileID: -8985567922445209820}
   - {fileID: 1419762970772820027}
