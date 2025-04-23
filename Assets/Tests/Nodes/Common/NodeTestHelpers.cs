@@ -14,6 +14,9 @@ namespace UnityGLTF.Interactivity.Tests
 {
     public class NodeTestHelpers
     {
+        protected const int FAIL_EVENT_INDEX = 0;
+        protected const int COMPLETED_EVENT_INDEX = 1;
+
         protected bool _testSuccessful = false;
 
         [SetUp]
@@ -243,8 +246,8 @@ namespace UnityGLTF.Interactivity.Tests
             var fail = g.CreateNode("event/send");
             var failLog = g.CreateNode("debug/log");
 
-            fail.AddConfiguration(ConstStrings.EVENT, 0);
-            pass.AddConfiguration(ConstStrings.EVENT, 1);
+            fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+            pass.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
 
             failLog.AddConfiguration(ConstStrings.MESSAGE, $"Output {outSocket}" + ", Expected: {expected}, Actual: {actual}");
             (var subIn, var subOut) = subGraph.CreateSubGraph(g);
