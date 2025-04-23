@@ -466,7 +466,112 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void TestSwitch()
         {
+            var outputFlowOrder = new int[] { 3, 2, -9, 1 };
+            Graph g = CreateGraphForTest();
 
+            g.AddEvent("trigger"); // 2
+
+            var flowIndexVariable = g.AddVariable("outputFlowIndex", 0);
+            var bitmaskVariable = g.AddVariable("bitmask", 0);
+
+            var flowIndexVariableIndex = g.IndexOfVariable(flowIndexVariable);
+            var bitmaskVariableIndex = g.IndexOfVariable(bitmaskVariable);
+
+            var onStartnode = g.CreateNode("event/onStart");
+            var triggerSend = g.CreateNode("event/send");
+
+            triggerSend.AddConfiguration(ConstStrings.EVENT, 2);
+            onStartnode.AddFlow(triggerSend);
+
+            var receiveTrigger = g.CreateNode("event/receive");
+            var switchNode = g.CreateNode("flow/switch");
+            var getOutputFlow = g.CreateNode("variable/get");
+
+            switchNode.AddConfiguration(ConstStrings.CASES, new int[] { 0, 1, 2, 3 });
+
+            receiveTrigger.AddConfiguration(ConstStrings.EVENT, 2);
+            receiveTrigger.AddFlow(switchNode);
+
+            getOutputFlow.AddConfiguration(ConstStrings.VARIABLE, flowIndexVariableIndex);
+
+            switchNode.AddConnectedValue(ConstStrings.SELECTION, getOutputFlow);
+
+            var expected = 0;
+
+            for (int i = 0; i < outputFlowOrder.Length; i++)
+            {
+                var subGraphEntry = CreateSwitchFlowSubGraph(g, outputFlowOrder[i], 1 << i, flowIndexVariableIndex, bitmaskVariableIndex);
+                switchNode.AddFlow(subGraphEntry, ConstStrings.Numbers[i]);
+
+                expected |= 1 << i;
+            }
+
+            var branch = g.CreateNode("flow/branch");
+            var bitmaskGet = g.CreateNode("variable/get");
+            var eq = g.CreateNode("math/eq");
+
+            bitmaskGet.AddConfiguration(ConstStrings.VARIABLE, bitmaskVariableIndex);
+
+            branch.AddConnectedValue(ConstStrings.CONDITION, eq);
+
+            eq.AddConnectedValue(ConstStrings.A, bitmaskGet);
+            eq.AddValue(ConstStrings.B, expected);
+
+            switchNode.AddFlow(branch, ConstStrings.DEFAULT);
+
+            var fail = g.CreateNode("event/send");
+            var completed = g.CreateNode("event/send");
+            var logFail = g.CreateNode("debug/log");
+
+            fail.AddConfiguration(ConstStrings.EVENT, 0);
+            completed.AddConfiguration(ConstStrings.EVENT, 1);
+
+            branch.AddFlow(completed, ConstStrings.TRUE);
+            branch.AddFlow(logFail, ConstStrings.FALSE);
+
+            logFail.AddConfiguration(ConstStrings.MESSAGE, "Completed with Bitmask Expected: {expected}, Actual: {actual}");
+            logFail.AddValue(ConstStrings.EXPECTED, expected);
+            logFail.AddConnectedValue(ConstStrings.ACTUAL, bitmaskGet);
+
+            logFail.AddFlow(fail);
+
+
+            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
+            var extension = new KHR_interactivity()
+            {
+                graphs = new List<Graph>() { g },
+                defaultGraphIndex = 0
+            };
+            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
+            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
+
+            Assert.IsTrue(_testSuccessful);
+        }
+
+        private static Node CreateSwitchFlowSubGraph(Graph g, int nextFlowIndex, int bitmask, int flowIndexVariableIndex, int bitmaskVariableIndex)
+        {
+            var setOutputFlow = g.CreateNode("variable/set");
+            setOutputFlow.AddConfiguration(ConstStrings.VARIABLE, flowIndexVariableIndex);
+            setOutputFlow.AddValue(ConstStrings.VALUE, nextFlowIndex);
+
+            var bitmaskSet = g.CreateNode("variable/set");
+            var add = g.CreateNode("math/add");
+            var bitmaskGet = g.CreateNode("variable/get");
+            var send = g.CreateNode("event/send");
+
+            send.AddConfiguration(ConstStrings.EVENT, 2);
+
+            setOutputFlow.AddFlow(bitmaskSet);
+
+            bitmaskSet.AddConfiguration(ConstStrings.VARIABLE, bitmaskVariableIndex);
+            bitmaskGet.AddConfiguration(ConstStrings.VARIABLE, bitmaskVariableIndex);
+
+            bitmaskSet.AddConnectedValue(ConstStrings.VALUE, add);
+            add.AddValue(ConstStrings.A, bitmask);
+            add.AddConnectedValue(ConstStrings.B, bitmaskGet);
+            bitmaskSet.AddFlow(send);
+
+            return setOutputFlow;
         }
     }
 }

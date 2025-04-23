@@ -19,10 +19,12 @@ namespace UnityGLTF.Interactivity
         {
             if (!_cases.TryGetValue(_selection, out Flow caseFlow))
             {
+                Util.Log($"Executing case {ConstStrings.DEFAULT}");
                 TryExecuteFlow(ConstStrings.DEFAULT);
                 return;
             }
 
+            Util.Log($"Executing case {_selection}");
             engine.ExecuteFlow(caseFlow);
         }
 
@@ -44,6 +46,9 @@ namespace UnityGLTF.Interactivity
 
                     for (int i = 0; i < node.flows.Count; i++)
                     {
+                        if (node.flows[i].fromSocket.Equals(ConstStrings.DEFAULT))
+                            continue;
+
                         _cases.Add(int.Parse(node.flows[i].fromSocket), node.flows[i]);
                     }
                 }
