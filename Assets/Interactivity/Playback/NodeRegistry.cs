@@ -104,6 +104,7 @@ namespace UnityGLTF.Interactivity
             ["variable/get"] = (engine, node) => new VariableGet(engine, node),
             ["variable/interpolate"] = (engine, node) => new VariableInterpolate(engine, node),
             ["variable/set"] = (engine, node) => new VariableSet(engine, node),
+            ["variable/setMultiple"] = (engine, node) => new VariableSetMultiple(engine, node),
             ["math/acos"] = (engine, node) => new MathACos(engine, node),
             ["math/acosh"] = (engine, node) => new MathACosH(engine, node),
             ["math/asin"] = (engine, node) => new MathASin(engine, node),
@@ -269,6 +270,7 @@ namespace UnityGLTF.Interactivity
             ["math/xor"] = new MathTwoOperandsSpec<int, bool>(),
             ["variable/get"] = new VariableGetSpec(),
             ["variable/set"] = new VariableSetSpec(),
+            ["variable/setMultiple"] = new VariableSetMultipleSpec(),
         };
     }
 }

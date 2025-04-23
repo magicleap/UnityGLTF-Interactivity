@@ -23,6 +23,9 @@ namespace UnityGLTF.Interactivity
                 Property<float2> pA when b is Property<float2> pB => new Property<bool>(AllEqual(pA.value, pB.value)),
                 Property<float3> pA when b is Property<float3> pB => new Property<bool>(AllEqual(pA.value, pB.value)),
                 Property<float4> pA when b is Property<float4> pB => new Property<bool>(AllEqual(pA.value, pB.value)),
+                Property<float2x2> pA when b is Property<float2x2> pB => new Property<bool>(AllEqual(pA.value, pB.value)),
+                Property<float3x3> pA when b is Property<float3x3> pB => new Property<bool>(AllEqual(pA.value, pB.value)),
+                Property<float4x4> pA when b is Property<float4x4> pB => new Property<bool>(AllEqual(pA.value, pB.value)),
                 _ => throw new InvalidOperationException($"No supported type found or input types did not match. Types were A: {a.GetTypeSignature()}, B: {b.GetTypeSignature()}"),
             };
         }
@@ -41,5 +44,26 @@ namespace UnityGLTF.Interactivity
         {
             return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
         }
+
+        private static bool AllEqual(float2x2 a, float2x2 b)
+        {
+            return a.c0.x == b.c0.x && a.c0.y == b.c0.y && a.c1.x == b.c1.x && a.c1.y == b.c1.y;
+        }
+
+        private static bool AllEqual(float3x3 a, float3x3 b)
+        {
+            return a.c0.x == b.c0.x && a.c0.y == b.c0.y && a.c0.z == b.c0.z &&
+                   a.c1.x == b.c1.x && a.c1.y == b.c1.y && a.c1.z == b.c1.z &&
+                   a.c2.x == b.c2.x && a.c2.y == b.c2.y && a.c2.z == b.c2.z;
+        }
+
+        private static bool AllEqual(float4x4 a, float4x4 b)
+        {
+            return a.c0.x == b.c0.x && a.c0.y == b.c0.y && a.c0.z == b.c0.z && a.c0.w == b.c0.w &&
+                   a.c1.x == b.c1.x && a.c1.y == b.c1.y && a.c1.z == b.c1.z && a.c1.w == b.c1.w &&
+                   a.c2.x == b.c2.x && a.c2.y == b.c2.y && a.c2.z == b.c2.z && a.c2.w == b.c2.w &&
+                   a.c3.x == b.c3.x && a.c3.y == b.c3.y && a.c3.z == b.c3.z && a.c3.w == b.c3.w;
+        }
+
     }
 }

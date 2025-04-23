@@ -148,6 +148,12 @@ namespace UnityGLTF.Interactivity.Tests
 
             foreach (var expected in expectedResults)
             {
+                if (subGraph is EqualSubGraph)
+                {
+                    CreateSingleValueTestSubGraph(g, opNode, expected.Key, expected.Value, subGraph);
+                    continue;
+                }
+
                 switch (expected.Value)
                 {
                     default:
