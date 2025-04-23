@@ -32,6 +32,8 @@ namespace UnityGLTF.Interactivity
 
                 engine.variableInterpolationManager.StopInterpolation(variable);
 
+                Util.Log($"SetMultiple: Setting Variable {variable.id} to {value.ToString()}");
+
                 variable.property = value;
             }
 

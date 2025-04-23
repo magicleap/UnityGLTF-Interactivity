@@ -100,14 +100,6 @@ namespace UnityGLTF.Interactivity.Tests
             failSend.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
             completeSend.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
 
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-
             var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
 
             Assert.IsTrue(_testSuccessful);
@@ -221,14 +213,6 @@ namespace UnityGLTF.Interactivity.Tests
             resetTrigger.AddConfiguration(ConstStrings.EVENT, 2);
             resetReceive.AddConfiguration(ConstStrings.EVENT, 3);
             resetSend.AddConfiguration(ConstStrings.EVENT, 3);
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
 
             var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
 
@@ -420,14 +404,6 @@ namespace UnityGLTF.Interactivity.Tests
             doneBranch.AddFlow(missedOutFlowLog, ConstStrings.FALSE);
             doneBranch.AddConnectedValue(ConstStrings.CONDITION, outVarGet);
             missedOutFlowLog.AddFlow(failMissedOutFlow);
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
 
             return g;
         }
