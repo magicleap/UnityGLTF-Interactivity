@@ -323,7 +323,7 @@ namespace UnityGLTF.Interactivity.Tests
             inputs.Add(ConstStrings.B, new Value() { id = ConstStrings.B, property = new Property<T>(b) });
             outputs.Add(ConstStrings.VALUE, new Property<T>(expected));
 
-            TestNode("math/select", inputs, outputs, ComparisonType.Approximately);
+            TestNode("math/select", inputs, outputs);
         }
 
         [Test]

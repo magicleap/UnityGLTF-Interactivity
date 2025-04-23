@@ -34,8 +34,8 @@ namespace UnityGLTF.Interactivity.Tests
             var failNode = g.CreateNode("event/send");
             var successNode = g.CreateNode("event/send");
 
-            failNode.AddConfiguration(ConstStrings.EVENT, 0);
-            successNode.AddConfiguration(ConstStrings.EVENT, 1);
+            failNode.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+            successNode.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
 
             onStartNode.AddFlow(branchNode);
 
@@ -97,8 +97,8 @@ namespace UnityGLTF.Interactivity.Tests
 
             failLog.AddFlow(failSend);
 
-            failSend.AddConfiguration(ConstStrings.EVENT, 0);
-            completeSend.AddConfiguration(ConstStrings.EVENT, 1);
+            failSend.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+            completeSend.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
 
             GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
             var extension = new KHR_interactivity()
@@ -213,9 +213,9 @@ namespace UnityGLTF.Interactivity.Tests
             start.AddFlow(startTrigger);
 
             startTrigger.AddConfiguration(ConstStrings.EVENT, 2);
-            failSend.AddConfiguration(ConstStrings.EVENT, 0);
-            failTotalSend.AddConfiguration(ConstStrings.EVENT, 0);
-            completeSend.AddConfiguration(ConstStrings.EVENT, 1);
+            failSend.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+            failTotalSend.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+            completeSend.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
             triggerSend.AddConfiguration(ConstStrings.EVENT, 2);
             triggerReceive.AddConfiguration(ConstStrings.EVENT, 2);
             resetTrigger.AddConfiguration(ConstStrings.EVENT, 2);
@@ -258,11 +258,11 @@ namespace UnityGLTF.Interactivity.Tests
             loopFailLog.AddConfiguration(ConstStrings.MESSAGE, "Loop Body with Index Expected: {expected}, Actual: {actual}");
             completedFailLog.AddConfiguration(ConstStrings.MESSAGE, "Completed with Index Expected: {expected}, Actual: {actual}");
 
-            loopBodyGet.AddConfiguration(ConstStrings.VARIABLE, 0);
+            loopBodyGet.AddConfiguration(ConstStrings.VARIABLE, g.IndexOfVariable(variable));
 
-            loopBodySend.AddConfiguration(ConstStrings.EVENT, 0);
-            completedSend.AddConfiguration(ConstStrings.EVENT, 0);
-            successSend.AddConfiguration(ConstStrings.EVENT, 1);
+            loopBodySend.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+            completedSend.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+            successSend.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
 
             onStartnode.AddFlow(forNode);
             forNode.AddFlow(varSet, ConstStrings.LOOP_BODY);
@@ -340,7 +340,7 @@ namespace UnityGLTF.Interactivity.Tests
                 var completedFailLog = g.CreateNode("debug/log");
                 var fail = g.CreateNode("event/send");
 
-                fail.AddConfiguration(ConstStrings.EVENT, 0);
+                fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
 
                 completedFailLog.AddConfiguration(ConstStrings.MESSAGE, "Completed with Total Iterations Expected: {expected}, Actual: {actual}");
                 completedFailLog.AddValue(ConstStrings.EXPECTED, i);
@@ -365,7 +365,7 @@ namespace UnityGLTF.Interactivity.Tests
                 else
                 {
                     var complete = g.CreateNode("event/send");
-                    complete.AddConfiguration(ConstStrings.EVENT, 1);
+                    complete.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
                     branch.AddFlow(complete, ConstStrings.TRUE);
                 }
 
@@ -403,9 +403,9 @@ namespace UnityGLTF.Interactivity.Tests
             outVarGet.AddConfiguration(ConstStrings.VARIABLE, varIndex);
             outVarSet.AddValue(ConstStrings.VALUE, true);
 
-            errSendNode.AddConfiguration(ConstStrings.EVENT, 0);
-            failMissedOutFlow.AddConfiguration(ConstStrings.EVENT, 0);
-            doneSendNode.AddConfiguration(ConstStrings.EVENT, 1);
+            errSendNode.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+            failMissedOutFlow.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+            doneSendNode.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
 
             onStartnode.AddFlow(setDelayNode);
 
