@@ -39,6 +39,42 @@ namespace UnityGLTF.Interactivity.Tests
             Assert.IsTrue(_testSuccessful);
         }
 
+        [Test]
+        public void TestReceive()
+        {
+            var g = CreateGraphForTest();
+
+            g.AddEvent("trigger");
+
+            var start = g.CreateNode("event/onStart");
+            var receiveTrigger = g.CreateNode("event/receive");
+            var sendTrigger = g.CreateNode("event/send");
+
+            var complete = g.CreateNode("event/send");
+
+            start.AddFlow(sendTrigger);
+
+            receiveTrigger.AddFlow(complete);
+
+            sendTrigger.AddConfiguration(ConstStrings.EVENT, 2);
+            receiveTrigger.AddConfiguration(ConstStrings.EVENT, 2);
+
+            complete.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
+
+            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
+            var extension = new KHR_interactivity()
+            {
+                graphs = new List<Graph>() { g },
+                defaultGraphIndex = 0
+            };
+            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
+
+            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
+
+            Assert.IsTrue(_testSuccessful);
+        }
+
+
         [UnityTest]
         public IEnumerator TestOnTick()
         {
