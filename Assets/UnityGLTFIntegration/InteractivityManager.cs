@@ -53,32 +53,28 @@ namespace UnityGLTF.Interactivity
             Camera.main.transform.rotation = Quaternion.Euler(0, 0, 0);
         }
 
-        private bool _loadedAudioFile = false;
-        private UnityEngine.AudioSource _loadingAudioSource = null;
+        //private bool _loadedAudioFile = false;
+        //private UnityEngine.AudioSource _loadingAudioSource = null;
         private AudioWrapper _audioWrapper = null;
-
-        private bool _loadedVideoFile = false;
-        private UnityEngine.Video.VideoPlayer _loadedVideoPlayer = null;
+        private int _audioIndex = 0;
         private VideoWrapper _videoWrapper = null;
 
         private void Update()
         {
-            if (_loadedAudioFile && _loadingAudioSource != null)
-            {
-                if (_loadingAudioSource.playOnAwake)
-                    _loadingAudioSource.Play();
-                _audioWrapper.AddAudioSource(0, new AudioPlayData() { index = 0, source = _loadingAudioSource });
-                _loadingAudioSource = null;
-                _loadedAudioFile = false;
-            }
-            if (_loadedVideoFile && _loadedVideoPlayer != null)
-            {
-                if (_loadedVideoPlayer.playOnAwake)
-                    _loadedVideoPlayer.Play();
-                _videoWrapper.AddVideoSource(0, new VideoPlayerData() { index = 0, player = _loadedVideoPlayer });
-                _loadedVideoPlayer = null;
-                _loadedVideoFile = false;
-            }
+            //if (_loadedAudioFile)
+            //{
+            //    if (_loadingAudioSource.playOnAwake)
+            //        _loadingAudioSource.Play();
+            //    _loadedAudioFile = false;
+            //}
+            //if (_loadedVideoFile && _loadedVideoPlayer != null)
+            //{
+            //    if (_loadedVideoPlayer.playOnAwake)
+            //        _loadedVideoPlayer.Play();
+            //    _videoWrapper.AddVideoSource(0, new VideoPlayerData() { index = 0, player = _loadedVideoPlayer });
+            //    _loadedVideoPlayer = null;
+            //    _loadedVideoFile = false;
+            //}
         }
 
         private void OnLoadComplete(GameObject obj, ExceptionDispatchInfo exceptionDispatchInfo, GLTFSceneImporter importer)
@@ -223,22 +219,23 @@ namespace UnityGLTF.Interactivity
 
                     if (!string.IsNullOrEmpty(finalFileName) && !string.IsNullOrEmpty(finalDir))
                     {
-                        if (_loadedVideoPlayer == null)
-                            _loadedVideoPlayer = importer.SceneParent.gameObject.AddComponent<UnityEngine.Video.VideoPlayer>();
-                        SetGOOGVideoValues(video, e, ref _loadedVideoPlayer);
+                        var loadedVideoPlayer = importer.SceneParent.gameObject.AddComponent<UnityEngine.Video.VideoPlayer>();
+                        SetGOOGVideoValues(video, e, ref loadedVideoPlayer);
                         string path1 = finalDir + Path.DirectorySeparatorChar + finalFileName; // Application.streamingAssetsPath + Path.DirectorySeparatorChar + video.uri;
-                        _loadedVideoPlayer.url = path1;
-                        _loadedVideoFile = true;
+                        loadedVideoPlayer.url = path1;
 
                         // duplicate quad and assign movie
                         GameObject newQuad = Instantiate(_quad, this.transform);
-                        _lastQuadPosition += new Vector3(.1f, .1f, 0);
+                        _lastQuadPosition += new Vector3(.3f, 0, 0);
                         newQuad.SetActive(true);
                         newQuad.transform.position += _lastQuadPosition;
                         RenderTexture newRT = Instantiate(_rt);
-                        newQuad.GetComponent<Renderer>().material.mainTexture = _rt;
-                        _loadedVideoPlayer.targetTexture = _rt;
-                        _loadedVideoPlayer.Play();
+                        newQuad.GetComponent<Renderer>().material.mainTexture = newRT;
+                        loadedVideoPlayer.targetTexture = newRT;
+
+                        if (loadedVideoPlayer.playOnAwake)
+                            loadedVideoPlayer.Play();
+                        _videoWrapper.AddVideoSource(idx, new VideoPlayerData() { index = idx, player = loadedVideoPlayer });
                     }
                     idx++;
                 }
@@ -300,10 +297,12 @@ namespace UnityGLTF.Interactivity
 
                     if (!string.IsNullOrEmpty(finalFileName) && !string.IsNullOrEmpty(finalDir))
                     {
-                        if (_loadingAudioSource == null)
-                            _loadingAudioSource = importer.SceneParent.gameObject.AddComponent<UnityEngine.AudioSource>();
-                        SetGOOGAudioValues(audio, e, ref _loadingAudioSource);
-                        StartCoroutine(LoadAudioSourceClipFromFile(finalDir + Path.DirectorySeparatorChar + finalFileName, Path.GetFileNameWithoutExtension(audio.uri)));
+//                        if (_loadingAudioSource == null)
+                        var loadingAudioSource = importer.SceneParent.gameObject.AddComponent<UnityEngine.AudioSource>();
+                        _audioWrapper.AddAudioSource(_audioIndex, new AudioPlayData() { index = _audioIndex, source = loadingAudioSource });
+                        SetGOOGAudioValues(audio, e, ref loadingAudioSource);
+                        StartCoroutine(LoadAudioSourceClipFromFile(_audioIndex, finalDir + Path.DirectorySeparatorChar + finalFileName, Path.GetFileNameWithoutExtension(audio.uri), e.autoPlay));
+                        _audioIndex++;
                     }
 
                     idx++;
@@ -366,12 +365,11 @@ namespace UnityGLTF.Interactivity
 
                     if (!string.IsNullOrEmpty(finalFileName) && !string.IsNullOrEmpty(finalDir))
                     {
-                        if (_loadingAudioSource == null)
-                            _loadingAudioSource = importer.SceneParent.gameObject.AddComponent<UnityEngine.AudioSource>();
-                        SetAudioValues(a, e, ref _loadingAudioSource);
-
-                        StartCoroutine(LoadAudioSourceClipFromFile(finalDir + Path.DirectorySeparatorChar + finalFileName, a.sourceName));
-
+                        var loadingAudioSource = importer.SceneParent.gameObject.AddComponent<UnityEngine.AudioSource>();
+                        _audioWrapper.AddAudioSource(_audioIndex, new AudioPlayData() { index = _audioIndex, source = loadingAudioSource });
+                        SetAudioValues(a, e, ref loadingAudioSource);
+                        StartCoroutine(LoadAudioSourceClipFromFile(_audioIndex, finalDir + Path.DirectorySeparatorChar + finalFileName, a.sourceName, e.autoPlay));
+                        _audioIndex++;
                     }
 
                     idx++;
@@ -486,7 +484,7 @@ namespace UnityGLTF.Interactivity
 
         //}
 
-        private IEnumerator LoadAudioSourceClipFromFile(string pathFileName, string clipName)
+        private IEnumerator LoadAudioSourceClipFromFile(int audioIndex, string pathFileName, string clipName, bool autoPlay)
         {
             UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(pathFileName, AudioType.MPEG);
             var download = www.SendWebRequest();
@@ -499,10 +497,14 @@ namespace UnityGLTF.Interactivity
             else
             {
                 var clip = DownloadHandlerAudioClip.GetContent(www);
-                _loadingAudioSource.clip = clip;
-                _loadingAudioSource.clip.name = clipName;
-                _loadedAudioFile = true;
-                yield return _loadingAudioSource;
+                var loadingAudioSource = _audioWrapper.GetAudioSource(audioIndex).source;
+                loadingAudioSource.clip = clip;
+                loadingAudioSource.clip.name = clipName;
+
+                if (autoPlay)
+                    loadingAudioSource.Play();
+//                _loadedAudioFile = true;
+                yield return loadingAudioSource;
             }
             yield return null;
         }

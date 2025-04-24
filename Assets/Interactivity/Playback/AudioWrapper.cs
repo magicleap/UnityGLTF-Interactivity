@@ -41,6 +41,7 @@ namespace UnityGLTF.Interactivity
         private AudioPlayData _currentAudioData;
 
         private readonly Dictionary<int, AudioPlayData> _audioSources = new();
+        public AudioPlayData GetAudioSource(int idx) { return _audioSources.FirstOrDefault(r => r.Key == idx).Value; }
 
         private BehaviourEngine _engine;
 
