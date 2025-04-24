@@ -31,6 +31,8 @@ namespace UnityGLTF.Interactivity
 
     public static class ConstStrings
     {
+        public const string TIME_SINCE_START = "timeSinceStart";
+        public const string TIME_SINCE_LAST_TICK = "timeSinceLastTick";
         public const string EXPECTED = "expected";
         public const string ACTUAL = "actual";
 

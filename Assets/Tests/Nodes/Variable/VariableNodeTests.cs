@@ -93,8 +93,6 @@ namespace UnityGLTF.Interactivity.Tests
             var eq = g.CreateNode("math/eq");
             var failLog = g.CreateNode("debug/log");
 
-            failLog.AddConfiguration(ConstStrings.MESSAGE, $"Variable \"{variableName}\" " + "Expected: {expected}, Actual: {actual}");
-
             fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
             success.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
 
@@ -104,10 +102,10 @@ namespace UnityGLTF.Interactivity.Tests
             eq.AddConnectedValue(ConstStrings.A, get);
             eq.AddValue(ConstStrings.B, setValue);
 
-
             branch.AddFlow(success, ConstStrings.TRUE);
             branch.AddFlow(failLog, ConstStrings.FALSE);
 
+            failLog.AddConfiguration(ConstStrings.MESSAGE, $"Variable \"{variableName}\" " + "Expected: {expected}, Actual: {actual}");
             failLog.AddValue(ConstStrings.EXPECTED, setValue);
             failLog.AddConnectedValue(ConstStrings.ACTUAL, get);
 

@@ -5,25 +5,30 @@ namespace UnityGLTF.Interactivity
 {
     public class EventOnTick : BehaviourEngineNode
     {
+        private float _timeSinceStart = float.NaN;
+        private float _timeSinceLastTick = float.NaN;
         private float _startTime = -9999f;
-        private float _lastTickTime = 0;
+
+        private bool _hasTicked = false;
 
         public EventOnTick(BehaviourEngine engine, Node node) : base(engine, node)
         {
-            engine.onStart += OnStart;
             engine.onTick += OnTick;
-        }
-
-        private void OnStart()
-        {
-            _startTime = Time.time;
         }
 
         private void OnTick()
         {
-            _lastTickTime = Time.time;
-
-            //Util.Log($"Time Since Start: {Time.time - _startTime}");
+            if(!_hasTicked)
+            {
+                _startTime = Time.time;
+                _timeSinceStart = 0f;
+                _hasTicked = true;
+            }
+            else
+            {
+                _timeSinceStart = Time.time - _startTime;
+                _timeSinceLastTick = Time.deltaTime;
+            }
 
             TryExecuteFlow(ConstStrings.OUT);
         }
@@ -32,8 +37,8 @@ namespace UnityGLTF.Interactivity
         {
             return id switch
             {
-                "timeSinceStart" => new Property<float>(Time.time - _startTime),
-                "timeSinceLastTick" => new Property<float>(Time.deltaTime),
+                ConstStrings.TIME_SINCE_START => new Property<float>(_timeSinceStart),
+                ConstStrings.TIME_SINCE_LAST_TICK => new Property<float>(_timeSinceLastTick),
                 _ => throw new InvalidOperationException($"No valid output with name {id}"),
             };
         }
