@@ -1,0 +1,27 @@
+{
+    "name": "UnityGLTF.Interactivity.Tests.Math",
+    "rootNamespace": "",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "UnityGLTF.Interactivity.Common",
+        "Unity.Mathematics",
+        "UnityGLTFScripts",
+        "UnityGLTF.Interactivity",
+        "UnityGLTF.Interactivity.Tests.Common"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

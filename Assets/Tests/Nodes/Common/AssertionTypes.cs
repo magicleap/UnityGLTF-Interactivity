@@ -9,6 +9,8 @@ using UnityGLTF.Interactivity;
 
 namespace UnityGLTF.Interactivity.Tests
 {
+    // No longer used, was from a time when we were doing smaller tests that were not self-contained.
+    // By creating self-contained tests there is no need for these assertions as the assertion is handled within the graph itself.
     public interface IAssertionByType
     {
         public void AreApproximatelyEqual(IProperty expectedProp, IProperty actualProp);
