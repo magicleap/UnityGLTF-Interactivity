@@ -408,6 +408,53 @@ namespace UnityGLTF.Interactivity.Tests
             return g;
         }
 
+        private static Graph GenerateWhileTestGraph(int iterations)
+        {
+            Graph g = CreateGraphForTest();
+
+            var start = g.CreateNode("event/onStart");
+            var whileNode = g.CreateNode("flow/while");
+            var get = g.CreateNode("variable/get");
+            var lt = g.CreateNode("math/lt");
+            var eq = g.CreateNode("math/eq");
+            var branch = g.CreateNode("flow/branch");
+            var failLog = g.CreateNode("debug/log");
+            var fail = g.CreateNode("event/send");
+            var completed = g.CreateNode("event/send");
+
+            failLog.AddConfiguration(ConstStrings.MESSAGE, "Completed with Bitmask Expected: {expected}, Actual: {actual}");
+            failLog.AddValue(ConstStrings.EXPECTED, iterations);
+            failLog.AddConnectedValue(ConstStrings.ACTUAL, get);
+
+            fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+            completed.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
+
+            var indexVariable = g.AddVariable("count", 0);
+
+            Node varSet = CreateVariableIncrementSubgraph(g, indexVariable);
+
+            get.AddConfiguration(ConstStrings.VARIABLE, g.IndexOfVariable(indexVariable));
+
+            start.AddFlow(whileNode);
+            whileNode.AddFlow(varSet, ConstStrings.LOOP_BODY);
+            whileNode.AddFlow(branch, ConstStrings.COMPLETED);
+            whileNode.AddConnectedValue(ConstStrings.CONDITION, lt);
+
+            lt.AddConnectedValue(ConstStrings.A, get);
+            lt.AddValue(ConstStrings.B, iterations);
+
+            eq.AddConnectedValue(ConstStrings.A, get);
+            eq.AddValue(ConstStrings.B, iterations);
+
+            branch.AddConnectedValue(ConstStrings.CONDITION, eq);
+            branch.AddFlow(completed, ConstStrings.TRUE);
+            branch.AddFlow(failLog, ConstStrings.FALSE);
+
+            failLog.AddFlow(fail);
+
+            return g;
+        }
+
         [Test]
         public void TestBranch()
         {
@@ -572,6 +619,24 @@ namespace UnityGLTF.Interactivity.Tests
             bitmaskSet.AddFlow(send);
 
             return setOutputFlow;
+        }
+
+        [Test]
+        public void TestWhile()
+        {
+            var g = GenerateWhileTestGraph(5);
+
+            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
+            var extension = new KHR_interactivity()
+            {
+                graphs = new List<Graph>() { g },
+                defaultGraphIndex = 0
+            };
+            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
+
+            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
+
+            Assert.IsTrue(_testSuccessful);
         }
     }
 }
