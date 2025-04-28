@@ -47,7 +47,7 @@ namespace UnityGLTF.Interactivity
             _ = _loader.LoadModelAsync($"{_modelName}.glb", OnLoadComplete, _loadTimeout);
 
             _quad.SetActive(false);
-            _lastQuadPosition = new Vector3(0f, 0f, 3.0f);
+            _lastQuadPosition = new Vector3(-.75f, 0f, 3.0f);
 
             Camera.main.transform.position = new Vector3(0, 0, 0);
             Camera.main.transform.rotation = Quaternion.Euler(0, 0, 0);
@@ -237,9 +237,9 @@ namespace UnityGLTF.Interactivity
 
                         // duplicate quad and assign movie
                         GameObject newQuad = Instantiate(_quad, this.transform);
-                        _lastQuadPosition += new Vector3(.3f, 0, 0);
                         newQuad.SetActive(true);
                         newQuad.transform.position += _lastQuadPosition;
+                        _lastQuadPosition += new Vector3(1.2f, 0, 0);
                         RenderTexture newRT = Instantiate(_rt);
                         newQuad.GetComponent<Renderer>().material.mainTexture = newRT;
                         loadedVideoPlayer.targetTexture = newRT;
