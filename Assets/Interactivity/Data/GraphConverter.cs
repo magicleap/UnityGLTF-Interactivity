@@ -56,10 +56,9 @@ namespace UnityGLTF.Interactivity
                 interactivity.defaultGraphIndex = jObj[ConstStrings.GRAPH].Value<int>();
                 interactivity.type = KHR_ExtensionGraph.GraphType.Interactivity;
             }
-            else if (jObj[ConstStrings.VIDEO_DATA] != null && jObj[ConstStrings.VIDEO_SOURCE] != null)
+            else if (jObj[ConstStrings.VIDEO_DATA] != null)
             {
                 var videoData = jObj[ConstStrings.VIDEO_DATA];
-                var videoSource = jObj[ConstStrings.VIDEO_SOURCE];
 
                 interactivity.type = KHR_ExtensionGraph.GraphType.GOOG_Video;
 
@@ -69,6 +68,18 @@ namespace UnityGLTF.Interactivity
                 {
                     GenerateVideoDataGraph(jObj, ref graph);
                 }
+
+                interactivity.graphs.Add(graph);
+
+            }
+            else if (jObj[ConstStrings.VIDEO_SOURCE] != null)
+            {
+                var videoSource = jObj[ConstStrings.VIDEO_SOURCE];
+
+                interactivity.type = KHR_ExtensionGraph.GraphType.GOOG_Video;
+
+                var graph = new Graph();
+
                 if (videoSource != null && videoSource.HasValues)
                 {
                     GenerateVideoSourceGraph(jObj, ref graph);

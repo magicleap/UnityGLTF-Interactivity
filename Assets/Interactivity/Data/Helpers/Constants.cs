@@ -35,8 +35,8 @@ namespace UnityGLTF.Interactivity
         public const string AUDIO_SOURCE = "audioSource";
         public const string AUDIO_SOURCES = "sources";
         public const string AUDIO_EMITTERS = "emitters";
-        public const string VIDEO_SOURCE = "videoSource";
-        public const string VIDEO_DATA = "videoData";
+        public const string VIDEO_SOURCE = "videos";
+        public const string VIDEO_DATA = "data";
         public const string MIME_TYPE = "mimeType";
         public const string BUFFER_VIEW = "bufferView";
         public const string VIDEO = "video";
@@ -79,6 +79,9 @@ namespace UnityGLTF.Interactivity
         public const string ANIMATION = "animation";
         public const string SPEED = "speed";
         public const string START_TIME = "startTime";
+        public const string PLAYHEAD = "playhead";
+        public const string SOURCE = "source";
+
         public const string STOP_TIME = "stopTime";
         public const string END_TIME = "endTime";
         public const string CANCEL = "cancel";

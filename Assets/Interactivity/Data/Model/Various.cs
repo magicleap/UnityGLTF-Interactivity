@@ -78,11 +78,10 @@ namespace UnityGLTF.Interactivity
 
     public class VideoData
     {
-        public string name { get; set; }
+        public int source { get; set; }
+        public int playHead{ get; set; }
         public bool autoPlay { get; set; }
         public bool loop { get; set; }
-        public float speed { get; set; }
-        public int video { get; set; }
     }
 
     public class Declaration

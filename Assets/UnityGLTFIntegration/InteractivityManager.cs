@@ -82,7 +82,6 @@ namespace UnityGLTF.Interactivity
             onModelLoadComplete?.Invoke();
 
             var extensions = importer.Root?.Extensions;
-
             if (extensions == null)
                 return;
 
@@ -123,7 +122,9 @@ namespace UnityGLTF.Interactivity
                         case KHR_ExtensionGraph.GraphType.GOOG_Video:
                             var videoSrcs = gdList.FindAll(r => (r.graph.videoSource != null) && (r.graph.videoSource.Count> 0));
                             if (videoSrcs != null && videoSrcs.Count > 0)
+                            {                                
                                 AddGOOGVideoSource(importer, videoSrcs);
+                            }
                             break;
                         default:
                             break;
@@ -165,6 +166,16 @@ namespace UnityGLTF.Interactivity
             if (_videoWrapper == null)
                 return;
 
+            var textureExtension = importer.Root?.Textures.Find((r => (r.Extensions != null)));
+            var extensions = textureExtension.Extensions;
+            IExtension extension;
+            if (!extensions.TryGetValue(VideoGraphExtension.GOOG_EXTENSION_NAME, out extension))
+                return;
+
+            if (!(extension is VideoGraphExtension videoGraphExt))
+                return;
+
+            var videoData = videoGraphExt.extensionData.graphs[videoGraphExt.extensionData.defaultGraphIndex].videoData;
             //loop through all of the audio graphs. Could be more than one conceivably. Practically speaking though, 
             // one model should have one audio graph with audio, emitters and sources
             foreach (var videoGraph in videoGraphs)
@@ -176,7 +187,7 @@ namespace UnityGLTF.Interactivity
                 // each audio
                 foreach (var video in graph.videoSource)
                 {
-                    VideoData e = GetVideoData(idx, graph.videoData);
+                    VideoData e = GetVideoData(idx, videoData);
 
                     if (e == null)
                     {
@@ -447,7 +458,6 @@ namespace UnityGLTF.Interactivity
             {
                 videoPlayer.playOnAwake = data.autoPlay;
                 videoPlayer.isLooping = data.loop;
-                videoPlayer.playbackSpeed = data.speed;
             }
         }
 
@@ -526,15 +536,14 @@ namespace UnityGLTF.Interactivity
         {
             foreach(VideoData videoData in videoDatas)
             {
-                if (videoData.video == idx)
+                if (videoData.source == idx)
                 {
                     return new VideoData()
                     {
                         autoPlay = videoData.autoPlay,
                         loop = videoData.loop,
-                        name = videoData.name,
-                        speed = videoData.speed,
-                        video = videoData.video
+                        source = videoData.source,
+                        playHead= videoData.playHead
                     };
                 }
             }
