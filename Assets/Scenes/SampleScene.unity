@@ -2263,6 +2263,8 @@ MonoBehaviour:
   _saveToFile: saveTesta.glb
   _loadTimeout: 8
   _settings: {fileID: 1, guid: be7f94609751fa34a928c17cac4150b3, type: 2}
+  _rt: {fileID: 8400000, guid: 03bf0931876a20e48ac5dc183b38e203, type: 2}
+  _quad: {fileID: 741694247}
 --- !u!1 &738271255
 GameObject:
   m_ObjectHideFlags: 0
