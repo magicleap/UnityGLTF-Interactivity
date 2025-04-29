@@ -169,6 +169,7 @@ namespace UnityGLTF.Interactivity
             ["flow/sequence"] = new FlowSequenceSpec(),
             ["flow/setDelay"] = new FlowSetDelaySpec(),
             ["flow/switch"] = new FlowSwitchSpec(),
+            ["flow/throttle"] = new FlowThrottleSpec(),
             ["flow/while"] = new FlowWhileSpec(),
             ["pointer/interpolate"] = new PointerInterpolateSpecs(),
             ["pointer/set"] = new PointerSetSpecs(),
