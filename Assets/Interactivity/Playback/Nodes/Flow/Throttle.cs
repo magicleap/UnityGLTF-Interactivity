@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -21,23 +20,30 @@ namespace UnityGLTF.Interactivity
                 _lastRemainingTime = float.NaN;
                 return;
             }
-                 
+
             TryEvaluateValue(ConstStrings.DURATION, out _duration);
-            if (_duration >= 0 && !float.IsNaN(_duration) && !float.IsInfinity(_duration))
+
+            if (_duration < 0 || float.IsNaN(_duration) || float.IsInfinity(_duration))
             {
-                if (!float.IsNaN(_lastRemainingTime))
-                {
-                    _elapsed = Time.time - _timestamp;
-                    if (_duration > _elapsed)
-                        _lastRemainingTime = _duration - _elapsed;
-                    else
-                        ExecuteOutFlow();
-                }
-                else
-                    ExecuteOutFlow();
+                TryExecuteFlow(ConstStrings.ERR);
+                return;
             }
-            else
-                TryExecuteFlow(ConstStrings.ERR);    
+
+            if (float.IsNaN(_lastRemainingTime))
+            {
+                ExecuteOutFlow();
+                return;
+            }
+
+            _elapsed = Time.time - _timestamp;
+
+            if (_duration <= _elapsed)
+            {
+                ExecuteOutFlow();
+                return;
+            }
+            
+            _lastRemainingTime = _duration - _elapsed;
         }
 
         private void ExecuteOutFlow()

@@ -455,6 +455,91 @@ namespace UnityGLTF.Interactivity.Tests
             return g;
         }
 
+
+        private static Graph GenerateThrottleTestGraph(float duration, float testDuration)
+        {
+            Graph g = CreateGraphForTest();
+
+            var isNaN = CreateNaNCheckSubGraph(g);
+            var throttle = g.CreateNode("flow/throttle");
+            throttle.AddValue(ConstStrings.DURATION, duration);
+            isNaN.AddConnectedValue(ConstStrings.A, throttle, ConstStrings.LAST_REMAINING_TIME);
+
+            var onTick = g.CreateNode("event/onTick");
+            onTick.AddFlow(throttle);
+
+            var errLog = g.CreateNode("debug/log");
+            var err = g.CreateNode("event/send");
+
+            err.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+
+            errLog.AddFlow(err);
+            errLog.AddConfiguration(ConstStrings.MESSAGE, "Err flow was activated which should not occur in this test.");
+            throttle.AddFlow(errLog, ConstStrings.ERR);
+
+            var outFlowActivationsVariable = g.AddVariable("outFlowActivations", 0);
+            var outFlowActivationsVariableIndex = g.IndexOfVariable(outFlowActivationsVariable);
+            Node outFlowCounter = CreateVariableIncrementSubgraph(g, outFlowActivationsVariable);
+
+            throttle.AddFlow(outFlowCounter);
+
+            var setDelayStart = g.CreateNode("event/onStart");
+            var setDelay = g.CreateNode("flow/setDelay");
+
+            setDelayStart.AddFlow(setDelay);
+            setDelay.AddValue(ConstStrings.DURATION, testDuration);
+
+            var completionBranch = g.CreateNode("flow/branch");
+            var eq = g.CreateNode("math/eq");
+            completionBranch.AddConnectedValue(ConstStrings.CONDITION, eq);
+            setDelay.AddFlow(completionBranch, ConstStrings.DONE);
+
+            var get = g.CreateNode("variable/get");
+            get.AddConfiguration(ConstStrings.VARIABLE, outFlowActivationsVariableIndex);
+
+            var expectedIterations = Mathf.FloorToInt(testDuration / duration) + 1;
+
+            eq.AddConnectedValue(ConstStrings.A, get);
+            eq.AddValue(ConstStrings.B, expectedIterations);
+
+            var incorrectIterationsLog = g.CreateNode("debug/log");
+            var fail = g.CreateNode("event/send");
+            var completed = g.CreateNode("event/send");
+
+            incorrectIterationsLog.AddFlow(fail);
+            incorrectIterationsLog.AddConfiguration(ConstStrings.MESSAGE, "Number of iterations, Expected: {expected}, Actual: {actual}");
+            incorrectIterationsLog.AddValue(ConstStrings.EXPECTED, expectedIterations);
+            incorrectIterationsLog.AddConnectedValue(ConstStrings.ACTUAL, get);
+
+            completionBranch.AddFlow(completed, ConstStrings.TRUE);
+            completionBranch.AddFlow(incorrectIterationsLog, ConstStrings.FALSE);
+
+            completed.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
+            fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+
+            return g;
+        }
+
+        private static Node CreateNaNCheckSubGraph(Graph g)
+        {
+            var start = g.CreateNode("event/onStart");
+            var branch = g.CreateNode("flow/branch");
+            var isNaN = g.CreateNode("math/isnan");
+            var failLog = g.CreateNode("debug/log");
+            var fail = g.CreateNode("event/send");
+
+            fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+
+            start.AddFlow(branch);
+            branch.AddConnectedValue(ConstStrings.CONDITION, isNaN);
+            branch.AddFlow(failLog, ConstStrings.FALSE);
+
+            failLog.AddFlow(fail);
+            failLog.AddConfiguration(ConstStrings.MESSAGE, "lastRemainingTime should be NaN before the first activation of throttle node's out flow.");
+
+            return isNaN;
+        }
+
         [Test]
         public void TestBranch()
         {
@@ -635,6 +720,33 @@ namespace UnityGLTF.Interactivity.Tests
             File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
 
             var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
+
+            Assert.IsTrue(_testSuccessful);
+        }
+
+        [UnityTest]
+        public IEnumerator TestThrottle()
+        {
+            var THROTTLE_DURATION = 0.5f;
+            var TEST_DURATION = 0.75f;
+            var EXTRA_TEST_RUNTIME = 0.25f;
+            var g = GenerateThrottleTestGraph(THROTTLE_DURATION, TEST_DURATION);
+
+            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
+            var extension = new KHR_interactivity()
+            {
+                graphs = new List<Graph>() { g },
+                defaultGraphIndex = 0
+            };
+            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
+
+            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
+
+            while (Time.time < TEST_DURATION + EXTRA_TEST_RUNTIME)
+            {
+                eng.Tick();
+                yield return null;
+            }
 
             Assert.IsTrue(_testSuccessful);
         }
