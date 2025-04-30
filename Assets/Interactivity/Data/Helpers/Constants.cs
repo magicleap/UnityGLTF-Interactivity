@@ -31,6 +31,8 @@ namespace UnityGLTF.Interactivity
 
     public static class ConstStrings
     {
+        public const string REMAINING_INPUTS = "remainingInputs";
+        public const string LAST_INDEX = "lastIndex";
         public const string LAST_REMAINING_TIME = "lastRemainingTime";
         public const string TIME_SINCE_START = "timeSinceStart";
         public const string TIME_SINCE_LAST_TICK = "timeSinceLastTick";
