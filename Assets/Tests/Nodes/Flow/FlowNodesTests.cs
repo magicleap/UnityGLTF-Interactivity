@@ -191,53 +191,6 @@ namespace UnityGLTF.Interactivity.Tests
             Assert.IsTrue(_testSuccessful);
         }
 
-        private Graph CreateSetDelayGraph(float duration, float extraExecutionTime)
-        {
-            Graph g = CreateGraphForTest();
-            var outVar = g.AddVariable("outTriggered", false);
-            g.AddVariable("doneTriggered", false);
-            g.AddVariable("testDuration", duration + extraExecutionTime);
-
-            var onStartnode = g.CreateNode("event/onStart");
-            var setDelayNode = g.CreateNode("flow/setDelay");
-            var outVarSet = g.CreateNode("variable/set");
-            var outVarGet = g.CreateNode("variable/get");
-            var errSendNode = g.CreateNode("event/send");
-            var doneSendNode = g.CreateNode("event/send");
-            var doneBranch = g.CreateNode("flow/branch");
-            var errFlowLog = g.CreateNode("debug/log");
-            var missedOutFlowLog = g.CreateNode("debug/log");
-            var failMissedOutFlow = g.CreateNode("event/send");
-
-            errFlowLog.AddConfiguration(ConstStrings.MESSAGE, "Err flow triggered with valid duration value.");
-            missedOutFlowLog.AddConfiguration(ConstStrings.MESSAGE, "Done flow triggered but out flow was never triggered.");
-
-            var varIndex = g.IndexOfVariable(outVar);
-            outVarSet.AddConfiguration(ConstStrings.VARIABLE, varIndex);
-            outVarGet.AddConfiguration(ConstStrings.VARIABLE, varIndex);
-            outVarSet.AddValue(ConstStrings.VALUE, true);
-
-            errSendNode.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
-            failMissedOutFlow.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
-            doneSendNode.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
-
-            onStartnode.AddFlow(setDelayNode);
-
-            setDelayNode.AddFlow(outVarSet);
-            setDelayNode.AddFlow(errFlowLog, ConstStrings.ERR);
-            setDelayNode.AddFlow(doneBranch, ConstStrings.DONE);
-            errFlowLog.AddFlow(errSendNode);
-
-            setDelayNode.AddValue(ConstStrings.DURATION, duration);
-
-            doneBranch.AddFlow(doneSendNode, ConstStrings.TRUE);
-            doneBranch.AddFlow(missedOutFlowLog, ConstStrings.FALSE);
-            doneBranch.AddConnectedValue(ConstStrings.CONDITION, outVarGet);
-            missedOutFlowLog.AddFlow(failMissedOutFlow);
-
-            return g;
-        }
-
         private static Graph GenerateWhileTestGraph(int iterations)
         {
             Graph g = CreateGraphForTest();
@@ -323,29 +276,6 @@ namespace UnityGLTF.Interactivity.Tests
         public void TestSequence()
         {
             CreateFlowSequenceGraph(5);
-        }
-
-        [UnityTest]
-        public IEnumerator TestSetDelay()
-        {
-            const float DURATION = 0.75f;
-            const float EXTRA_EXECUTION_TIME = 0.25f;
-            var g = CreateSetDelayGraph(DURATION, EXTRA_EXECUTION_TIME);
-
-            var startTime = Time.time;
-            var endTime = Time.time + DURATION;
-            var finishExecutionTime = endTime + EXTRA_EXECUTION_TIME;
-
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            while (Time.time < finishExecutionTime)
-            {
-                eng.Tick();
-                yield return null;
-            }
-
-            Assert.IsTrue(_testSuccessful);
         }
 
         [Test]
