@@ -129,6 +129,16 @@ namespace UnityGLTF.Interactivity.Tests
 
             branch2.AddFlow(completed, ConstStrings.TRUE);
 
+            var completedFlowFailLog = g.CreateNode("debug/log");
+            var completedFlowFail = g.CreateNode("event/send");
+
+            completedFlowFail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+
+            completedFlowFailLog.AddFlow(completedFlowFail);
+            completedFlowFailLog.AddConfiguration(ConstStrings.MESSAGE, "Completed flow should never activate in this test.");
+
+            waitAll.AddFlow(completedFlowFailLog, ConstStrings.COMPLETED);
+
             return g;
         }
     }
