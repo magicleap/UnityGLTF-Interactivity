@@ -28,6 +28,7 @@ namespace UnityGLTF.Interactivity
                         return;
                     }
 
+                    Util.Log($"Executing delay with duration of {_duration}s");
                     _lastDelayIndex = engine.nodeDelayManager.AddDelayNode(this, _duration, () => TryExecuteFlow(ConstStrings.DONE));
 
                     TryExecuteFlow(ConstStrings.OUT);

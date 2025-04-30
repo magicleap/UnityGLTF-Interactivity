@@ -16,6 +16,8 @@ namespace UnityGLTF.Interactivity
 
         protected override void Execute(string socket, ValidationResult validationResult)
         {
+            Util.Log($"Sending event index {_eventNum}");
+
             engine.FireCustomEvent(_eventNum, _outValues);
 
             TryExecuteFlow(ConstStrings.OUT);

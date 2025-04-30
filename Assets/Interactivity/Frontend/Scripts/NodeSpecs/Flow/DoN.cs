@@ -26,7 +26,7 @@ namespace UnityGLTF.Interactivity
                 new NodeValue(ConstStrings.CURRENT_COUNT, "Current iteration index.", new System.Type[] { typeof(int) }),
         };
 
-            return (flows, null);
+            return (flows, values);
         }
     }
 }

@@ -28,7 +28,7 @@ namespace UnityGLTF.Interactivity
                 new NodeValue(ConstStrings.LAST_REMAINING_TIME, "The remaining throttling time, in seconds, at the moment of the last valid activation of the input flow or NaN if the input flow has never been activated with a valid duration input value.", new System.Type[] { typeof(float) }),
         };
 
-            return (flows, null);
+            return (flows, values);
         }
     }
 }
