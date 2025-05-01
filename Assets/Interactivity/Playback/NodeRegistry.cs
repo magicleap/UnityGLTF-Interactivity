@@ -274,6 +274,7 @@ namespace UnityGLTF.Interactivity
             ["math/xor"] = new MathTwoOperandsSpec<int, bool>(),
             ["variable/get"] = new VariableGetSpec(),
             ["variable/set"] = new VariableSetSpec(),
+            ["variable/interpolate"] = new VariableInterpolateSpec(),
             ["variable/setMultiple"] = new VariableSetMultipleSpec(),
         };
     }

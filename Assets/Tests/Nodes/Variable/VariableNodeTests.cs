@@ -13,9 +13,14 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void VariableGetAndSet_VariablesAllChangeToSetValuesAndGetReturnsThemCorrectly()
         {
-            QueueTest(GetCallerName(), CreateVariableGetAndSetGraph());
+            QueueTest(GetCallerName(), CreateVariableGetAndSetGraph(new VariableSetSubGraph()));
         }
 
+        [Test]
+        public void VariableInterpolate_VariablesAllChangeToSetValuesAndGetReturnsThemCorrectly()
+        {
+            QueueTest(GetCallerName(), CreateVariableGetAndSetGraph(new VariableInterpolateSubGraph()));
+        }
 
         [Test]
         public void TestVariableSetMultiple_VariablesAllChangeToSetValuesAndGetReturnsThemCorrectly()
@@ -23,19 +28,24 @@ namespace UnityGLTF.Interactivity.Tests
             QueueTest(GetCallerName(), CreateVariableSetMultipleGraph());
         }
 
-        private static Graph CreateVariableGetAndSetGraph()
+        private static Graph CreateVariableGetAndSetGraph(IVariableSubGraph subGraphGenerator)
         {
             var g = CreateGraphForTest();
 
-            AppendVariableTestSubGraph(g, false, true);
-            AppendVariableTestSubGraph(g, 0, 5);
-            AppendVariableTestSubGraph(g, 0f, 10f);
-            AppendVariableTestSubGraph(g, new float2(0f, 1f), new float2(2f, 3f));
-            AppendVariableTestSubGraph(g, new float3(0f, 1f, 2f), new float3(3f, 4f, 5f));
-            AppendVariableTestSubGraph(g, new float4(0f, 1f, 2f, 3f), new float4(4f, 5f, 6f, 7f));
+            if(subGraphGenerator is VariableSetSubGraph)
+            {
+                // Can't interpolate from false to true so only do that in the "variable/set" test.
+                subGraphGenerator.AppendVariableTestSubGraph(g, false, true);
+                subGraphGenerator.AppendVariableTestSubGraph(g, 0, 5);
+            }
+            
+            subGraphGenerator.AppendVariableTestSubGraph(g, 0f, 10f);
+            subGraphGenerator.AppendVariableTestSubGraph(g, new float2(0f, 1f), new float2(2f, 3f));
+            subGraphGenerator.AppendVariableTestSubGraph(g, new float3(0f, 1f, 2f), new float3(3f, 4f, 5f));
+            subGraphGenerator.AppendVariableTestSubGraph(g, new float4(0f, 1f, 2f, 3f), new float4(4f, 5f, 6f, 7f));
             var float2x2a = new float2x2(new float2(0f, 1f), new float2(2f, 3f));
             var float2x2b = new float2x2(new float2(-1f, -2f), new float2(-3f, -4f));
-            AppendVariableTestSubGraph(g, float2x2a, float2x2b);
+            subGraphGenerator.AppendVariableTestSubGraph(g, float2x2a, float2x2b);
             var float3x3a = new float3x3(
                 new float3(0f, 1f, 2f),
                 new float3(3f, 4f, 5f),
@@ -46,7 +56,7 @@ namespace UnityGLTF.Interactivity.Tests
                 new float3(-4f, -5f, -6f),
                 new float3(-7f, -8f, -9f)
             );
-            AppendVariableTestSubGraph(g, float3x3a, float3x3b);
+            subGraphGenerator.AppendVariableTestSubGraph(g, float3x3a, float3x3b);
 
             var float4x4a = new float4x4(
                 new float4(0f, 1f, 2f, 3f),
@@ -60,23 +70,9 @@ namespace UnityGLTF.Interactivity.Tests
                 new float4(-9f, -10f, -11f, -12f),
                 new float4(-13f, -14f, -15f, -16f)
             );
-            AppendVariableTestSubGraph(g, float4x4a, float4x4b);
+            subGraphGenerator.AppendVariableTestSubGraph(g, float4x4a, float4x4b);
 
             return g;
-        }
-
-        private static void AppendVariableTestSubGraph<T>(Graph g, T initialValue, T setValue)
-        {
-            var onStartNode = g.CreateNode("event/onStart");
-            var set = g.CreateNode("variable/set");
-
-            (var branch, var variableIndex) = CreateCheckEqualitySubGraph(g, initialValue, setValue);
-
-            set.AddConfiguration(ConstStrings.VARIABLE, variableIndex);
-            set.AddValue(ConstStrings.VALUE, setValue);
-
-            onStartNode.AddFlow(set);
-            set.AddFlow(branch);
         }
 
         private static (Node branch, int variableIndex) CreateCheckEqualitySubGraph<T>(Graph g, T initialValue, T setValue)
@@ -184,6 +180,87 @@ namespace UnityGLTF.Interactivity.Tests
             });
 
             return g;
+        }
+
+        private interface IVariableSubGraph
+        {
+            public void AppendVariableTestSubGraph<T>(Graph g, T initialValue, T setValue);
+        }
+
+        private class VariableSetSubGraph : IVariableSubGraph
+        {
+            public void AppendVariableTestSubGraph<T>(Graph g, T initialValue, T setValue)
+            {
+                (var branch, var variableIndex) = CreateCheckEqualitySubGraph(g, initialValue, setValue);
+
+                var onStartNode = g.CreateNode("event/onStart");
+
+                var set = g.CreateNode("variable/set");
+
+                set.AddConfiguration(ConstStrings.VARIABLE, variableIndex);
+                set.AddValue(ConstStrings.VALUE, setValue);
+
+                onStartNode.AddFlow(set);
+                set.AddFlow(branch);
+            }
+        }
+
+        private class VariableInterpolateSubGraph : IVariableSubGraph
+        {
+            private const float INTERPOLATE_DURATION = 0.5f;
+            private static readonly float2 P1 = new float2(0.42f, 0f);
+            private static readonly float2 P2 = new float2(0.52f, 1f);
+
+            public void AppendVariableTestSubGraph<T>(Graph g, T initialValue, T setValue)
+            {
+                var interpolateType = Helpers.GetSignatureBySystemType(typeof(T));
+
+                (var branch, var variableIndex) = CreateCheckEqualitySubGraph(g, initialValue, setValue);
+
+                var onStartNode = g.CreateNode("event/onStart");
+                var interpolate = g.CreateNode("variable/interpolate");
+
+                var fail = g.CreateNode("event/send");
+                var failLog = g.CreateNode("debug/log");
+
+                fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+                failLog.AddConfiguration(ConstStrings.MESSAGE, $"Err flow activated on interpolate node for type {interpolateType}.");
+                failLog.AddFlow(fail);
+
+                interpolate.AddConfiguration(ConstStrings.USE_SLERP, false);
+                interpolate.AddConfiguration(ConstStrings.VARIABLE, variableIndex);
+                interpolate.AddValue(ConstStrings.VALUE, setValue);
+                interpolate.AddValue(ConstStrings.DURATION, INTERPOLATE_DURATION);
+                interpolate.AddValue(ConstStrings.P1, P1);
+                interpolate.AddValue(ConstStrings.P2, P2);
+
+                onStartNode.AddFlow(interpolate);
+
+                var outTriggeredVar = g.AddVariable($"{interpolateType}InterpOutTriggered", false);
+                var outTriggeredVarIndex = g.IndexOfVariable(outTriggeredVar);
+                var outSet = g.CreateNode("variable/set");
+                var outGet = g.CreateNode("variable/get");
+                var outBranch = g.CreateNode("flow/branch");
+                var outFail = g.CreateNode("event/send");
+                var outFailLog = g.CreateNode("debug/log");
+
+                outFail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+                outFailLog.AddConfiguration(ConstStrings.MESSAGE, $"Out flow did not activate on interpolate node for type {interpolateType} before done flow.");
+                outFailLog.AddFlow(outFail);
+
+                outSet.AddValue(ConstStrings.VALUE, true);
+                outSet.AddConfiguration(ConstStrings.VARIABLE, outTriggeredVarIndex);
+                outGet.AddConfiguration(ConstStrings.VARIABLE, outTriggeredVarIndex);
+
+                outBranch.AddConnectedValue(ConstStrings.CONDITION, outGet);
+
+                interpolate.AddFlow(outBranch, ConstStrings.DONE);
+                interpolate.AddFlow(outSet);
+                interpolate.AddFlow(failLog, ConstStrings.ERR);
+
+                outBranch.AddFlow(branch, ConstStrings.TRUE);
+                outBranch.AddFlow(outFailLog, ConstStrings.FALSE);
+            }
         }
     }
 }

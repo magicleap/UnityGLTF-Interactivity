@@ -21,6 +21,15 @@ namespace UnityGLTF.Interactivity.Tests
         }
 
         [Test]
+        public void SetDelay_CancelInputMidDelay_DoneFlowDoesNotTrigger()
+        {
+            const float DURATION = 0.75f;
+            const float CANCEL_TIME = 0.5f;
+            const float EXTRA_EXECUTION_TIME = 0.15f;
+            QueueTest(GetCallerName(), CreateSetDelayCancelGraph(DURATION, CANCEL_TIME, EXTRA_EXECUTION_TIME));
+        }
+
+        [Test]
         public void CancelDelay_SetDelayActivatedCancelDelayActivatedAfterwards_SetDelayDoneFlowDoesNotTrigger()
         {
             const float DURATION = 0.75f;
@@ -76,7 +85,66 @@ namespace UnityGLTF.Interactivity.Tests
             return g;
         }
 
-         private Graph CreateCancelDelayGraph(float duration, float cancelTime, float extraExecutionTime)
+        private Graph CreateSetDelayCancelGraph(float duration, float cancelTime, float extraExecutionTime)
+        {
+            Graph g = CreateGraphForTest();
+            var outVar = g.AddVariable("cancelActivated", false);
+            var outVarIndex = g.IndexOfVariable(outVar);
+
+            var onStart = g.CreateNode("event/onStart");
+            var setDelay = g.CreateNode("flow/setDelay");
+            var doneFailLog = g.CreateNode("debug/log");
+            var doneFail = g.CreateNode("event/send");
+
+            doneFailLog.AddConfiguration(ConstStrings.MESSAGE, "Done flow was activated even though it should have been canceled.");
+            doneFailLog.AddFlow(doneFail);
+            doneFail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+
+            setDelay.AddValue(ConstStrings.DURATION, duration);
+            onStart.AddFlow(setDelay);
+            setDelay.AddFlow(doneFailLog, ConstStrings.DONE);
+
+            var onTick = g.CreateNode("event/onTick");
+            var timeBranch = g.CreateNode("flow/branch");
+            var ge = g.CreateNode("math/ge");
+
+            ge.AddValue(ConstStrings.B, cancelTime);
+            ge.AddConnectedValue(ConstStrings.A, onTick, ConstStrings.TIME_SINCE_START);
+
+            var branch = g.CreateNode("flow/branch");
+            var get = g.CreateNode("variable/get");
+
+            get.AddConfiguration(ConstStrings.VARIABLE, outVarIndex);
+            branch.AddConnectedValue(ConstStrings.CONDITION, get);
+
+            onTick.AddFlow(branch);
+            branch.AddFlow(timeBranch, ConstStrings.FALSE);
+            var set = g.CreateNode("variable/set");
+            set.AddConfiguration(ConstStrings.VARIABLE, outVarIndex);
+            set.AddValue(ConstStrings.VALUE, true);
+
+            timeBranch.AddConnectedValue(ConstStrings.CONDITION, ge);
+            timeBranch.AddFlow(set, ConstStrings.TRUE);
+
+            set.AddFlow(setDelay, ConstStrings.OUT, ConstStrings.CANCEL);
+
+            var completedBranch = g.CreateNode("flow/branch");
+            var completedge = g.CreateNode("math/ge");
+
+            completedge.AddValue(ConstStrings.B, duration + extraExecutionTime);
+            completedge.AddConnectedValue(ConstStrings.A, onTick, ConstStrings.TIME_SINCE_START);
+
+            var complete = g.CreateNode("event/send");
+            complete.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
+
+            completedBranch.AddConnectedValue(ConstStrings.CONDITION, completedge);
+            completedBranch.AddFlow(complete, ConstStrings.TRUE);
+            branch.AddFlow(completedBranch, ConstStrings.TRUE);
+
+            return g;
+        }
+
+        private Graph CreateCancelDelayGraph(float duration, float cancelTime, float extraExecutionTime)
         {
             Graph g = CreateGraphForTest();
             var outVar = g.AddVariable("cancelActivated", false);

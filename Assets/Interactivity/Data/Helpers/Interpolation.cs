@@ -93,5 +93,38 @@ namespace UnityGLTF.Interactivity
                 return nlerp(q1, q2, t);
             }
         }
+
+        public static float2x2 LerpComponentwise(float2x2 from, float2x2 to, float t)
+        {
+            var c0 = math.lerp(from.c0, to.c0, t);
+            var c1 = math.lerp(from.c1, to.c1, t);
+
+            var m = new float2x2(c0, c1);
+
+            return m;
+        }
+
+        public static float3x3 LerpComponentwise(float3x3 from, float3x3 to, float t)
+        {
+            var c0 = math.lerp(from.c0, to.c0, t);
+            var c1 = math.lerp(from.c1, to.c1, t);
+            var c2 = math.lerp(from.c2, to.c2, t);
+
+            var m = new float3x3(c0, c1, c2);
+
+            return m;
+        }
+
+        public static float4x4 LerpComponentwise(float4x4 from, float4x4 to, float t)
+        {
+            var c0 = math.lerp(from.c0, to.c0, t);
+            var c1 = math.lerp(from.c1, to.c1, t);
+            var c2 = math.lerp(from.c2, to.c2, t);
+            var c3 = math.lerp(from.c3, to.c3, t);
+
+            var m = new float4x4(c0, c1, c2, c3);
+
+            return m;
+        }
     }
 }

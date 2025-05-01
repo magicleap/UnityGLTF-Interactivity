@@ -110,8 +110,11 @@ namespace UnityGLTF.Interactivity
                 Property<float3> => GetInterpolator(Getfloat3Evaluator(cp1, cp2), data),
                 Property<float4> when data.slerp => GetInterpolator(GetquaternionEvaluator(cp1, cp2), data),
                 Property<float4> when !data.slerp=> GetInterpolator(Getfloat4Evaluator(cp1, cp2), data),
+                Property<float2x2> => GetInterpolator(Getfloat2x2Evaluator(cp1, cp2), data),
+                Property<float3x3> => GetInterpolator(Getfloat3x3Evaluator(cp1, cp2), data),
+                Property<float4x4> => GetInterpolator(Getfloat4x4Evaluator(cp1, cp2), data),
 
-                _ => throw new NotImplementedException(),
+                _ => throw new NotImplementedException($"Interpolation has not been defined for type {data.variable.property.GetTypeSignature()}!"),
             };
 
             return interpolator;
@@ -155,6 +158,21 @@ namespace UnityGLTF.Interactivity
         {
             // Just a copy from unity mathematics library to avoid a bunch of type conversions.
             return (a, b, t) => new Property<float4>(Helpers.Slerpfloat4(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
+        }
+
+        private Func<float2x2, float2x2, float, Property<float2x2>> Getfloat2x2Evaluator(float2 cp1, float2 cp2)
+        {
+            return (a, b, t) => new Property<float2x2>(Helpers.LerpComponentwise(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
+        }
+
+        private Func<float3x3, float3x3, float, Property<float3x3>> Getfloat3x3Evaluator(float2 cp1, float2 cp2)
+        {
+            return (a, b, t) => new Property<float3x3>(Helpers.LerpComponentwise(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
+        }
+
+        private Func<float4x4, float4x4, float, Property<float4x4>> Getfloat4x4Evaluator(float2 cp1, float2 cp2)
+        {
+            return (a, b, t) => new Property<float4x4>(Helpers.LerpComponentwise(a, b, Helpers.CubicBezier(t, cp1, cp2).y));
         }
     }
 }
