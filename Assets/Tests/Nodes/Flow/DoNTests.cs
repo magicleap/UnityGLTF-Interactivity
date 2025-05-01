@@ -13,18 +13,18 @@ namespace UnityGLTF.Interactivity.Tests
     partial class FlowNodesTests
     {
         [Test]
-        public void TestDoN()
+        public void DoN()
         {
-            CreateDoNGraph(5, 3);
+            QueueTest(GetCallerName(), CreateDoNGraph(5, 3));
         }
 
         [Test]
-        public void TestDoNWithReset()
+        public void DoN_Reset()
         {
-            CreateDoNResetGraph(5, 3);
+            QueueTest(GetCallerName(), CreateDoNResetGraph(5, 3));
         }
 
-        private void CreateDoNGraph(int n, int extraTimesToTriggerInFlow)
+        private Graph CreateDoNGraph(int n, int extraTimesToTriggerInFlow)
         {
             Graph g = CreateGraphForTest();
 
@@ -75,12 +75,10 @@ namespace UnityGLTF.Interactivity.Tests
             failSend.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
             completeSend.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
 
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            return g;
         }
 
-        private void CreateDoNResetGraph(int n, int resetAfter)
+        private Graph CreateDoNResetGraph(int n, int resetAfter)
         {
             const int COUNTER_VARIABLE_INITIAL_VALUE = 0;
             const string TOTAL_COUNT = "totalCount";
@@ -189,9 +187,7 @@ namespace UnityGLTF.Interactivity.Tests
             resetReceive.AddConfiguration(ConstStrings.EVENT, 3);
             resetSend.AddConfiguration(ConstStrings.EVENT, 3);
 
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            return g;
         }
     }
 }

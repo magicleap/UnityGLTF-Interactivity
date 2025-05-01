@@ -9,38 +9,27 @@ namespace UnityGLTF.Interactivity.Tests
 {
     public class EventNodeTests : NodeTestHelpers
     {
-        void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
+        protected override string _subDirectory => "Event";
+
+        [Test]
+        public void OnStart_OutFlowActivatedOnEnginePlaybackStart()
         {
-            switch (eventIndex)
-            {
-                case 0:
-                    Assert.Fail("Failure case was triggered by this test.");
-                    break;
-                case 1:
-                    _testSuccessful = true;
-                    break;
-            }
+            QueueTest(GetCallerName(), CreateOnStartTestGraph());
         }
 
         [Test]
-        public void TestOnStart()
+        public void Receive_EventIsReceivedAndOutFlowActivates()
         {
-            var g = CreateGraphForTest();
-
-            var start = g.CreateNode("event/onStart");
-            var complete = g.CreateNode("event/send");
-
-            start.AddFlow(complete);
-
-            complete.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            QueueTest(GetCallerName(), CreateEventReceiveTestGraph());
         }
 
         [Test]
-        public void TestReceive()
+        public void OnTick_OccursAfterOnStartAndOutputValuesAreCorrectByFrame()
+        {
+            QueueTest(GetCallerName(), CreateOnTickTestGraph());
+        }
+
+        private static Graph CreateEventReceiveTestGraph()
         {
             var g = CreateGraphForTest();
 
@@ -60,48 +49,20 @@ namespace UnityGLTF.Interactivity.Tests
             receiveTrigger.AddConfiguration(ConstStrings.EVENT, 2);
 
             complete.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            return g;
         }
 
-
-        [UnityTest]
-        public IEnumerator TestOnTick()
+        private static Graph CreateOnStartTestGraph()
         {
-            Graph g = CreateOnTickTestGraph();
+            var g = CreateGraphForTest();
 
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
+            var start = g.CreateNode("event/onStart");
+            var complete = g.CreateNode("event/send");
 
-            var frameCount = 0;
+            start.AddFlow(complete);
 
-            // Test takes place over onStart, the first onTick, and the second onTick
-            // Could implement as a timeout general thing where we look for _testSuccessful unless it runs too long.
-            while(frameCount < 2)
-            {
-                Debug.Log($"Tick on frame {frameCount}");
-                eng.Tick();
-                frameCount++;
-                yield return null;
-            }
-
-            Assert.IsTrue(_testSuccessful);
+            complete.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
+            return g;
         }
 
         private static Graph CreateOnTickTestGraph()

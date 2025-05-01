@@ -12,20 +12,51 @@ namespace UnityGLTF.Interactivity.Tests
 {
     public partial class FlowNodesTests : NodeTestHelpers
     {
-        void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
+        protected override string _subDirectory => "Flow";
+
+        [Test]
+        public void Branch_TrueCondition_TrueFlow()
         {
-            switch(eventIndex)
-            {
-                case 0:
-                    Assert.Fail("Failure case was triggered by this test.");
-                    break;
-                case 1:
-                    _testSuccessful = true;
-                    break;
-            }
+            QueueTest(GetCallerName(), CreateFlowBranchGraph(true));
         }
 
-        private void CreateFlowBranchGraph(bool outputSocketFromBranchNode)
+        [Test]
+        public void Branch_FalseCondition_FalseFlow()
+        {
+            QueueTest(GetCallerName(), CreateFlowBranchGraph(false));
+        }
+
+        [Test]
+        public void For_Starti0Endi6Initiali3_CorrectNumberOfIterationsAndCompletedFlowActivates()
+        {
+            QueueTest(GetCallerName(), CreateForTestGraph(0, 6, 3));
+        }
+
+        [Test]
+        public void For_Starti0Endi4Initiali0_CorrectNumberOfIterationsAndCompletedFlowActivates()
+        {
+            QueueTest(GetCallerName(), CreateForTestGraph(0, 4, 0));
+        }
+
+        [Test]
+        public void Sequence_AllFlowsActivateAndInOrder()
+        {
+            QueueTest(GetCallerName(), CreateFlowSequenceGraph(5));
+        }
+
+        [Test]
+        public void FlowSwitch_AllCasesActivatedOutOfOrderThenDefaultCase_AllFlowsActivated()
+        {
+            QueueTest(GetCallerName(), CreateSwitchGraph());
+        }
+
+        [Test]
+        public void While_LoopBodyActivatesCorrectNumberOfTimesAndCompletedActivatesAtTheEnd()
+        {
+            QueueTest(GetCallerName(), GenerateWhileTestGraph(5));
+        }
+
+        private Graph CreateFlowBranchGraph(bool outputSocketFromBranchNode)
         {
             var g = CreateGraphForTest();
 
@@ -44,12 +75,10 @@ namespace UnityGLTF.Interactivity.Tests
 
             branchNode.AddValue(ConstStrings.CONDITION, outputSocketFromBranchNode);
 
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            return g;
         }
 
-        private void TestFlowForGraph(int startIndex, int endIndex, int initialIndex)
+        private static Graph CreateForTestGraph(int startIndex, int endIndex, int initialIndex)
         {
             Graph g = CreateGraphForTest();
 
@@ -110,9 +139,7 @@ namespace UnityGLTF.Interactivity.Tests
             completedEq.AddValue(ConstStrings.A, endIndex);
             completedEq.AddConnectedValue(ConstStrings.B, forNode, ConstStrings.INDEX);
 
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            return g;
         }
 
         private static Node CreateVariableIncrementSubgraph(Graph g, Variable variable)
@@ -133,7 +160,7 @@ namespace UnityGLTF.Interactivity.Tests
             return varSet;
         }
 
-        private void CreateFlowSequenceGraph(int numOutFlows)
+        private static Graph CreateFlowSequenceGraph(int numOutFlows)
         {
             const string EXPECTED_OUTPUT_FLOW_INDEX = "expectedOutputFlowIndex";
 
@@ -186,9 +213,7 @@ namespace UnityGLTF.Interactivity.Tests
                 sequenceNode.AddFlow(branch, ConstStrings.Numbers[i]);
             }
 
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            return g;
         }
 
         private static Graph GenerateWhileTestGraph(int iterations)
@@ -258,31 +283,10 @@ namespace UnityGLTF.Interactivity.Tests
             return isNaN;
         }
 
-        [Test]
-        public void TestBranch()
+        private static Graph CreateSwitchGraph()
         {
-            CreateFlowBranchGraph(false);
-            CreateFlowBranchGraph(true);
-        }
-
-        [Test]
-        public void TestFor()
-        {
-            TestFlowForGraph(0, 6, 3);
-            TestFlowForGraph(0, 4, 0);
-        }
-
-        [Test]
-        public void TestSequence()
-        {
-            CreateFlowSequenceGraph(5);
-        }
-
-        [Test]
-        public void TestSwitch()
-        {
-            var outputFlowOrder = new int[] { 3, 2, -9, 1 };
             Graph g = CreateGraphForTest();
+            var outputFlowOrder = new int[] { 3, 2, -9, 1 };
 
             g.AddEvent("trigger"); // 2
 
@@ -350,17 +354,7 @@ namespace UnityGLTF.Interactivity.Tests
 
             logFail.AddFlow(fail);
 
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            return g;
         }
 
         private static Node CreateSwitchFlowSubGraph(Graph g, int nextFlowIndex, int bitmask, int flowIndexVariableIndex, int bitmaskVariableIndex)
@@ -387,24 +381,6 @@ namespace UnityGLTF.Interactivity.Tests
             bitmaskSet.AddFlow(send);
 
             return setOutputFlow;
-        }
-
-        [Test]
-        public void TestWhile()
-        {
-            var g = GenerateWhileTestGraph(5);
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
         }
     }
 }

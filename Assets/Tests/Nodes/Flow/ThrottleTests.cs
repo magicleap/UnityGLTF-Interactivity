@@ -12,103 +12,34 @@ namespace UnityGLTF.Interactivity.Tests
 {
     partial class FlowNodesTests
     {
-        [UnityTest]
-        public IEnumerator TestThrottle()
+        [Test]
+        public void Throttle_Basic()
         {
             var THROTTLE_DURATION = 0.5f;
             var TEST_DURATION = 0.75f;
-            var EXTRA_TEST_RUNTIME = 0.25f;
-            var g = GenerateThrottleTestGraph(THROTTLE_DURATION, TEST_DURATION);
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            while (Time.time < TEST_DURATION + EXTRA_TEST_RUNTIME)
-            {
-                eng.Tick();
-                yield return null;
-            }
-
-            Assert.IsTrue(_testSuccessful);
+            QueueTest(GetCallerName(), GenerateThrottleTestGraph(THROTTLE_DURATION, TEST_DURATION));
         }
 
         [Test]
-        public void TestThrottleInvalidDuration()
+        public void Throttle_InfNaNNegativeDuration_ActivatesErrFlow()
         {
-            var g = GenerateThrottleInvalidDurationTestGraph();
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            QueueTest(GetCallerName(), GenerateThrottleInvalidDurationTestGraph());
         }
 
-        [UnityTest]
-        public IEnumerator TestThrottleLastRemainingTime()
+        [Test]
+        public void Throttle_ActivateNormally_LastRemainingTimeCorrect()
         {
             var THROTTLE_DURATION = 0.5f;
             var TEST_DURATION = 0.4f;
-            var EXTRA_TEST_RUNTIME = 0.6f;
-            var g = GenerateThrottleLastRemainingTimeTestGraph(THROTTLE_DURATION, TEST_DURATION);
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            while (!_testSuccessful && Time.time < TEST_DURATION + EXTRA_TEST_RUNTIME)
-            {
-                eng.Tick();
-                yield return null;
-            }
-
-            Assert.IsTrue(_testSuccessful);
+            QueueTest(GetCallerName(), GenerateThrottleLastRemainingTimeTestGraph(THROTTLE_DURATION, TEST_DURATION));
         }
 
-        [UnityTest]
-        public IEnumerator TestThrottleReset()
+        [Test]
+        public void Throttle_Reset_LastRemainingTimeIsNaN()
         {
             var THROTTLE_DURATION = 1f;
             var RESET_TIME = 0.5f;
-            var EXTRA_TEST_RUNTIME = 0.6f;
-            var g = GenerateThrottleResetTestGraph(THROTTLE_DURATION, RESET_TIME);
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            while (!_testSuccessful && Time.time < RESET_TIME + EXTRA_TEST_RUNTIME)
-            {
-                eng.Tick();
-                yield return null;
-            }
-
-            Assert.IsTrue(_testSuccessful);
+            QueueTest(GetCallerName(), GenerateThrottleResetTestGraph(THROTTLE_DURATION, RESET_TIME));
         }
 
         private static Graph GenerateThrottleTestGraph(float duration, float testDuration)

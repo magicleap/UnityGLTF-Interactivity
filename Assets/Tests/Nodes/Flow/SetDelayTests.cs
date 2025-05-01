@@ -12,60 +12,21 @@ namespace UnityGLTF.Interactivity.Tests
 {
     public partial class FlowNodesTests : NodeTestHelpers
     {
-        [UnityTest]
-        public IEnumerator TestSetDelay()
+        [Test]
+        public void SetDelay_OutFlowTriggers_DoneFlowTriggersAfterDuration_ErrFlowDoesNotTrigger()
         {
             const float DURATION = 0.75f;
             const float EXTRA_EXECUTION_TIME = 0.25f;
-            var g = CreateSetDelayGraph(DURATION, EXTRA_EXECUTION_TIME);
-
-            var startTime = Time.time;
-            var endTime = Time.time + DURATION;
-            var finishExecutionTime = endTime + EXTRA_EXECUTION_TIME;
-
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            while (!_testSuccessful && Time.time < finishExecutionTime)
-            {
-                eng.Tick();
-                yield return null;
-            }
-
-            Assert.IsTrue(_testSuccessful);
+            QueueTest(GetCallerName(), CreateSetDelayGraph(DURATION, EXTRA_EXECUTION_TIME));
         }
 
-        [UnityTest]
-        public IEnumerator TestSetDelayCancel()
+        [Test]
+        public void CancelDelay_SetDelayActivatedCancelDelayActivatedAfterwards_SetDelayDoneFlowDoesNotTrigger()
         {
             const float DURATION = 0.75f;
             const float CANCEL_TIME = 0.5f;
             const float EXTRA_EXECUTION_TIME = 0.15f;
-            const float TEST_EXTRA_WAIT_TIME = 0.1f;
-
-            var g = CreateSetDelayCancelGraph(DURATION, CANCEL_TIME, EXTRA_EXECUTION_TIME);
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-
-            var startTime = Time.time;
-            var endTime = Time.time + DURATION;
-            var finishExecutionTime = endTime + EXTRA_EXECUTION_TIME + TEST_EXTRA_WAIT_TIME;
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            while (!_testSuccessful && Time.time < finishExecutionTime)
-            {
-                eng.Tick();
-                yield return null;
-            }
-
-            Assert.IsTrue(_testSuccessful);
+            QueueTest(GetCallerName(), CreateCancelDelayGraph(DURATION, CANCEL_TIME, EXTRA_EXECUTION_TIME));
         }
 
         private Graph CreateSetDelayGraph(float duration, float extraExecutionTime)
@@ -115,7 +76,7 @@ namespace UnityGLTF.Interactivity.Tests
             return g;
         }
 
-         private Graph CreateSetDelayCancelGraph(float duration, float cancelTime, float extraExecutionTime)
+         private Graph CreateCancelDelayGraph(float duration, float cancelTime, float extraExecutionTime)
         {
             Graph g = CreateGraphForTest();
             var outVar = g.AddVariable("cancelActivated", false);

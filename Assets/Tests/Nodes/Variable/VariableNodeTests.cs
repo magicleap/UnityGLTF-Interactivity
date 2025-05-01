@@ -8,33 +8,34 @@ namespace UnityGLTF.Interactivity.Tests
 {
     public class VariableNodeTests : NodeTestHelpers
     {
-        void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
-        {
-            switch (eventIndex)
-            {
-                case 0:
-                    Assert.Fail("Failure case was triggered by this test.");
-                    break;
-                case 1:
-                    _testSuccessful = true;
-                    break;
-            }
-        }
+        protected override string _subDirectory => "Variable";
 
         [Test]
-        public void TestVariableGetAndSet()
+        public void VariableGetAndSet_VariablesAllChangeToSetValuesAndGetReturnsThemCorrectly()
+        {
+            QueueTest(GetCallerName(), CreateVariableGetAndSetGraph());
+        }
+
+
+        [Test]
+        public void TestVariableSetMultiple_VariablesAllChangeToSetValuesAndGetReturnsThemCorrectly()
+        {
+            QueueTest(GetCallerName(), CreateVariableSetMultipleGraph());
+        }
+
+        private static Graph CreateVariableGetAndSetGraph()
         {
             var g = CreateGraphForTest();
 
-            CreateVariableTestSubGraph(g, false, true);
-            CreateVariableTestSubGraph(g, 0, 5);
-            CreateVariableTestSubGraph(g, 0f, 10f);
-            CreateVariableTestSubGraph(g, new float2(0f, 1f), new float2(2f, 3f));
-            CreateVariableTestSubGraph(g, new float3(0f, 1f, 2f), new float3(3f, 4f, 5f));
-            CreateVariableTestSubGraph(g, new float4(0f, 1f, 2f, 3f), new float4(4f, 5f, 6f, 7f));
+            AppendVariableTestSubGraph(g, false, true);
+            AppendVariableTestSubGraph(g, 0, 5);
+            AppendVariableTestSubGraph(g, 0f, 10f);
+            AppendVariableTestSubGraph(g, new float2(0f, 1f), new float2(2f, 3f));
+            AppendVariableTestSubGraph(g, new float3(0f, 1f, 2f), new float3(3f, 4f, 5f));
+            AppendVariableTestSubGraph(g, new float4(0f, 1f, 2f, 3f), new float4(4f, 5f, 6f, 7f));
             var float2x2a = new float2x2(new float2(0f, 1f), new float2(2f, 3f));
             var float2x2b = new float2x2(new float2(-1f, -2f), new float2(-3f, -4f));
-            CreateVariableTestSubGraph(g, float2x2a, float2x2b);
+            AppendVariableTestSubGraph(g, float2x2a, float2x2b);
             var float3x3a = new float3x3(
                 new float3(0f, 1f, 2f),
                 new float3(3f, 4f, 5f),
@@ -45,7 +46,7 @@ namespace UnityGLTF.Interactivity.Tests
                 new float3(-4f, -5f, -6f),
                 new float3(-7f, -8f, -9f)
             );
-            CreateVariableTestSubGraph(g, float3x3a, float3x3b);
+            AppendVariableTestSubGraph(g, float3x3a, float3x3b);
 
             var float4x4a = new float4x4(
                 new float4(0f, 1f, 2f, 3f),
@@ -59,14 +60,12 @@ namespace UnityGLTF.Interactivity.Tests
                 new float4(-9f, -10f, -11f, -12f),
                 new float4(-13f, -14f, -15f, -16f)
             );
-            CreateVariableTestSubGraph(g, float4x4a, float4x4b);
+            AppendVariableTestSubGraph(g, float4x4a, float4x4b);
 
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            return g;
         }
 
-        private void CreateVariableTestSubGraph<T>(Graph g, T initialValue, T setValue)
+        private static void AppendVariableTestSubGraph<T>(Graph g, T initialValue, T setValue)
         {
             var onStartNode = g.CreateNode("event/onStart");
             var set = g.CreateNode("variable/set");
@@ -114,8 +113,7 @@ namespace UnityGLTF.Interactivity.Tests
             return (branch, variableIndex);
         }
 
-        [Test]
-        public void TestVariableSetMultiple()
+        private static Graph CreateVariableSetMultipleGraph()
         {
             var g = CreateGraphForTest();
 
@@ -185,16 +183,7 @@ namespace UnityGLTF.Interactivity.Tests
                 float4x4Index
             });
 
-            //GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            //var extension = new KHR_interactivity()
-            //{
-            //    graphs = new List<Graph>() { g },
-            //    defaultGraphIndex = 0
-            //};
-            //File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            return g;
         }
     }
 }
