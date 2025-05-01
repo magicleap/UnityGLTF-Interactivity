@@ -1,29 +1,41 @@
+#define GENERATE_TEST_FILES
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.TestTools;
 using UnityGLTF.Interactivity;
 using UnityGLTF.Loader;
 
 namespace UnityGLTF.Interactivity.Tests
 {
-    public class NodeTestHelpers
+    public abstract class NodeTestHelpers
     {
+        protected struct TestData
+        {
+            public string fileName;
+            public Graph graph;
+            public float executionTime;
+        }
+
         protected const int FAIL_EVENT_INDEX = 0;
         protected const int COMPLETED_EVENT_INDEX = 1;
+        protected const float DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT = 10f;
 
         protected bool _testSuccessful = false;
+        private GraphSerializer _serializer = new(Newtonsoft.Json.Formatting.Indented);
 
-        [SetUp]
-        public void SetUp()
-        {
-            _testSuccessful = false;
-        }
+        protected string _testGraphDirectory;
+        protected abstract string _subDirectory { get; }
+
+        protected static readonly List<TestData> _testQueue = new();
 
         public static readonly ISubGraph[] subGraphs = new ISubGraph[]
         {
@@ -33,96 +45,131 @@ namespace UnityGLTF.Interactivity.Tests
             new IsInfSubGraph()
         };
 
-        private static readonly Dictionary<Type, IAssertionByType> assertionsByType = new()
+        protected void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
         {
-            [typeof(float)] = new FloatAssertion(),
-            [typeof(float2)] = new Float2Assertion(),
-            [typeof(float3)] = new Float3Assertion(),
-            [typeof(float4)] = new Float4Assertion(),
-            [typeof(float2x2)] = new Float2x2Assertion(),
-            [typeof(float3x3)] = new Float3x3Assertion(),
-            [typeof(float4x4)] = new Float4x4Assertion(),
-            [typeof(int)] = new IntAssertion(),
-            [typeof(int[])] = new IntArrayAssertion(),
-            [typeof(bool)] = new BoolAssertion(),
-            [typeof(string)] = new StringAssertion(),
-        };
-
-        protected static void TestNode<V>(string nodeName, V expected, ComparisonType subGraphType = ComparisonType.Equals) => TestNode(nodeName, new V[0], expected, subGraphType);
-        protected static void TestNode<T, V>(string nodeName, T a, V expected, ComparisonType subGraphType = ComparisonType.Equals) => TestNode(nodeName, new T[1] { a }, expected, subGraphType);
-        protected static void TestNode<T, V>(string nodeName, T a, T b, V expected, ComparisonType subGraphType = ComparisonType.Equals) => TestNode(nodeName, new T[2] { a, b }, expected, subGraphType);
-        protected static void TestNode<T, V>(string nodeName, T a, T b, T c, V expected, ComparisonType subGraphType = ComparisonType.Equals) => TestNode(nodeName, new T[3] { a, b, c }, expected, subGraphType);
-        protected static void TestNode<T, V>(string nodeName, T a, T b, T c, T d, V expected, ComparisonType subGraphType = ComparisonType.Equals) => TestNode(nodeName, new T[4] { a, b, c, d }, expected, subGraphType);
-
-        protected static void TestNodeWithAllFloatNInputVariants(string nodeName, float4 a, float4 expected, ComparisonType subGraphType = ComparisonType.Approximately)
-        {
-            TestNode(nodeName, new float[1] { a.x }, expected.x, subGraphType);
-            TestNode(nodeName, new float[1] { a.y }, expected.y, subGraphType);
-            TestNode(nodeName, new float[1] { a.z }, expected.z, subGraphType);
-            TestNode(nodeName, new float[1] { a.w }, expected.w, subGraphType);
-
-            TestNode(nodeName, new float2[1] { new float2(a.x, a.y) }, expected.xy, subGraphType);
-            TestNode(nodeName, new float2[1] { new float2(a.z, a.w) }, expected.zw, subGraphType);
-
-            TestNode(nodeName, new float3[1] { new float3(a.x, a.y, a.z) }, expected.xyz, subGraphType);
-            TestNode(nodeName, new float3[1] { new float3(a.y, a.z, a.w) }, expected.yzw, subGraphType);
-
-            TestNode(nodeName, new float4[1] { a }, expected, subGraphType);
+            switch (eventIndex)
+            {
+                case 0:
+                    Assert.Fail("Failure case was triggered by this test.");
+                    break;
+                case 1:
+                    _testSuccessful = true;
+                    break;
+            }
         }
 
-        protected static void TestNodeWithAllFloatNInputVariants(string nodeName, float4 a, float4 b, float4 expected, ComparisonType subGraphType = ComparisonType.Approximately)
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
         {
-            TestNode(nodeName, new float[2] { a.x, b.x }, expected.x, subGraphType);
-            TestNode(nodeName, new float[2] { a.y, b.y }, expected.y, subGraphType);
-            TestNode(nodeName, new float[2] { a.z, b.z }, expected.z, subGraphType);
-            TestNode(nodeName, new float[2] { a.w, b.w }, expected.w, subGraphType);
+            var dir = Path.GetFullPath(Path.Combine(Application.dataPath, @"..\"));
+            if (!string.IsNullOrWhiteSpace(_subDirectory))
+                _testGraphDirectory = Path.Combine(dir, "TestGraphJson", _subDirectory);
+            else
+                _testGraphDirectory = Path.Combine(dir, "TestGraphJson");
 
-            TestNode(nodeName, new float2[2] { new float2(a.x, a.y), new float2(b.x, b.y) }, expected.xy, subGraphType);
-            TestNode(nodeName, new float2[2] { new float2(a.z, a.w), new float2(b.z, b.w) }, expected.zw, subGraphType);
-
-            TestNode(nodeName, new float3[2] { new float3(a.x, a.y, a.z), new float3(b.x, b.y, b.z) }, expected.xyz, subGraphType);
-            TestNode(nodeName, new float3[2] { new float3(a.y, a.z, a.w), new float3(b.y, b.z, b.w) }, expected.yzw, subGraphType);
-
-            TestNode(nodeName, new float4[2] { a, b }, expected, subGraphType);
+            Directory.CreateDirectory(_testGraphDirectory);
         }
 
-        protected static void TestNodeWithAllFloatNInputVariants(string nodeName, float4 a, float4 b, float4 c, float4 expected, ComparisonType subGraphType = ComparisonType.Approximately)
+        [SetUp]
+        public void SetUp()
         {
-            TestNode(nodeName, new float[3] { a.x, b.x, c.x }, expected.x, subGraphType);
-            TestNode(nodeName, new float[3] { a.y, b.y, c.y }, expected.y, subGraphType);
-            TestNode(nodeName, new float[3] { a.z, b.z, c.z }, expected.z, subGraphType);
-            TestNode(nodeName, new float[3] { a.w, b.w, c.w }, expected.w, subGraphType);
-
-            TestNode(nodeName, new float2[3]
-            {
-                new float2(a.x, a.y),
-                new float2(b.x, b.y),
-                new float2(c.x, c.y)
-            }, expected.xy, subGraphType);
-
-            TestNode(nodeName, new float2[3]
-            {
-                new float2(a.z, a.w),
-                new float2(b.z, b.w),
-                new float2(c.z, c.w)
-            }, expected.zw, subGraphType);
-
-            TestNode(nodeName, new float3[3]
-            {
-                new float3(a.x, a.y, a.z),
-                new float3(b.x, b.y, b.z),
-                new float3(c.x, c.y, c.z)
-            }, expected.xyz, subGraphType);
-
-            TestNode(nodeName, new float3[3]
-            {
-                new float3(a.y, a.z, a.w),
-                new float3(b.y, b.z, b.w),
-                new float3(c.y, c.z, c.w)
-            }, expected.yzw, subGraphType);
-
-            TestNode(nodeName, new float4[3] { a, b, c }, expected, subGraphType);
+            _testQueue.Clear();
         }
+
+        [UnityTearDown]
+        public IEnumerator TearDown()
+        {
+            foreach(var test in _testQueue)
+            {
+                _testSuccessful = false;
+#if GENERATE_TEST_FILES
+                Task.Run(() =>
+                {
+                    // Record graph to json file.
+                    if (!string.IsNullOrWhiteSpace(test.fileName))
+                    {
+                        var extension = new KHR_interactivity()
+                        {
+                            graphs = new List<Graph>() { test.graph },
+                            defaultGraphIndex = 0
+                        };
+                        File.WriteAllText($"{_testGraphDirectory}/{test.fileName}.json", _serializer.Serialize(extension));
+                    }
+                });
+#endif
+
+                // Actually run test.
+                var eng = CreateBehaviourEngineForGraph(test.graph, OnCustomEventFired, startPlayback: true);
+
+                while (!_testSuccessful && Time.time < test.executionTime)
+                {
+                    eng.Tick();
+                    yield return null;
+                }
+
+                Assert.IsTrue(_testSuccessful);
+            }
+        }
+
+        protected static void TestNodeWithAllFloatNInputVariants(string testName, string nodeName, float4 a, float4 expected, ComparisonType subGraphType = ComparisonType.Approximately)
+        {
+            QueueTest($"{testName}-float-x", CreateSelfContainedTestGraph(nodeName, In(a.x), Out(expected.x), subGraphType));
+            QueueTest($"{testName}-float-y", CreateSelfContainedTestGraph(nodeName, In(a.y), Out(expected.y), subGraphType));
+            QueueTest($"{testName}-float-z", CreateSelfContainedTestGraph(nodeName, In(a.z), Out(expected.z), subGraphType));
+            QueueTest($"{testName}-float-w", CreateSelfContainedTestGraph(nodeName, In(a.w), Out(expected.w), subGraphType));
+
+            QueueTest($"{testName}-float2-xy", CreateSelfContainedTestGraph(nodeName, In(new float2(a.x, a.y)), Out(expected.xy), subGraphType));
+            QueueTest($"{testName}-float2-zw", CreateSelfContainedTestGraph(nodeName, In(new float2(a.z, a.w)), Out(expected.zw), subGraphType));
+
+            QueueTest($"{testName}-float3-xyz", CreateSelfContainedTestGraph(nodeName, In(new float3(a.x, a.y, a.z)), Out(expected.xyz), subGraphType));
+            QueueTest($"{testName}-float3-yzw", CreateSelfContainedTestGraph(nodeName, In(new float3(a.y, a.z, a.w)), Out(expected.yzw), subGraphType));
+
+            QueueTest($"{testName}-float4", CreateSelfContainedTestGraph(nodeName, In(a), Out(expected), subGraphType));
+        }
+
+        protected static void TestNodeWithAllFloatNInputVariants(string testName, string nodeName, float4 a, float4 b, float4 expected, ComparisonType subGraphType = ComparisonType.Approximately)
+        {
+            QueueTest($"{testName}-float-x", CreateSelfContainedTestGraph(nodeName, In(a.x, b.x), Out(expected.x), subGraphType));
+            QueueTest($"{testName}-float-y", CreateSelfContainedTestGraph(nodeName, In(a.y, b.y), Out(expected.y), subGraphType));
+            QueueTest($"{testName}-float-z", CreateSelfContainedTestGraph(nodeName, In(a.z, b.z), Out(expected.z), subGraphType));
+            QueueTest($"{testName}-float-w", CreateSelfContainedTestGraph(nodeName, In(a.w, b.w), Out(expected.w), subGraphType));
+
+            QueueTest($"{testName}-float2-xy", CreateSelfContainedTestGraph(nodeName, In(new float2(a.x, a.y), new float2(b.x, b.y)), Out(expected.xy), subGraphType));
+            QueueTest($"{testName}-float2-zw", CreateSelfContainedTestGraph(nodeName, In(new float2(a.z, a.w), new float2(b.z, b.w)), Out(expected.zw), subGraphType));
+
+            QueueTest($"{testName}-float3-xyz", CreateSelfContainedTestGraph(nodeName, In(new float3(a.x, a.y, a.z), new float3(b.x, b.y, b.z)), Out(expected.xyz), subGraphType));
+            QueueTest($"{testName}-float3-yzw", CreateSelfContainedTestGraph(nodeName, In(new float3(a.y, a.z, a.w), new float3(b.y, b.z, b.w)), Out(expected.yzw), subGraphType));
+
+            QueueTest($"{testName}-float4", CreateSelfContainedTestGraph(nodeName, In(a, b), Out(expected), subGraphType));
+        }
+
+
+        protected static void TestNodeWithAllFloatNInputVariants(string testName, string nodeName, float4 a, float4 b, float4 c, float4 expected, ComparisonType subGraphType = ComparisonType.Approximately)
+        {
+            QueueTest($"{testName}-float-x", CreateSelfContainedTestGraph(nodeName, In(a.x, b.x, c.x), Out(expected.x), subGraphType));
+            QueueTest($"{testName}-float-y", CreateSelfContainedTestGraph(nodeName, In(a.y, b.y, c.y), Out(expected.y), subGraphType));
+            QueueTest($"{testName}-float-z", CreateSelfContainedTestGraph(nodeName, In(a.z, b.z, c.z), Out(expected.z), subGraphType));
+            QueueTest($"{testName}-float-w", CreateSelfContainedTestGraph(nodeName, In(a.w, b.w, c.w), Out(expected.w), subGraphType));
+
+            QueueTest($"{testName}-float2-xy", CreateSelfContainedTestGraph(nodeName,
+                In(new float2(a.x, a.y), new float2(b.x, b.y), new float2(c.x, c.y)),
+                Out(expected.xy), subGraphType));
+
+            QueueTest($"{testName}-float2-zw", CreateSelfContainedTestGraph(nodeName,
+                In(new float2(a.z, a.w), new float2(b.z, b.w), new float2(c.z, c.w)),
+                Out(expected.zw), subGraphType));
+
+            QueueTest($"{testName}-float3-xyz", CreateSelfContainedTestGraph(nodeName,
+                In(new float3(a.x, a.y, a.z), new float3(b.x, b.y, b.z), new float3(c.x, c.y, c.z)),
+                Out(expected.xyz), subGraphType));
+
+            QueueTest($"{testName}-float3-yzw", CreateSelfContainedTestGraph(nodeName,
+                In(new float3(a.y, a.z, a.w), new float3(b.y, b.z, b.w), new float3(c.y, c.z, c.w)),
+                Out(expected.yzw), subGraphType));
+
+            QueueTest($"{testName}-float4", CreateSelfContainedTestGraph(nodeName, In(a, b, c), Out(expected), subGraphType));
+        }
+
 
         protected static (Graph, Node) CreateSelfContainedTestGraph(string nodeStr, Dictionary<string, Value> values, Dictionary<string, IProperty> expectedResults, ComparisonType subGraphType)
         {
@@ -274,37 +321,6 @@ namespace UnityGLTF.Interactivity.Tests
             failLogActualValue.TryConnectToSocket(outNode, outSocket);
         }
 
-        protected static void TestNode(string nodeName, Dictionary<string, Value> inputValues, Dictionary<string, IProperty> expectedValues, ComparisonType subGraphType = ComparisonType.Equals)
-        {
-            var (graph, node) = CreateSelfContainedTestGraph(nodeName, inputValues, expectedValues, subGraphType);
-
-            var eng = CreateBehaviourEngineForGraph(graph, OnCustomEventFired, startPlayback: true);
-
-            void OnCustomEventFired(int eventIndex, Dictionary<string, IProperty> outValues)
-            {
-                if(eventIndex == 0) Assert.Fail("Fail event was triggered by this test.");
-            }
-        }
-
-        private static void TestNode<T, V>(string nodeName, T[] inputValues, V expected, ComparisonType subGraphType = ComparisonType.Equals)
-        {
-            Dictionary<string, Value> inputs = new();
-            Dictionary<string, IProperty> expectedOutputs = new();
-
-            for (int i = 0; i < inputValues.Length; i++)
-            {
-                inputs.Add(ConstStrings.Letters[i], new Value()
-                {
-                    id = ConstStrings.Letters[i],
-                    property = new Property<T>(inputValues[i])
-                });
-            }
-
-            expectedOutputs.Add(ConstStrings.VALUE, new Property<V>(expected));
-
-            TestNode(nodeName, inputs, expectedOutputs, subGraphType);
-        }
-
         protected static BehaviourEngine CreateBehaviourEngineForGraph(Graph g, Action<int, Dictionary<string, IProperty>> onEventFired, bool startPlayback = true)
         {
             return CreateBehaviourEngineForGraph(g, onEventFired, null, startPlayback);
@@ -366,6 +382,68 @@ namespace UnityGLTF.Interactivity.Tests
             graph.AddEvent("Failed");
             graph.AddEvent("Completed");
             return graph;
+        }
+
+        protected static string GetCallerName([CallerMemberName] string caller = null)
+        {
+            return caller;
+        }
+
+        protected static void QueueTest(string fileName, Graph graph)
+        {
+            _testQueue.Add(new TestData()
+            {
+                fileName = fileName,
+                graph = graph,
+                executionTime = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT
+            });
+        }
+
+        protected static void QueueTest(string fileName, (Graph graph, Node node) graphTuple)
+        {
+            _testQueue.Add(new TestData()
+            {
+                fileName = fileName,
+                graph = graphTuple.graph,
+                executionTime = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT
+            });
+        }
+
+        protected static Dictionary<string, Value> In<T>(params T[] inputValues)
+        {
+            Dictionary<string, Value> inputs = new();
+
+            for (int i = 0; i < inputValues.Length; i++)
+            {
+                inputs.Add(ConstStrings.Letters[i], new Value()
+                {
+                    id = ConstStrings.Letters[i],
+                    property = new Property<T>(inputValues[i])
+                });
+            }
+
+            return inputs;
+        }
+
+        protected static Dictionary<string, IProperty> Out<T>(T expected)
+        {
+            Dictionary<string, IProperty> outputs = new();
+
+            outputs.Add(ConstStrings.VALUE, new Property<T>(expected));
+
+            return outputs;
+        }
+
+        protected static Dictionary<string, IProperty> Out<T>(params KeyValuePair<string, T>[] expectedOutputs)
+        {
+            Dictionary<string, IProperty> outputs = new();
+
+            for (int i = 0; i < expectedOutputs.Length; i++)
+            {
+                outputs.Add(expectedOutputs[i].Key, new Property<T>(expectedOutputs[i].Value));
+            }
+
+            return outputs;
         }
     }
 }

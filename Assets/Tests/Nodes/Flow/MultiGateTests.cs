@@ -8,57 +8,21 @@ namespace UnityGLTF.Interactivity.Tests
     partial class FlowNodesTests
     {
         [Test]
-        public void TestMultiGate()
+        public void MultiGate_RunAllOutputsOnce_AllOutputsRun()
         {
-            var g = GenerateMultiGateTestGraph(5);
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            QueueTest(GetCallerName(), GenerateMultiGateTestGraph(5));
         }
 
         [Test]
-        public void TestMultiGateLoop()
+        public void MultiGate_IsLoop_RunsAllOutputFlowsInALoop()
         {
-            var g = GenerateMultiGateLoopTestGraph(5, 35);
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            QueueTest(GetCallerName(), GenerateMultiGateLoopTestGraph(5, 35));
         }
 
         [Test]
-        public void TestMultiGateReset()
+        public void MultiGate_ResetAfterMoreActivationsThanOutputs_CorrectNumberOfOutputFlowsOccur()
         {
-            var g = GenerateMultiGateResetTestGraph(5, 8, 10);
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            QueueTest(GetCallerName(), GenerateMultiGateResetTestGraph(5, 8, 10));
         }
 
         private static Graph GenerateMultiGateTestGraph(int outputs)

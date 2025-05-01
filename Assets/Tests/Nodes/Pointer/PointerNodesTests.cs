@@ -15,6 +15,8 @@ namespace UnityGLTF.Interactivity.Tests
 {
     public class PointerNodesTests : NodeTestHelpers
     {
+        protected override string _subDirectory => "Pointer";
+
         private (Graph, Node) CreatePointerInterpolateGraph<T>(int nodeIndex, string pointer, float duration, T val)
         {
             var graph = new Graph();

@@ -8,39 +8,15 @@ namespace UnityGLTF.Interactivity.Tests
     partial class FlowNodesTests
     {
         [Test]
-        public void TestWaitAll()
+        public void WaitAll_ActivateAllInputs_CompletedFlowActivates()
         {
-            var g = GenerateWaitAllTestGraph(5);
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            QueueTest(GetCallerName(), GenerateWaitAllTestGraph(5));
         }
 
         [Test]
-        public void TestWaitAllReset()
+        public void WaitAll_ResetWhileActivatingInputs_CompletedFlowDoesNotActivateAndRemainingInputsIsCorrect()
         {
-            var g = GenerateWaitAllResetTestGraph();
-
-            GraphSerializer serializer = new(Newtonsoft.Json.Formatting.Indented);
-            var extension = new KHR_interactivity()
-            {
-                graphs = new List<Graph>() { g },
-                defaultGraphIndex = 0
-            };
-            File.WriteAllText($"{Application.streamingAssetsPath}/outputTestGraph.json", serializer.Serialize(extension));
-
-            var eng = CreateBehaviourEngineForGraph(g, OnCustomEventFired, startPlayback: true);
-
-            Assert.IsTrue(_testSuccessful);
+            QueueTest(GetCallerName(), GenerateWaitAllResetTestGraph());
         }
 
         private static Graph GenerateWaitAllTestGraph(int inputs)
