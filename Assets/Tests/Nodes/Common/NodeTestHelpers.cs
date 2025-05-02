@@ -22,7 +22,7 @@ namespace UnityGLTF.Interactivity.Tests
         {
             public string fileName;
             public Graph graph;
-            public float executionTime;
+            public float executionTimeoutDuration;
             public GLTFSceneImporter importer;
         }
 
@@ -83,6 +83,7 @@ namespace UnityGLTF.Interactivity.Tests
         {
             foreach(var test in _testQueue)
             {
+                var endTime = Time.time + test.executionTimeoutDuration;
                 _testSuccessful = false;
 #if GENERATE_TEST_FILES
                 Task.Run(() =>
@@ -103,7 +104,7 @@ namespace UnityGLTF.Interactivity.Tests
                 // Actually run test.
                 var eng = CreateBehaviourEngineForGraph(test.graph, OnCustomEventFired, test.importer, startPlayback: true);
 
-                while (!_testSuccessful && Time.time < test.executionTime)
+                while (!_testSuccessful && Time.time < endTime)
                 {
                     eng.Tick();
                     yield return null;
@@ -392,7 +393,7 @@ namespace UnityGLTF.Interactivity.Tests
             {
                 fileName = fileName,
                 graph = graph,
-                executionTime = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT,
+                executionTimeoutDuration = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT,
                 importer = importer
             });
         }
@@ -403,7 +404,7 @@ namespace UnityGLTF.Interactivity.Tests
             {
                 fileName = fileName,
                 graph = graph,
-                executionTime = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT
+                executionTimeoutDuration = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT
             });
         }
 
@@ -413,7 +414,7 @@ namespace UnityGLTF.Interactivity.Tests
             {
                 fileName = fileName,
                 graph = graphTuple.graph,
-                executionTime = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT
+                executionTimeoutDuration = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT
             });
         }
 

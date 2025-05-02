@@ -119,6 +119,7 @@ namespace UnityGLTF.Interactivity
             {
                 Pointer<float3> => GetInterpolator(property, data),
                 Pointer<Color> => GetInterpolator(new Property<Color>(property.value.ToColor()), data),
+                Pointer<Color3> => GetInterpolator(new Property<Color3>(property.value.ToColor()), data),
                 Pointer<quaternion> => GetInterpolator(new Property<quaternion>(quaternion.Euler(property.value)), data),
 
                 _ => throw new InvalidOperationException($"Pointer type {data.pointer.GetSystemType()} is not supported for this float3 property."),

@@ -15,32 +15,96 @@ namespace UnityGLTF.Interactivity.Tests
 {
     public partial class PointerNodesTests : NodeTestHelpers
     {
+        private const float INTERPOLATION_DURATION = 0.5f;
+        private static readonly float2 P1 = new float2(0.42f, 0f);
+        private static readonly float2 P2 = new float2(0.52f, 1f);
         protected override string _subDirectory => "Pointer";
 
-        private Graph CreatePointerInterpolateGraph<T>(int nodeIndex, string pointer, float duration, T val)
+        [UnityTest]
+        public IEnumerator PointerInterpolateGet_ValuesInGetAreWhatWereInterpolatedTo()
         {
-            var graph = new Graph();
-            graph.AddDefaultTypes();
+            var importer = LoadTestModel("material_pointers_test.gltf");
+            while (!importer.IsCompleted)
+            {
+                yield return null;
+            }
 
-            var onStartNode = graph.CreateNode("event/onStart", Vector2.zero);
-            var pointerIntNode = graph.CreateNode("pointer/interpolate", Vector2.zero);
-
-            onStartNode.AddFlow(pointerIntNode, ConstStrings.OUT, ConstStrings.IN);
-            pointerIntNode.AddValue("nodeIndex", nodeIndex);
-            pointerIntNode.AddConfiguration("type", new JArray("float"));
-            pointerIntNode.AddConfiguration("pointer", new JArray(pointer));
-
-            pointerIntNode.AddValue(ConstStrings.DURATION, duration);
-            pointerIntNode.AddValue(ConstStrings.VALUE, val);
-
-            pointerIntNode.AddValue(ConstStrings.P1, new float2(0.2f, 0.2f));
-            pointerIntNode.AddValue(ConstStrings.P2, new float2(0.6f, 0.6f));
-
-
-            return graph;
+            for (int i = 0; i < MATERIAL_POINTERS.Length; i++)
+            {
+                QueueTest($"InterpolateAndGetPointer{MATERIAL_POINTERS[i].pointer.Replace('/', '_')}", CreatePointerInterpolateGraph(MATERIAL_POINTERS[i].pointer, MATERIAL_POINTERS[i].type), importer.Result);
+            }
         }
 
-        private static Graph CreateMaterialPointerSetGraph(string pointer, string type)
+        [UnityTest]
+        public IEnumerator PointerSetGet_ValuesInGetAreWhatWereSet()
+        {
+            var importer = LoadTestModel("material_pointers_test.gltf");
+            while (!importer.IsCompleted)
+            {
+                yield return null;
+            }
+
+            for (int i = 0; i < MATERIAL_POINTERS.Length; i++)
+            {
+                QueueTest($"SetAndGetPointer{MATERIAL_POINTERS[i].pointer.Replace('/', '_')}", CreatePointerSetGraph(MATERIAL_POINTERS[i].pointer, MATERIAL_POINTERS[i].type), importer.Result);
+            }
+        }
+
+        private Graph CreatePointerInterpolateGraph(string pointer, string type)
+        {
+            var g = CreateGraphForTest();
+
+            IProperty value = type switch
+            {
+                "float" => new Property<float>(0.7f),
+                "float2" => new Property<float2>(new float2(0.7f, 0.5f)),
+                "float3" => new Property<float3>(new float3(0.7f, 0.5f, 0.3f)),
+                "float4" => new Property<float4>(new float4(0.7f, 0.5f, 0.3f, 0.2f)),
+                _ => throw new InvalidOperationException(),
+            };
+
+            Util.Log($"{pointer} with type {type}");
+
+            var typeIndex = g.IndexOfType(type);
+            var onStartNode = g.CreateNode("event/onStart");
+            var pointerInterpolateNode = g.CreateNode("pointer/interpolate");
+
+            pointerInterpolateNode.AddValue(ConstStrings.NODE_INDEX, 0);
+            pointerInterpolateNode.AddConfiguration(ConstStrings.TYPE, typeIndex);
+            pointerInterpolateNode.AddConfiguration(ConstStrings.POINTER, pointer);
+            pointerInterpolateNode.AddValue(ConstStrings.VALUE, value);
+            pointerInterpolateNode.AddValue(ConstStrings.DURATION, INTERPOLATION_DURATION);
+            pointerInterpolateNode.AddValue(ConstStrings.P1, P1);
+            pointerInterpolateNode.AddValue(ConstStrings.P2, P2);
+
+            var get = g.CreateNode("pointer/get");
+            get.AddConfiguration(ConstStrings.POINTER, pointer);
+            get.AddConfiguration(ConstStrings.TYPE, typeIndex);
+            get.AddValue(ConstStrings.NODE_INDEX, 0);
+
+            var branch = g.CreateNode("flow/branch");
+            var eq = g.CreateNode("math/eq");
+
+            branch.AddConnectedValue(ConstStrings.CONDITION, eq);
+
+            eq.AddConnectedValue(ConstStrings.A, get);
+            eq.AddValue(ConstStrings.B, value);
+
+            var complete = g.CreateNode("event/send");
+            var failLog = CreateFailSubGraph(g, $"Get did not return the correct value for pointer {pointer}." + " Expected: {expected}, Actual: {actual}");
+            failLog.AddConnectedValue(ConstStrings.ACTUAL, get);
+            failLog.AddValue(ConstStrings.EXPECTED, value);
+            failLog.AddValue(ConstStrings.NODE_INDEX, 0);
+
+            onStartNode.AddFlow(pointerInterpolateNode);
+            pointerInterpolateNode.AddFlow(branch, ConstStrings.DONE);
+            branch.AddFlow(complete, ConstStrings.TRUE);
+            branch.AddFlow(failLog, ConstStrings.FALSE);
+            complete.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
+            return g;
+        }
+
+        private static Graph CreatePointerSetGraph(string pointer, string type)
         {
             var g = CreateGraphForTest();
 
@@ -91,8 +155,7 @@ namespace UnityGLTF.Interactivity.Tests
             return g;
         }
 
-        [UnityTest]
-        public IEnumerator TestMaterialPointers()
+        public IEnumerator TestPointerInterpolateFloat(string pointer, float targetValue)
         {
             var importer = LoadTestModel("material_pointers_test.gltf");
             while (!importer.IsCompleted)
@@ -101,32 +164,9 @@ namespace UnityGLTF.Interactivity.Tests
             }
 
             for (int i = 0; i < MATERIAL_POINTERS.Length; i++)
-            { 
-                QueueTest($"SetAndGetPointer{MATERIAL_POINTERS[i].pointer.Replace('/','_')}", CreateMaterialPointerSetGraph(MATERIAL_POINTERS[i].pointer, MATERIAL_POINTERS[i].type), importer.Result);
-            }
-        }
-
-        public IEnumerator TestPointerInterpolateFloat(string pointer, float targetValue)
-        {
-            var importer = LoadTestModel("material_pointers_test.gltf");
-            while (importer.IsCompleted == false)
             {
-                yield return new WaitForFixedUpdate();
+                QueueTest($"SetAndGetPointer{MATERIAL_POINTERS[i].pointer.Replace('/', '_')}", CreatePointerInterpolateGraph(MATERIAL_POINTERS[i].pointer, MATERIAL_POINTERS[i].type), importer.Result);
             }
-
-            if (pointer.StartsWith("/materials") == false)
-            {
-                pointer = "/materials/{nodeIndex}/" + pointer;
-            }
-
-            float duration = 3.5f;
-            QueueTest(GetCallerName(), CreatePointerInterpolateGraph(0, pointer, duration, targetValue));
-        }
-
-        [UnityTest]
-        public IEnumerator TestPointerInterpolateAlphaCutoff()
-        {
-            yield return TestPointerInterpolateFloat("alphaCutoff", 0.78f);
         }
     }
 }
