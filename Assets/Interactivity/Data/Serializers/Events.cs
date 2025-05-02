@@ -46,12 +46,11 @@ namespace UnityGLTF.Interactivity
 
         private static void WriteEventValue(JsonWriter writer, EventValue eventValue, Dictionary<Type, int> typeIndexByType)
         {
-            writer.WriteStartObject();
-
             writer.WritePropertyName(eventValue.id);
 
-            writer.WritePropertyName(ConstStrings.TYPE);
-            writer.WriteValue(typeIndexByType[eventValue.property.GetType()]);
+            writer.WriteStartObject();
+
+            NodesSerializer.WriteValueLiteral(writer, eventValue.property, typeIndexByType);
 
             writer.WriteEndObject();
         }

@@ -2,6 +2,7 @@ using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -21,6 +22,18 @@ namespace UnityGLTF.Interactivity.Tests
         public void Receive_EventIsReceivedAndOutFlowActivates()
         {
             QueueTest(GetCallerName(), CreateEventReceiveTestGraph());
+        }
+
+        [Test]
+        public void Receive_SendWithValues_ValuesAreReceived()
+        {
+            QueueTest(GetCallerName(), CreateEventReceiveWithValuesTestGraph());
+        }
+
+        [Test]
+        public void Receive_CheckOutputValuesBeforeSendOccurs_ValuesAreEventValueDefaults()
+        {
+            QueueTest(GetCallerName(), CreateEventReceiveWithNoSendCheckOutputValuesTestGraph());
         }
 
         [Test]
@@ -65,6 +78,195 @@ namespace UnityGLTF.Interactivity.Tests
             return g;
         }
 
+        private static Graph CreateEventReceiveWithValuesTestGraph()
+        {
+            var g = CreateGraphForTest();
+
+            var initial = new IProperty[]
+            {
+                P(false),
+                P(1),
+                P(1f),
+                P(new float2(1f, 1f)),
+                P(new float3(1f, 1f, 1f)),
+                P(new float4(1f, 1f, 1f, 1f)),
+                P(new float2x2(new float2(1f, 1f), new float2(1f, 1f))),
+                P(new float3x3(new float3(1f, 1f, 1f), new float3(1f, 1f, 1f), new float3(1f, 1f, 1f))),
+                P(new float4x4(new float4(1f, 1f, 1f, 1f), new float4(1f, 1f, 1f, 1f), new float4(1f, 1f, 1f, 1f), new float4(1f, 1f, 1f, 1f)))
+            };
+
+            var expected = new IProperty[]
+            {
+                P(true),
+                P(42),
+                P(3.14f),
+                P(new float2(0.75f, -2.5f)),
+                P(new float3(1.23f, -0.98f, 4.56f)),
+                P(new float4(-1.1f, 0.0f, 2.2f, 3.3f)),
+                P(new float2x2(
+                    new float2(7.77f, -8.88f),
+                    new float2(9.99f, -0.12f))
+                ),
+                P(new float3x3(
+                    new float3(0.1f, 0.2f, 0.3f),
+                    new float3(4.4f, 5.5f, 6.6f),
+                    new float3(7.7f, 8.8f, 9.9f))
+                ),
+                P(new float4x4(
+                    new float4(1.1f, 2.2f, 3.3f, 4.4f),
+                    new float4(5.5f, 6.6f, 7.7f, 8.8f),
+                    new float4(9.9f, -1.2f, -3.4f, -5.6f),
+                    new float4(0.0f, 0.1f, 0.2f, 0.3f))
+                )
+            };
+
+            var values = new List<EventValue>();
+
+            for (int i = 0; i < initial.Length; i++)
+            {
+                values.Add(new EventValue(initial[i].GetTypeSignature(), initial[i]));
+            }
+
+            g.AddEvent("trigger", values);
+
+            var start = g.CreateNode("event/onStart");
+            var receiveTrigger = g.CreateNode("event/receive");
+            var sendTrigger = g.CreateNode("event/send");
+
+            var complete = g.CreateNode("event/send");
+
+            start.AddFlow(sendTrigger);
+
+            sendTrigger.AddConfiguration(ConstStrings.EVENT, 2);
+
+            for (int i = 0; i < expected.Length; i++)
+            {
+                sendTrigger.AddValue(values[i].id, expected[i]);
+            }
+
+            receiveTrigger.AddConfiguration(ConstStrings.EVENT, 2);
+
+            var sequence = g.CreateNode("flow/sequence");
+            receiveTrigger.AddFlow(sequence);
+
+            for (int i = 0; i < values.Count; i++)
+            {
+                var eq = g.CreateNode("math/eq");
+                var branch = g.CreateNode("flow/branch");
+                var fail = g.CreateNode("event/send");
+                var failLog = g.CreateNode("debug/log");
+
+                eq.AddConnectedValue(ConstStrings.A, receiveTrigger, values[i].id);
+                eq.AddValue(ConstStrings.B, expected[i]);
+
+                branch.AddConnectedValue(ConstStrings.CONDITION, eq);
+                branch.AddFlow(failLog, ConstStrings.FALSE);
+
+                failLog.AddConfiguration(ConstStrings.MESSAGE, $"{values[i].id} " + "Expected: {expected}, Actual: {actual}");
+                failLog.AddConnectedValue(ConstStrings.ACTUAL, receiveTrigger, values[i].id);
+                failLog.AddValue(ConstStrings.EXPECTED, expected[i]);
+                failLog.AddFlow(fail);
+
+                fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+
+                sequence.AddFlow(branch, ConstStrings.Numbers[i]);
+            }
+
+            sequence.AddFlow(complete, ConstStrings.Numbers[values.Count]);
+
+            complete.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
+
+            return g;
+
+            IProperty P<T>(T value)
+            {
+                return new Property<T>(value);
+            }
+        }
+
+        private static Graph CreateEventReceiveWithNoSendCheckOutputValuesTestGraph()
+        {
+            var g = CreateGraphForTest();
+
+            var initial = new IProperty[]
+            {
+                P(true),
+                P(42),
+                P(3.14f),
+                P(new float2(0.75f, -2.5f)),
+                P(new float3(1.23f, -0.98f, 4.56f)),
+                P(new float4(-1.1f, 0.0f, 2.2f, 3.3f)),
+                P(new float2x2(
+                    new float2(7.77f, -8.88f),
+                    new float2(9.99f, -0.12f))
+                ),
+                P(new float3x3(
+                    new float3(0.1f, 0.2f, 0.3f),
+                    new float3(4.4f, 5.5f, 6.6f),
+                    new float3(7.7f, 8.8f, 9.9f))
+                ),
+                P(new float4x4(
+                    new float4(1.1f, 2.2f, 3.3f, 4.4f),
+                    new float4(5.5f, 6.6f, 7.7f, 8.8f),
+                    new float4(9.9f, -1.2f, -3.4f, -5.6f),
+                    new float4(0.0f, 0.1f, 0.2f, 0.3f))
+                )
+            };
+
+            var values = new List<EventValue>();
+
+            for (int i = 0; i < initial.Length; i++)
+            {
+                values.Add(new EventValue(initial[i].GetTypeSignature(), initial[i]));
+            }
+
+            g.AddEvent("trigger", values);
+
+            var start = g.CreateNode("event/onStart");
+            var receiveTrigger = g.CreateNode("event/receive");
+
+            var complete = g.CreateNode("event/send");
+
+            receiveTrigger.AddConfiguration(ConstStrings.EVENT, 2);
+
+            var sequence = g.CreateNode("flow/sequence");
+            start.AddFlow(sequence);
+
+            for (int i = 0; i < values.Count; i++)
+            {
+                var eq = g.CreateNode("math/eq");
+                var branch = g.CreateNode("flow/branch");
+                var fail = g.CreateNode("event/send");
+                var failLog = g.CreateNode("debug/log");
+
+                eq.AddConnectedValue(ConstStrings.A, receiveTrigger, values[i].id);
+                eq.AddValue(ConstStrings.B, initial[i]);
+
+                branch.AddConnectedValue(ConstStrings.CONDITION, eq);
+                branch.AddFlow(failLog, ConstStrings.FALSE);
+
+                failLog.AddConfiguration(ConstStrings.MESSAGE, $"{values[i].id} " + "Expected: {expected}, Actual: {actual}");
+                failLog.AddConnectedValue(ConstStrings.ACTUAL, receiveTrigger, values[i].id);
+                failLog.AddValue(ConstStrings.EXPECTED, initial[i]);
+                failLog.AddFlow(fail);
+
+                fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+
+                sequence.AddFlow(branch, ConstStrings.Numbers[i]);
+            }
+
+            sequence.AddFlow(complete, ConstStrings.Numbers[values.Count]);
+
+            complete.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
+
+            return g;
+
+            IProperty P<T>(T value)
+            {
+                return new Property<T>(value);
+            }
+        }
+      
         private static Graph CreateOnTickTestGraph()
         {
             var g = CreateGraphForTest();
