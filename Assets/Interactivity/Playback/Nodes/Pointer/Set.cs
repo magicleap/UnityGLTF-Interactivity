@@ -42,6 +42,9 @@ namespace UnityGLTF.Interactivity
                 case Property<float3> prop when _pointer is Pointer<Color> p:
                     p.setter(prop.value.ToColor());
                     break;
+                case Property<float3> prop when _pointer is Pointer<Color3> p:
+                    p.setter(prop.value.ToColor());
+                    break;
                 case Property<float4> prop when _pointer is Pointer<float4> p:
                     p.setter(prop.value);
                     break;

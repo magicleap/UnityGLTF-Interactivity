@@ -24,7 +24,7 @@ namespace UnityGLTF.Interactivity.Materials
                 texCoord = PointerHelpers.CreateFloatPointer(mat, texCoordHash)
             };
 
-            baseColorFactor = PointerHelpers.CreateColorPointer(mat, baseColorFactorHash);
+            baseColorFactor = PointerHelpers.CreateColorRGBAPointer(mat, baseColorFactorHash);
         }
 
         public static IPointer ProcessExtensionsPointer(StringSpanReader reader, BaseColorPointers pointers)

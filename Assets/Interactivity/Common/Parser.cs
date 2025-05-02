@@ -5,6 +5,23 @@ using UnityEngine;
 
 namespace UnityGLTF.Interactivity
 {
+    public struct Color3
+    {
+        public float r;
+        public float g;
+        public float b;
+
+        public Color3(float r, float g, float b)
+        {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+        }
+
+        public static implicit operator Color(Color3 c) => new Color(c.r, c.g, c.b, 1f);
+        public static implicit operator Color3(Color c) => new Color3(c.r, c.g, c.b);
+    }
+
     public static class Parser
     {
         public static float ToFloat(JArray jArray)

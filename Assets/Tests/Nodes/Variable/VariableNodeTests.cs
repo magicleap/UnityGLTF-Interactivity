@@ -246,18 +246,6 @@ namespace UnityGLTF.Interactivity.Tests
             return interpolate;
         }
 
-        private static Node CreateFailSubGraph(Graph g, string failMessage)
-        {
-            var fail = g.CreateNode("event/send");
-            fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
-
-            var log = g.CreateNode("debug/log");
-            log.AddConfiguration(ConstStrings.MESSAGE, failMessage);
-            log.AddFlow(fail);
-
-            return log;
-        }
-
         private interface IVariableSubGraph
         {
             public void AppendVariableTestSubGraph<T>(Graph g, T initialValue, T setValue);

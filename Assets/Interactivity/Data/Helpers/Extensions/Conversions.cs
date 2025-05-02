@@ -10,6 +10,11 @@ namespace UnityGLTF.Interactivity.Extensions
             return new float3(c.r, c.g, c.b);
         }
 
+        public static float3 ToFloat3(this Color3 c)
+        {
+            return new float3(c.r, c.g, c.b);
+        }
+
         public static Color ToColor(this float3 v)
         {
             return new Color(v.x, v.y, v.z, 1f);

@@ -28,7 +28,17 @@ namespace UnityGLTF.Interactivity.Materials
             };
         }
 
-        public static Pointer<Color> CreateColorPointer(Material mat, int hash)
+        public static Pointer<Color3> CreateColorRGBPointer(Material mat, int hash)
+        {
+            return new Pointer<Color3>()
+            {
+                setter = (v) => mat.SetColor(hash, v),
+                getter = () => mat.GetColor(hash),
+                evaluator = (a, b, t) => Color.Lerp(a, b, t)
+            };
+        }
+
+        public static Pointer<Color> CreateColorRGBAPointer(Material mat, int hash)
         {
             return new Pointer<Color>()
             {

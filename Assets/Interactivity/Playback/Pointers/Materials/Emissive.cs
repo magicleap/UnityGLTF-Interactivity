@@ -12,7 +12,7 @@ namespace UnityGLTF.Interactivity.Materials
         private static readonly int emissiveFactorHash = Shader.PropertyToID("emissiveFactor");
 
         public TransformPointers transformPointers;
-        public Pointer<Color> emissiveFactor;
+        public Pointer<Color3> emissiveFactor;
 
         public EmissivePointers(Material mat)
         {
@@ -24,7 +24,7 @@ namespace UnityGLTF.Interactivity.Materials
                 texCoord = PointerHelpers.CreateFloatPointer(mat, texCoordHash)
             };
 
-            emissiveFactor = PointerHelpers.CreateColorPointer(mat, emissiveFactorHash);
+            emissiveFactor = PointerHelpers.CreateColorRGBPointer(mat, emissiveFactorHash);
         }
 
         public static IPointer ProcessExtensionsPointer(StringSpanReader reader, EmissivePointers pointers)

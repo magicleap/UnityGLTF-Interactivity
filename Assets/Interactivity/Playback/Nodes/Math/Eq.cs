@@ -19,7 +19,7 @@ namespace UnityGLTF.Interactivity
             {
                 Property<bool> aProp when b is Property<bool> bProp => new Property<bool>(aProp.value == bProp.value),
                 Property<int> aInt when b is Property<int> bInt => new Property<bool>(aInt.value == bInt.value),
-                Property<float> aFloat when b is Property<float> bFloat => new Property<bool>(aFloat.value == bFloat.value),
+                Property<float> aFloat when b is Property<float> bFloat => new Property<bool>(eq(aFloat.value,bFloat.value)),
                 Property<float2> pA when b is Property<float2> pB => new Property<bool>(AllEqual(pA.value, pB.value)),
                 Property<float3> pA when b is Property<float3> pB => new Property<bool>(AllEqual(pA.value, pB.value)),
                 Property<float4> pA when b is Property<float4> pB => new Property<bool>(AllEqual(pA.value, pB.value)),
@@ -32,38 +32,43 @@ namespace UnityGLTF.Interactivity
 
         private static bool AllEqual(float2 a, float2 b)
         {
-            return a.x == b.x && a.y == b.y;
+            return eq(a.x, b.x) && eq(a.y, b.y);
         }
 
         private static bool AllEqual(float3 a, float3 b)
         {
-            return a.x == b.x && a.y == b.y && a.z == b.z;
+            return eq(a.x, b.x) && eq(a.y, b.y) && eq(a.z, b.z);
         }
 
         private static bool AllEqual(float4 a, float4 b)
         {
-            return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
+            return eq(a.x, b.x) && eq(a.y, b.y) && eq(a.z, b.z) && eq(a.w, b.w);
         }
 
         private static bool AllEqual(float2x2 a, float2x2 b)
         {
-            return a.c0.x == b.c0.x && a.c0.y == b.c0.y && a.c1.x == b.c1.x && a.c1.y == b.c1.y;
+            return eq(a.c0.x, b.c0.x) && eq(a.c0.y, b.c0.y) &&
+                   eq(a.c1.x, b.c1.x) && eq(a.c1.y, b.c1.y);
         }
 
         private static bool AllEqual(float3x3 a, float3x3 b)
         {
-            return a.c0.x == b.c0.x && a.c0.y == b.c0.y && a.c0.z == b.c0.z &&
-                   a.c1.x == b.c1.x && a.c1.y == b.c1.y && a.c1.z == b.c1.z &&
-                   a.c2.x == b.c2.x && a.c2.y == b.c2.y && a.c2.z == b.c2.z;
+            return eq(a.c0.x, b.c0.x) && eq(a.c0.y, b.c0.y) && eq(a.c0.z, b.c0.z) &&
+                   eq(a.c1.x, b.c1.x) && eq(a.c1.y, b.c1.y) && eq(a.c1.z, b.c1.z) &&
+                   eq(a.c2.x, b.c2.x) && eq(a.c2.y, b.c2.y) && eq(a.c2.z, b.c2.z);
         }
 
         private static bool AllEqual(float4x4 a, float4x4 b)
         {
-            return a.c0.x == b.c0.x && a.c0.y == b.c0.y && a.c0.z == b.c0.z && a.c0.w == b.c0.w &&
-                   a.c1.x == b.c1.x && a.c1.y == b.c1.y && a.c1.z == b.c1.z && a.c1.w == b.c1.w &&
-                   a.c2.x == b.c2.x && a.c2.y == b.c2.y && a.c2.z == b.c2.z && a.c2.w == b.c2.w &&
-                   a.c3.x == b.c3.x && a.c3.y == b.c3.y && a.c3.z == b.c3.z && a.c3.w == b.c3.w;
+            return eq(a.c0.x, b.c0.x) && eq(a.c0.y, b.c0.y) && eq(a.c0.z, b.c0.z) && eq(a.c0.w, b.c0.w) &&
+                   eq(a.c1.x, b.c1.x) && eq(a.c1.y, b.c1.y) && eq(a.c1.z, b.c1.z) && eq(a.c1.w, b.c1.w) &&
+                   eq(a.c2.x, b.c2.x) && eq(a.c2.y, b.c2.y) && eq(a.c2.z, b.c2.z) && eq(a.c2.w, b.c2.w) &&
+                   eq(a.c3.x, b.c3.x) && eq(a.c3.y, b.c3.y) && eq(a.c3.z, b.c3.z) && eq(a.c3.w, b.c3.w);
         }
 
+        private static bool eq(float a, float b)
+        {
+            return Mathf.Approximately(a,b);
+        }
     }
 }

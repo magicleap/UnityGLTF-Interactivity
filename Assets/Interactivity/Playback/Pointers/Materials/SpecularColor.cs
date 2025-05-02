@@ -12,7 +12,7 @@ namespace UnityGLTF.Interactivity.Materials
         private static readonly int colorFactorHash = Shader.PropertyToID("specularColorFactor");
 
         public TransformPointers transformPointers;
-        public Pointer<Color> specularColorFactor;
+        public Pointer<Color3> specularColorFactor;
 
         public SpecularColorPointers(Material mat)
         {
@@ -24,7 +24,7 @@ namespace UnityGLTF.Interactivity.Materials
                 texCoord = PointerHelpers.CreateFloatPointer(mat, texCoordHash)
             };
 
-            specularColorFactor = PointerHelpers.CreateColorPointer(mat, colorFactorHash);
+            specularColorFactor = PointerHelpers.CreateColorRGBPointer(mat, colorFactorHash);
         }
 
         public static IPointer ProcessExtensionsPointer(StringSpanReader reader, SpecularColorPointers pointers)

@@ -25,7 +25,7 @@ namespace UnityGLTF.Interactivity.Materials
         public Pointer<float> alphaCutoff;
         public Pointer<float> ior;
         public Pointer<float> attenuationDistance;
-        public Pointer<Color> attenuationColor;
+        public Pointer<Color3> attenuationColor;
         public Pointer<float> dispersion;
 
         public BaseColorPointers baseColorPointers;
@@ -53,7 +53,7 @@ namespace UnityGLTF.Interactivity.Materials
             alphaCutoff = PointerHelpers.CreateFloatPointer(mat, alphaCutoffHash);
             ior = PointerHelpers.CreateFloatPointer(mat, iorHash);
             attenuationDistance = PointerHelpers.CreateFloatPointer(mat, attenuationDistanceHash);
-            attenuationColor = PointerHelpers.CreateColorPointer(mat, attenuationColorHash);
+            attenuationColor = PointerHelpers.CreateColorRGBPointer(mat, attenuationColorHash);
             dispersion = PointerHelpers.CreateFloatPointer(mat, dispersionHash);
 
             baseColorPointers = new(mat);

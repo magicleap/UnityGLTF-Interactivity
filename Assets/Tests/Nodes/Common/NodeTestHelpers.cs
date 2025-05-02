@@ -23,6 +23,7 @@ namespace UnityGLTF.Interactivity.Tests
             public string fileName;
             public Graph graph;
             public float executionTime;
+            public GLTFSceneImporter importer;
         }
 
         protected const int FAIL_EVENT_INDEX = 0;
@@ -53,6 +54,7 @@ namespace UnityGLTF.Interactivity.Tests
                     Assert.Fail("Failure case was triggered by this test.");
                     break;
                 case 1:
+                    Util.Log("Test was successful.");
                     _testSuccessful = true;
                     break;
             }
@@ -99,7 +101,7 @@ namespace UnityGLTF.Interactivity.Tests
 #endif
 
                 // Actually run test.
-                var eng = CreateBehaviourEngineForGraph(test.graph, OnCustomEventFired, startPlayback: true);
+                var eng = CreateBehaviourEngineForGraph(test.graph, OnCustomEventFired, test.importer, startPlayback: true);
 
                 while (!_testSuccessful && Time.time < test.executionTime)
                 {
@@ -321,11 +323,6 @@ namespace UnityGLTF.Interactivity.Tests
             failLogActualValue.TryConnectToSocket(outNode, outSocket);
         }
 
-        protected static BehaviourEngine CreateBehaviourEngineForGraph(Graph g, Action<int, Dictionary<string, IProperty>> onEventFired, bool startPlayback = true)
-        {
-            return CreateBehaviourEngineForGraph(g, onEventFired, null, startPlayback);
-        }
-
         protected static BehaviourEngine CreateBehaviourEngineForGraph(Graph g, Action<int, Dictionary<string, IProperty>> onEventFired, GLTFSceneImporter importer, bool startPlayback)
         {
             BehaviourEngine eng = new BehaviourEngine(g, importer);
@@ -389,6 +386,17 @@ namespace UnityGLTF.Interactivity.Tests
             return caller;
         }
 
+        protected static void QueueTest(string fileName, Graph graph, GLTFSceneImporter importer)
+        {
+            _testQueue.Add(new TestData()
+            {
+                fileName = fileName,
+                graph = graph,
+                executionTime = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT,
+                importer = importer
+            });
+        }
+
         protected static void QueueTest(string fileName, Graph graph)
         {
             _testQueue.Add(new TestData()
@@ -444,6 +452,18 @@ namespace UnityGLTF.Interactivity.Tests
             }
 
             return outputs;
+        }
+
+        protected static Node CreateFailSubGraph(Graph g, string failMessage)
+        {
+            var fail = g.CreateNode("event/send");
+            fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+
+            var log = g.CreateNode("debug/log");
+            log.AddConfiguration(ConstStrings.MESSAGE, failMessage);
+            log.AddFlow(fail);
+
+            return log;
         }
     }
 }
