@@ -21,6 +21,12 @@ namespace UnityGLTF.Interactivity.Tests
         }
 
         [Test]
+        public void SetDelay_InfNaNNegativeDuration_ActivatesErrFlow()
+        {
+            QueueTest(GetCallerName(), GenerateSetDelayInvalidDurationTestGraph());
+        }
+
+        [Test]
         public void SetDelay_CancelInputMidDelay_DoneFlowDoesNotTrigger()
         {
             const float DURATION = 0.75f;
@@ -203,6 +209,51 @@ namespace UnityGLTF.Interactivity.Tests
             branch.AddFlow(completedBranch, ConstStrings.TRUE);
 
             return g;
+        }
+
+        private static Graph GenerateSetDelayInvalidDurationTestGraph()
+        {
+            Graph g = CreateGraphForTest();
+
+            var start = g.CreateNode("event/onStart");
+            var success = g.CreateNode("event/send");
+            success.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
+
+            var setDelayNeg = CreateSetDelayInvalidDurationSubGraph(g, -1f);
+            var setDelayInf = CreateSetDelayInvalidDurationSubGraph(g, float.PositiveInfinity);
+            var setDelayNaN = CreateSetDelayInvalidDurationSubGraph(g, float.NaN);
+
+            start.AddFlow(setDelayNeg);
+            setDelayNeg.AddFlow(setDelayInf, ConstStrings.ERR);
+            setDelayInf.AddFlow(setDelayNaN, ConstStrings.ERR);
+            setDelayNaN.AddFlow(success, ConstStrings.ERR);
+
+            return g;
+        }
+
+        private static Node CreateSetDelayInvalidDurationSubGraph(Graph g, float invalidDuration)
+        {
+            var setDelay = g.CreateNode("flow/setDelay");
+            setDelay.AddValue(ConstStrings.DURATION, invalidDuration);
+
+            var logFailOut = CreateFailSubGraph(g, $"Out flow was activated despite using {invalidDuration} duration.");
+            var logFailDone = CreateFailSubGraph(g, $"Done flow was activated despite using {invalidDuration} duration.");
+
+            setDelay.AddFlow(logFailOut);
+            setDelay.AddFlow(logFailDone, ConstStrings.DONE);
+            return setDelay;
+        }
+
+        private static Node CreateFailSubGraph(Graph g, string failMessage)
+        {
+            var fail = g.CreateNode("event/send");
+            fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+
+            var log = g.CreateNode("debug/log");
+            log.AddConfiguration(ConstStrings.MESSAGE, failMessage);
+            log.AddFlow(fail);
+
+            return log;
         }
     }
 }

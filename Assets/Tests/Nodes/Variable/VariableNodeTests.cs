@@ -8,6 +8,9 @@ namespace UnityGLTF.Interactivity.Tests
 {
     public class VariableNodeTests : NodeTestHelpers
     {
+        private const float INTERPOLATE_DURATION = 0.5f;
+        private static readonly float2 P1 = new float2(0.42f, 0f);
+        private static readonly float2 P2 = new float2(0.52f, 1f);
         protected override string _subDirectory => "Variable";
 
         [Test]
@@ -23,7 +26,25 @@ namespace UnityGLTF.Interactivity.Tests
         }
 
         [Test]
-        public void TestVariableSetMultiple_VariablesAllChangeToSetValuesAndGetReturnsThemCorrectly()
+        public void VariableInterpolate_InvalidDuration_ActivatesErrFlow()
+        {
+            QueueTest(GetCallerName(), GenerateInterpolateInvalidInputTestGraph(ConstStrings.DURATION, -1f, float.PositiveInfinity, float.NaN));
+        }
+
+        [Test]
+        public void VariableInterpolate_InvalidCP1_ActivatesErrFlow()
+        {
+            QueueTest(GetCallerName(), GenerateInterpolateInvalidInputTestGraph(ConstStrings.P1, new float2(-1f, 0f), new float2(0f, float.PositiveInfinity), new float2(0.5f, float.NaN)));
+        }
+
+        [Test]
+        public void VariableInterpolate_InvalidCP2_ActivatesErrFlow()
+        {
+            QueueTest(GetCallerName(), GenerateInterpolateInvalidInputTestGraph(ConstStrings.P2, new float2(-1f, 0f), new float2(0f, float.PositiveInfinity), new float2(0.5f, float.NaN)));
+        }
+
+        [Test]
+        public void VariableSetMultiple_VariablesAllChangeToSetValuesAndGetReturnsThemCorrectly()
         {
             QueueTest(GetCallerName(), CreateVariableSetMultipleGraph());
         }
@@ -182,6 +203,61 @@ namespace UnityGLTF.Interactivity.Tests
             return g;
         }
 
+        private static Graph GenerateInterpolateInvalidInputTestGraph<T>(string inputName, T invalid1, T invalid2, T invalid3)
+        {
+            Graph g = CreateGraphForTest();
+
+            g.AddVariable("a", 0f); // 0
+
+            var start = g.CreateNode("event/onStart");
+            var success = g.CreateNode("event/send");
+            success.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
+
+            var setDelayNeg = CreateInterpolateInvalidInputSubGraph(g, inputName, invalid1);
+            var setDelayInf = CreateInterpolateInvalidInputSubGraph(g, inputName, invalid2);
+            var setDelayNaN = CreateInterpolateInvalidInputSubGraph(g, inputName, invalid3);
+
+            start.AddFlow(setDelayNeg);
+            setDelayNeg.AddFlow(setDelayInf, ConstStrings.ERR);
+            setDelayInf.AddFlow(setDelayNaN, ConstStrings.ERR);
+            setDelayNaN.AddFlow(success, ConstStrings.ERR);
+
+            return g;
+        }
+
+        private static Node CreateInterpolateInvalidInputSubGraph<T>(Graph g, string inputName, T inputValue)
+        {
+            var interpolate = g.CreateNode("variable/interpolate");
+
+            interpolate.AddConfiguration(ConstStrings.USE_SLERP, false);
+            interpolate.AddValue(ConstStrings.VALUE, 100f);
+            interpolate.AddValue(ConstStrings.P1, P1);
+            interpolate.AddValue(ConstStrings.P2, P2);
+            interpolate.AddValue(ConstStrings.DURATION, INTERPOLATE_DURATION);
+
+            interpolate.AddConfiguration(ConstStrings.VARIABLE, 0);
+            interpolate.AddValue(inputName, inputValue);
+
+            var logFailOut = CreateFailSubGraph(g, $"Out flow was activated despite using {inputValue} duration.");
+            var logFailDone = CreateFailSubGraph(g, $"Done flow was activated despite using {inputValue} duration.");
+
+            interpolate.AddFlow(logFailOut);
+            interpolate.AddFlow(logFailDone, ConstStrings.DONE);
+            return interpolate;
+        }
+
+        private static Node CreateFailSubGraph(Graph g, string failMessage)
+        {
+            var fail = g.CreateNode("event/send");
+            fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
+
+            var log = g.CreateNode("debug/log");
+            log.AddConfiguration(ConstStrings.MESSAGE, failMessage);
+            log.AddFlow(fail);
+
+            return log;
+        }
+
         private interface IVariableSubGraph
         {
             public void AppendVariableTestSubGraph<T>(Graph g, T initialValue, T setValue);
@@ -207,10 +283,6 @@ namespace UnityGLTF.Interactivity.Tests
 
         private class VariableInterpolateSubGraph : IVariableSubGraph
         {
-            private const float INTERPOLATE_DURATION = 0.5f;
-            private static readonly float2 P1 = new float2(0.42f, 0f);
-            private static readonly float2 P2 = new float2(0.52f, 1f);
-
             public void AppendVariableTestSubGraph<T>(Graph g, T initialValue, T setValue)
             {
                 var interpolateType = Helpers.GetSignatureBySystemType(typeof(T));

@@ -52,8 +52,35 @@ namespace UnityGLTF.Interactivity
         {
             return TryEvaluateValue(ConstStrings.VALUE, out _interpGoal) && 
                 TryEvaluateValue(ConstStrings.DURATION, out _duration) &&
+                DurationIsValid(_duration) &&
                 TryEvaluateValue(ConstStrings.P1, out _p1) &&
-                TryEvaluateValue(ConstStrings.P2, out _p2);
+                ControlPointIsValid(_p1) &&
+                TryEvaluateValue(ConstStrings.P2, out _p2) &&
+                ControlPointIsValid(_p2);
+        }
+
+        private static bool DurationIsValid(float duration)
+        {
+            if (float.IsNaN(duration) || float.IsInfinity(duration) || duration < 0)
+                return false;
+
+            return true;
+        }
+
+        private static bool ControlPointIsValid(float2 cp)
+        {
+            if (IsInvalid(cp.x))
+                return false;
+
+            if (IsInvalid(cp.y))
+                return false;
+
+            return true;
+
+            bool IsInvalid(float v)
+            {
+                return float.IsNaN(v) || float.IsInfinity(v) || v < 0 || v > 1;
+            }
         }
     }
 }
