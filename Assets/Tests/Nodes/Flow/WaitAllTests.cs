@@ -10,13 +10,13 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void WaitAll_ActivateAllInputs_CompletedFlowActivates()
         {
-            QueueTest(GetCallerName(), GenerateWaitAllTestGraph(5));
+            QueueTest("flow/waitAll", GetCallerName(), "WaitAll Basic", "Triggers all 5 input flows. Test fails if completed flow is not activated.", GenerateWaitAllTestGraph(5));
         }
 
         [Test]
         public void WaitAll_ResetWhileActivatingInputs_CompletedFlowDoesNotActivateAndRemainingInputsIsCorrect()
         {
-            QueueTest(GetCallerName(), GenerateWaitAllResetTestGraph());
+            QueueTest("flow/waitAll", GetCallerName(), "WaitAll Reset", "Triggers 3 input flows, then resets and triggers the last 2. Test fails if the completed flow is activated or if remainingInputs has an incorrect value at any time after an input flow is activated.", GenerateWaitAllResetTestGraph());
         }
 
         private static Graph GenerateWaitAllTestGraph(int inputs)

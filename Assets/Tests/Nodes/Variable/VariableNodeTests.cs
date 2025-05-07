@@ -16,37 +16,37 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void VariableGetAndSet_VariablesAllChangeToSetValuesAndGetReturnsThemCorrectly()
         {
-            QueueTest(GetCallerName(), CreateVariableGetAndSetGraph(new VariableSetSubGraph()));
+            QueueTest("variable/set", GetCallerName(), "Variable Set & Get", "Creates a bool, int, float, float2, float3, float4, float2x2, float3x3, and float4x4 variable with an arbitrary default value, sets each to a different value, and uses a get node to check that they changed correctly.", CreateVariableGetAndSetGraph(new VariableSetSubGraph()));
         }
 
         [Test]
         public void VariableInterpolate_VariablesAllChangeToSetValuesAndGetReturnsThemCorrectly()
         {
-            QueueTest(GetCallerName(), CreateVariableGetAndSetGraph(new VariableInterpolateSubGraph()));
+            QueueTest("variable/interpolate", GetCallerName(), "Variable Interpolate Basic", "Creates variables for all floatN and floatNxN types with an arbitrary default value, and interpolates each to a different value. Test fails if err flow is activated, if the out flow does not activate before done flow, or if any of the values are incorrect after the done flow activates.", CreateVariableGetAndSetGraph(new VariableInterpolateSubGraph()));
         }
 
         [Test]
         public void VariableInterpolate_InvalidDuration_ActivatesErrFlow()
         {
-            QueueTest(GetCallerName(), GenerateInterpolateInvalidInputTestGraph(ConstStrings.DURATION, -1f, float.PositiveInfinity, float.NaN));
+            QueueTest("variable/interpolate", GetCallerName(), "Variable Interpolate Invalid Duration", "Test fails if out or done flow is activated for any of the three duration inputs or if the err flow is not activated for all three inputs.", GenerateInterpolateInvalidInputTestGraph(ConstStrings.DURATION, -1f, float.PositiveInfinity, float.NaN));
         }
 
         [Test]
         public void VariableInterpolate_InvalidCP1_ActivatesErrFlow()
         {
-            QueueTest(GetCallerName(), GenerateInterpolateInvalidInputTestGraph(ConstStrings.P1, new float2(-1f, 0f), new float2(0f, float.PositiveInfinity), new float2(0.5f, float.NaN)));
+            QueueTest("variable/interpolate", GetCallerName(), "Variable Interpolate Invalid P1", "Test fails if out or done flow is activated for any of the three duration inputs or if the err flow is not activated for all three inputs.", GenerateInterpolateInvalidInputTestGraph(ConstStrings.P1, new float2(-1f, 0f), new float2(0f, float.PositiveInfinity), new float2(0.5f, float.NaN)));
         }
 
         [Test]
         public void VariableInterpolate_InvalidCP2_ActivatesErrFlow()
         {
-            QueueTest(GetCallerName(), GenerateInterpolateInvalidInputTestGraph(ConstStrings.P2, new float2(-1f, 0f), new float2(0f, float.PositiveInfinity), new float2(0.5f, float.NaN)));
+            QueueTest("variable/interpolate", GetCallerName(), "Variable Interpolate Invalid P2", "Test fails if out or done flow is activated for any of the three duration inputs or if the err flow is not activated for all three inputs.", GenerateInterpolateInvalidInputTestGraph(ConstStrings.P2, new float2(-1f, 0f), new float2(0f, float.PositiveInfinity), new float2(0.5f, float.NaN)));
         }
 
         [Test]
         public void VariableSetMultiple_VariablesAllChangeToSetValuesAndGetReturnsThemCorrectly()
         {
-            QueueTest(GetCallerName(), CreateVariableSetMultipleGraph());
+            QueueTest("variable/setMultiple", GetCallerName(), "Variable Set Multiple", "Creates a bool, int, float, float2, float3, float4, float2x2, float3x3, and float4x4 variable with an arbitrary default value, sets each to a different value, and uses a get node to check that they changed correctly. Sequence used for simplifying graph.", CreateVariableSetMultipleGraph());
         }
 
         private static Graph CreateVariableGetAndSetGraph(IVariableSubGraph subGraphGenerator)

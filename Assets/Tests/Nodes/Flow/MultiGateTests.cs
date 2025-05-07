@@ -10,19 +10,19 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void MultiGate_RunAllOutputsOnce_AllOutputsRun()
         {
-            QueueTest(GetCallerName(), GenerateMultiGateTestGraph(5));
+            QueueTest("flow/multiGate", GetCallerName(), "MultiGate Basic", "Runs all output flows once. Test fails if all output flows do not occur.", GenerateMultiGateTestGraph(5));
         }
 
         [Test]
         public void MultiGate_IsLoop_RunsAllOutputFlowsInALoop()
         {
-            QueueTest(GetCallerName(), GenerateMultiGateLoopTestGraph(5, 35));
+            QueueTest("flow/multiGate", GetCallerName(), "MultiGate IsLoop", "Triggers the in flow x times. Test fails if x output flow activations in total do not occur for x in flows or if lastIndex is incorrect after an output flow is activated.", GenerateMultiGateLoopTestGraph(5, 35));
         }
 
         [Test]
         public void MultiGate_ResetAfterMoreActivationsThanOutputs_CorrectNumberOfOutputFlowsOccur()
         {
-            QueueTest(GetCallerName(), GenerateMultiGateResetTestGraph(5, 8, 10));
+            QueueTest("flow/multiGate", GetCallerName(), "MultiGate Reset", "Triggers the in flow 9x with reset triggered after the 8th in flow. Test fails if an incorrect number of output flow activations occur.", GenerateMultiGateResetTestGraph(5, 8, 10));
         }
 
         private static Graph GenerateMultiGateTestGraph(int outputs)

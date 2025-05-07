@@ -14,7 +14,7 @@ namespace UnityGLTF.Interactivity
             public Declaration declaration;
         }
 
-        internal static Dictionary<string, DeclarationData> GetDeclarations(List<Node> nodes, Dictionary<Type, int> typeIndexByType)
+        public static Dictionary<string, DeclarationData> GetDeclarations(List<Node> nodes, Dictionary<Type, int> typeIndexByType)
         {
             var declarations = new Dictionary<string, DeclarationData>();
 

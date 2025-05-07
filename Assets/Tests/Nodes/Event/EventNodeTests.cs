@@ -15,31 +15,31 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void OnStart_OutFlowActivatedOnEnginePlaybackStart()
         {
-            QueueTest(GetCallerName(), CreateOnStartTestGraph());
+            QueueTest("event/onStart", GetCallerName(), "OnStart", "Test fails if the out flow never triggers when the test begins.", CreateOnStartTestGraph());
         }
 
         [Test]
         public void Receive_EventIsReceivedAndOutFlowActivates()
         {
-            QueueTest(GetCallerName(), CreateEventReceiveTestGraph());
+            QueueTest("event/receive", GetCallerName(), "Receive Basic", "Fails if trigger event is never received by a receive node.", CreateEventReceiveTestGraph());
         }
 
         [Test]
         public void Receive_SendWithValues_ValuesAreReceived()
         {
-            QueueTest(GetCallerName(), CreateEventReceiveWithValuesTestGraph());
+            QueueTest("event/receive", GetCallerName(), "Receive With Values", "Sends an event with every event value type included. Test fails if they are not received on the other end or are incorrect.", CreateEventReceiveWithValuesTestGraph());
         }
 
         [Test]
         public void Receive_CheckOutputValuesBeforeSendOccurs_ValuesAreEventValueDefaults()
         {
-            QueueTest(GetCallerName(), CreateEventReceiveWithNoSendCheckOutputValuesTestGraph());
+            QueueTest("event/receive", GetCallerName(), "Receive Access Values w/o Event Send", "Grabs every type of value from an event/receive node without triggering send first. Test fails if the values retrieved are not the defaults set in the event itself.", CreateEventReceiveWithNoSendCheckOutputValuesTestGraph());
         }
 
         [Test]
         public void OnTick_OccursAfterOnStartAndOutputValuesAreCorrectByFrame()
         {
-            QueueTest(GetCallerName(), CreateOnTickTestGraph());
+            QueueTest("event/onTick", GetCallerName(), "OnTick", "Fails if: onStart does not activate its out flow before onTick; timeSinceStart and timeSinceLastTick are not NaN before first out flow from onTick node;  timeSinceStart is not zero or timeSinceLastTick is not NaN on first activation of out flow from onTick;  timeSinceStart and timeSinceLastTick are not valid and greater than 0 on second activation of out flow from onTick ", CreateOnTickTestGraph());
         }
 
         private static Graph CreateEventReceiveTestGraph()

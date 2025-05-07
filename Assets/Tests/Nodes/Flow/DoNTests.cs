@@ -15,17 +15,19 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void DoN()
         {
-            QueueTest(GetCallerName(), CreateDoNGraph(5, 3));
+            QueueTest("flow/doN", GetCallerName(), "DoN Basic", "A for node is used to run the doN node (n+m) times where n is the \"n\" input value of the doN node and m is the additional number of times the for loop will try to run the doN node. Test can fail if the doN node does not correctly increment its currentCount output value or if it triggers more than \"n\" out flows. Does not test reset input flow.", CreateDoNGraph(5, 3));
         }
 
         [Test]
         public void DoN_Reset()
         {
-            QueueTest(GetCallerName(), CreateDoNResetGraph(5, 3));
+            QueueTest("flow/doN", GetCallerName(), "DoN Reset", "doN is triggered m times before its reset input flow is triggered. Afterwards it is triggered n times. Test fails if the value of current count is ever incorrect or if the total number of \"out\" flow executions is incorrect.", CreateDoNResetGraph(5, 3));
         }
 
         private Graph CreateDoNGraph(int n, int extraTimesToTriggerInFlow)
         {
+            const int INITIAL_INDEX = 0;
+            const int START_INDEX = 0;
             Graph g = CreateGraphForTest();
 
             var start = g.CreateNode("event/onStart");
@@ -44,11 +46,13 @@ namespace UnityGLTF.Interactivity.Tests
 
             start.AddFlow(forNode);
 
-            forNode.AddConfiguration(ConstStrings.INITIAL_INDEX, 0);
+            var endIndex = n + extraTimesToTriggerInFlow;
+
+            forNode.AddConfiguration(ConstStrings.INITIAL_INDEX, INITIAL_INDEX);
             forNode.AddFlow(doNNode, ConstStrings.LOOP_BODY);
             forNode.AddFlow(branch, ConstStrings.COMPLETED);
-            forNode.AddValue(ConstStrings.START_INDEX, 0);
-            forNode.AddValue(ConstStrings.END_INDEX, n + extraTimesToTriggerInFlow);
+            forNode.AddValue(ConstStrings.START_INDEX, START_INDEX);
+            forNode.AddValue(ConstStrings.END_INDEX, endIndex);
 
             doNNode.AddValue(ConstStrings.N, n);
 

@@ -17,13 +17,13 @@ namespace UnityGLTF.Interactivity.Tests
         {
             const float DURATION = 0.75f;
             const float EXTRA_EXECUTION_TIME = 0.25f;
-            QueueTest(GetCallerName(), CreateSetDelayGraph(DURATION, EXTRA_EXECUTION_TIME));
+            QueueTest("flow/setDelay", GetCallerName(), "SetDelay Basic", "Test fails if: err flow triggers, out flow does not trigger, done flow does not trigger, done flow triggers at the wrong time.", CreateSetDelayGraph(DURATION, EXTRA_EXECUTION_TIME));
         }
 
         [Test]
         public void SetDelay_InfNaNNegativeDuration_ActivatesErrFlow()
         {
-            QueueTest(GetCallerName(), GenerateSetDelayInvalidDurationTestGraph());
+            QueueTest("flow/setDelay", GetCallerName(), "SetDelay Invalid Duration", "Activates setDelay nodes with negative, infinite, and NaN durations. Test fails if out or done flow is activated for any of the three duration inputs or if the err flow is not activated for all three inputs.", GenerateSetDelayInvalidDurationTestGraph());
         }
 
         [Test]
@@ -32,7 +32,7 @@ namespace UnityGLTF.Interactivity.Tests
             const float DURATION = 0.75f;
             const float CANCEL_TIME = 0.5f;
             const float EXTRA_EXECUTION_TIME = 0.15f;
-            QueueTest(GetCallerName(), CreateSetDelayCancelGraph(DURATION, CANCEL_TIME, EXTRA_EXECUTION_TIME));
+            QueueTest("flow/setDelay", GetCallerName(), "SetDelay Cancel Input", "Cancel input flow on the setDelay is activated during the delay. Test fails if the done output flow triggers during a 1s long test.", CreateSetDelayCancelGraph(DURATION, CANCEL_TIME, EXTRA_EXECUTION_TIME));
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace UnityGLTF.Interactivity.Tests
             const float DURATION = 0.75f;
             const float CANCEL_TIME = 0.5f;
             const float EXTRA_EXECUTION_TIME = 0.15f;
-            QueueTest(GetCallerName(), CreateCancelDelayGraph(DURATION, CANCEL_TIME, EXTRA_EXECUTION_TIME));
+            QueueTest("flow/cancelDelay", GetCallerName(), "CancelDelay", "Delay is activated and then cancelDelay node activates with delayIndex = lastDelayIndex from the setDelay node after a short delay. Test fails if the setDelay node done output flow triggers during a 1s long test.", CreateCancelDelayGraph(DURATION, CANCEL_TIME, EXTRA_EXECUTION_TIME));
         }
 
         private Graph CreateSetDelayGraph(float duration, float extraExecutionTime)

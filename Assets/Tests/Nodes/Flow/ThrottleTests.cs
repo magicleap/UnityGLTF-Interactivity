@@ -17,13 +17,13 @@ namespace UnityGLTF.Interactivity.Tests
         {
             var THROTTLE_DURATION = 0.5f;
             var TEST_DURATION = 0.75f;
-            QueueTest(GetCallerName(), GenerateThrottleTestGraph(THROTTLE_DURATION, TEST_DURATION));
+            QueueTest("flow/throttle", GetCallerName(), "Throttle Basic", "Test fails if err flow is activated, if the out flow is activated more than twice, or lastRemainingTime is not NaN before the in flow is activated. Does not test reset input flow.", GenerateThrottleTestGraph(THROTTLE_DURATION, TEST_DURATION));
         }
 
         [Test]
         public void Throttle_InfNaNNegativeDuration_ActivatesErrFlow()
         {
-            QueueTest(GetCallerName(), GenerateThrottleInvalidDurationTestGraph());
+            QueueTest("flow/throttle", GetCallerName(), "Throttle Invalid Duration", "Test fails if out flow is activated for any of the three duration inputs or if the err flow is not activated for all three inputs.", GenerateThrottleInvalidDurationTestGraph());
         }
 
         [Test]
@@ -31,7 +31,7 @@ namespace UnityGLTF.Interactivity.Tests
         {
             var THROTTLE_DURATION = 0.5f;
             var TEST_DURATION = 0.4f;
-            QueueTest(GetCallerName(), GenerateThrottleLastRemainingTimeTestGraph(THROTTLE_DURATION, TEST_DURATION));
+            QueueTest("flow/throttle", GetCallerName(), "Throttle LastRemainingTime Valid", "Test fails if lastRemainingTime is non-zero after the first activation of throttle out flow or if lastRemainingTime is incorrect for the next 0.4s.", GenerateThrottleLastRemainingTimeTestGraph(THROTTLE_DURATION, TEST_DURATION));
         }
 
         [Test]
@@ -39,7 +39,7 @@ namespace UnityGLTF.Interactivity.Tests
         {
             var THROTTLE_DURATION = 1f;
             var RESET_TIME = 0.5f;
-            QueueTest(GetCallerName(), GenerateThrottleResetTestGraph(THROTTLE_DURATION, RESET_TIME));
+            QueueTest("flow/throttle", GetCallerName(), "Throttle Reset", "Test fails if lastRemainingTime is not NaN after activating reset input.", GenerateThrottleResetTestGraph(THROTTLE_DURATION, RESET_TIME));
         }
 
         private static Graph GenerateThrottleTestGraph(float duration, float testDuration)

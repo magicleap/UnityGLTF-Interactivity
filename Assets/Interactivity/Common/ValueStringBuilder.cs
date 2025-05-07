@@ -47,7 +47,7 @@ namespace UnityGLTF.Interactivity
 
         public void Append(char c)
         {
-            if (_bufferPosition == _buffer.Length - 1)
+            if (_bufferPosition >= _buffer.Length - 1)
             {
                 Grow();
             }
@@ -74,6 +74,10 @@ namespace UnityGLTF.Interactivity
         {
             Append(str);
             Append(Environment.NewLine);
+        }
+        public void MoveBufferPositionBack(int numIndices)
+        {
+            _bufferPosition -= numIndices;
         }
 
         public override string ToString() => new(_buffer[.._bufferPosition]);

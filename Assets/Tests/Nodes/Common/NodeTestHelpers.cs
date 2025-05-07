@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
@@ -18,17 +19,62 @@ namespace UnityGLTF.Interactivity.Tests
 {
     public abstract class NodeTestHelpers
     {
+        public struct TestValues
+        {
+            public ReadOnlyDictionary<string, Value> values;
+            public ReadOnlyDictionary<string, IProperty> expectedResults;
+            public Dictionary<string, IProperty> config;
+        }
+
+        protected struct ManifestEntry
+        {
+            public string nodeName;
+            public string fileName;
+            public string title;
+            public string description;
+            public string dependencies;
+        }
+
         protected struct TestData
         {
+            public string nodeName;
             public string fileName;
             public Graph graph;
             public float executionTimeoutDuration;
             public GLTFSceneImporter importer;
+            public string title;
+            public string description;
+            public TestValues values;
+
+            public ManifestEntry CreateManifestEntry()
+            {
+                var typeIndexByType = TypesSerializer.GetSystemTypeByIndexDictionary(graph);
+                var declarations = DeclarationsSerializer.GetDeclarations(graph.nodes, typeIndexByType);
+
+                var dependencies = new ValueStringBuilder();
+
+                foreach(var declaration in declarations)
+                {
+                    dependencies.Append(declaration.Key);
+                    dependencies.Append(',');
+                    dependencies.Append(' ');
+                }
+
+                return new ManifestEntry()
+                {
+                    nodeName = nodeName,
+                    fileName = fileName,
+                    title = title,
+                    description = description,
+                    dependencies = dependencies.ToString()
+                };
+            }
         }
 
         protected const int FAIL_EVENT_INDEX = 0;
         protected const int COMPLETED_EVENT_INDEX = 1;
         protected const float DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT = 10f;
+        protected const string TEST_GRAPH_SAVE_DIRECTORY = "TestGraphJson";
 
         protected bool _testSuccessful = false;
         private GraphSerializer _serializer = new(Newtonsoft.Json.Formatting.Indented);
@@ -37,6 +83,8 @@ namespace UnityGLTF.Interactivity.Tests
         protected abstract string _subDirectory { get; }
 
         protected static readonly List<TestData> _testQueue = new();
+
+        protected string _manifestPath;
 
         public static readonly ISubGraph[] subGraphs = new ISubGraph[]
         {
@@ -65,11 +113,16 @@ namespace UnityGLTF.Interactivity.Tests
         {
             var dir = Path.GetFullPath(Path.Combine(Application.dataPath, @"..\"));
             if (!string.IsNullOrWhiteSpace(_subDirectory))
-                _testGraphDirectory = Path.Combine(dir, "TestGraphJson", _subDirectory);
+                _testGraphDirectory = Path.Combine(dir, TEST_GRAPH_SAVE_DIRECTORY, _subDirectory);
             else
-                _testGraphDirectory = Path.Combine(dir, "TestGraphJson");
+                _testGraphDirectory = Path.Combine(dir, TEST_GRAPH_SAVE_DIRECTORY);
 
             Directory.CreateDirectory(_testGraphDirectory);
+
+            _manifestPath = $"{_testGraphDirectory}/manifest.md";
+
+            if (!File.Exists(_manifestPath))
+                File.WriteAllText(_manifestPath, "|Filename|Node Type|Title|Description|Dependencies|\n|---|---|---|---|---|\n");
         }
 
         [SetUp]
@@ -86,6 +139,10 @@ namespace UnityGLTF.Interactivity.Tests
                 var endTime = Time.time + test.executionTimeoutDuration;
                 _testSuccessful = false;
 #if GENERATE_TEST_FILES
+                var e = test.CreateManifestEntry();
+
+                File.AppendAllTextAsync(_manifestPath, $"|{e.fileName}|{e.nodeName}|{e.title}|{e.description}|{e.dependencies}|\n");
+
                 Task.Run(() =>
                 {
                     // Record graph to json file.
@@ -114,67 +171,57 @@ namespace UnityGLTF.Interactivity.Tests
             }
         }
 
-        protected static void TestNodeWithAllFloatNInputVariants(string testName, string nodeName, float4 a, float4 expected, ComparisonType subGraphType = ComparisonType.Approximately)
+        protected static void TestNodeWithAllFloatNInputVariants(string fileName, string testName, string testDescription, string nodeName, float4 a, float4 expected, ComparisonType subGraphType = ComparisonType.Approximately)
         {
-            QueueTest($"{testName}-float-x", CreateSelfContainedTestGraph(nodeName, In(a.x), Out(expected.x), subGraphType));
-            QueueTest($"{testName}-float-y", CreateSelfContainedTestGraph(nodeName, In(a.y), Out(expected.y), subGraphType));
-            QueueTest($"{testName}-float-z", CreateSelfContainedTestGraph(nodeName, In(a.z), Out(expected.z), subGraphType));
-            QueueTest($"{testName}-float-w", CreateSelfContainedTestGraph(nodeName, In(a.w), Out(expected.w), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float-x", $"{testName} (float-x)", $"{testDescription} Uses the x-component of the float4 version of this test to test this node's float operation.", CreateSelfContainedTestGraph(nodeName, In(a.x), Out(expected.x), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float-y", $"{testName} (float-y)", $"{testDescription}Uses the y-component of the float4 version of this test to test this node's float operation.", CreateSelfContainedTestGraph(nodeName, In(a.y), Out(expected.y), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float-z", $"{testName} (float-z)", $"{testDescription}Uses the z-component of the float4 version of this test to test this node's float operation.", CreateSelfContainedTestGraph(nodeName, In(a.z), Out(expected.z), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float-w", $"{testName} (float-w)", $"{testDescription}Uses the w-component of the float4 version of this test to test this node's float operation.", CreateSelfContainedTestGraph(nodeName, In(a.w), Out(expected.w), subGraphType));
 
-            QueueTest($"{testName}-float2-xy", CreateSelfContainedTestGraph(nodeName, In(new float2(a.x, a.y)), Out(expected.xy), subGraphType));
-            QueueTest($"{testName}-float2-zw", CreateSelfContainedTestGraph(nodeName, In(new float2(a.z, a.w)), Out(expected.zw), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float2-xy", $"{testName} (float2-xy)", $"{testDescription}Uses the xy-components of the float4 version of this test to test this node's float2 operation.", CreateSelfContainedTestGraph(nodeName, In(new float2(a.x, a.y)), Out(expected.xy), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float2-zw", $"{testName} (float2-zw)", $"{testDescription}Uses the zw-components of the float4 version of this test to test this node's float2 operation.", CreateSelfContainedTestGraph(nodeName, In(new float2(a.z, a.w)), Out(expected.zw), subGraphType));
 
-            QueueTest($"{testName}-float3-xyz", CreateSelfContainedTestGraph(nodeName, In(new float3(a.x, a.y, a.z)), Out(expected.xyz), subGraphType));
-            QueueTest($"{testName}-float3-yzw", CreateSelfContainedTestGraph(nodeName, In(new float3(a.y, a.z, a.w)), Out(expected.yzw), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float3-xyz", $"{testName} (float3-xyz)", $"{testDescription}Uses the xyz-components of the float4 version of this test to test this node's float3 operation.", CreateSelfContainedTestGraph(nodeName, In(new float3(a.x, a.y, a.z)), Out(expected.xyz), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float3-yzw", $"{testName} (float3-yzw)", $"{testDescription}Uses the yzw-components of the float4 version of this test to test this node's float3 operation.", CreateSelfContainedTestGraph(nodeName, In(new float3(a.y, a.z, a.w)), Out(expected.yzw), subGraphType));
 
-            QueueTest($"{testName}-float4", CreateSelfContainedTestGraph(nodeName, In(a), Out(expected), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float4", $"{testName} (float4)", $"{testDescription}Tests this node's float4 operation.", CreateSelfContainedTestGraph(nodeName, In(a), Out(expected), subGraphType));
         }
 
-        protected static void TestNodeWithAllFloatNInputVariants(string testName, string nodeName, float4 a, float4 b, float4 expected, ComparisonType subGraphType = ComparisonType.Approximately)
+        protected static void TestNodeWithAllFloatNInputVariants(string fileName, string testName, string testDescription, string nodeName, float4 a, float4 b, float4 expected, ComparisonType subGraphType = ComparisonType.Approximately)
         {
-            QueueTest($"{testName}-float-x", CreateSelfContainedTestGraph(nodeName, In(a.x, b.x), Out(expected.x), subGraphType));
-            QueueTest($"{testName}-float-y", CreateSelfContainedTestGraph(nodeName, In(a.y, b.y), Out(expected.y), subGraphType));
-            QueueTest($"{testName}-float-z", CreateSelfContainedTestGraph(nodeName, In(a.z, b.z), Out(expected.z), subGraphType));
-            QueueTest($"{testName}-float-w", CreateSelfContainedTestGraph(nodeName, In(a.w, b.w), Out(expected.w), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float-x", $"{testName} (float-x)", $"{testDescription}Uses the x-components of the float4 version of this test to test this node's float operation.", CreateSelfContainedTestGraph(nodeName, In(a.x, b.x), Out(expected.x), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float-y", $"{testName} (float-y)", $"{testDescription}Uses the y-components of the float4 version of this test to test this node's float operation.", CreateSelfContainedTestGraph(nodeName, In(a.y, b.y), Out(expected.y), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float-z", $"{testName} (float-z)", $"{testDescription}Uses the z-components of the float4 version of this test to test this node's float operation.", CreateSelfContainedTestGraph(nodeName, In(a.z, b.z), Out(expected.z), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float-w", $"{testName} (float-w)", $"{testDescription}Uses the w-components of the float4 version of this test to test this node's float operation.", CreateSelfContainedTestGraph(nodeName, In(a.w, b.w), Out(expected.w), subGraphType));
 
-            QueueTest($"{testName}-float2-xy", CreateSelfContainedTestGraph(nodeName, In(new float2(a.x, a.y), new float2(b.x, b.y)), Out(expected.xy), subGraphType));
-            QueueTest($"{testName}-float2-zw", CreateSelfContainedTestGraph(nodeName, In(new float2(a.z, a.w), new float2(b.z, b.w)), Out(expected.zw), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float2-xy", $"{testName} (float2-xy)", $"{testDescription}Uses the xy-components of the float4 version of this test to test this node's float2 operation.", CreateSelfContainedTestGraph(nodeName, In(new float2(a.x, a.y), new float2(b.x, b.y)), Out(expected.xy), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float2-zw", $"{testName} (float2-zw)", $"{testDescription}Uses the zw-components of the float4 version of this test to test this node's float2 operation.", CreateSelfContainedTestGraph(nodeName, In(new float2(a.z, a.w), new float2(b.z, b.w)), Out(expected.zw), subGraphType));
 
-            QueueTest($"{testName}-float3-xyz", CreateSelfContainedTestGraph(nodeName, In(new float3(a.x, a.y, a.z), new float3(b.x, b.y, b.z)), Out(expected.xyz), subGraphType));
-            QueueTest($"{testName}-float3-yzw", CreateSelfContainedTestGraph(nodeName, In(new float3(a.y, a.z, a.w), new float3(b.y, b.z, b.w)), Out(expected.yzw), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float3-xyz", $"{testName} (float3-xyz)", $"{testDescription}Uses the xyz-components of the float4 version of this test to test this node's float3 operation.", CreateSelfContainedTestGraph(nodeName, In(new float3(a.x, a.y, a.z), new float3(b.x, b.y, b.z)), Out(expected.xyz), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float3-yzw", $"{testName} (float3-yzw)", $"{testDescription}Uses the yzw-components of the float4 version of this test to test this node's float3 operation.", CreateSelfContainedTestGraph(nodeName, In(new float3(a.y, a.z, a.w), new float3(b.y, b.z, b.w)), Out(expected.yzw), subGraphType));
 
-            QueueTest($"{testName}-float4", CreateSelfContainedTestGraph(nodeName, In(a, b), Out(expected), subGraphType));
-        }
-
-
-        protected static void TestNodeWithAllFloatNInputVariants(string testName, string nodeName, float4 a, float4 b, float4 c, float4 expected, ComparisonType subGraphType = ComparisonType.Approximately)
-        {
-            QueueTest($"{testName}-float-x", CreateSelfContainedTestGraph(nodeName, In(a.x, b.x, c.x), Out(expected.x), subGraphType));
-            QueueTest($"{testName}-float-y", CreateSelfContainedTestGraph(nodeName, In(a.y, b.y, c.y), Out(expected.y), subGraphType));
-            QueueTest($"{testName}-float-z", CreateSelfContainedTestGraph(nodeName, In(a.z, b.z, c.z), Out(expected.z), subGraphType));
-            QueueTest($"{testName}-float-w", CreateSelfContainedTestGraph(nodeName, In(a.w, b.w, c.w), Out(expected.w), subGraphType));
-
-            QueueTest($"{testName}-float2-xy", CreateSelfContainedTestGraph(nodeName,
-                In(new float2(a.x, a.y), new float2(b.x, b.y), new float2(c.x, c.y)),
-                Out(expected.xy), subGraphType));
-
-            QueueTest($"{testName}-float2-zw", CreateSelfContainedTestGraph(nodeName,
-                In(new float2(a.z, a.w), new float2(b.z, b.w), new float2(c.z, c.w)),
-                Out(expected.zw), subGraphType));
-
-            QueueTest($"{testName}-float3-xyz", CreateSelfContainedTestGraph(nodeName,
-                In(new float3(a.x, a.y, a.z), new float3(b.x, b.y, b.z), new float3(c.x, c.y, c.z)),
-                Out(expected.xyz), subGraphType));
-
-            QueueTest($"{testName}-float3-yzw", CreateSelfContainedTestGraph(nodeName,
-                In(new float3(a.y, a.z, a.w), new float3(b.y, b.z, b.w), new float3(c.y, c.z, c.w)),
-                Out(expected.yzw), subGraphType));
-
-            QueueTest($"{testName}-float4", CreateSelfContainedTestGraph(nodeName, In(a, b, c), Out(expected), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float4", $"{testName} (float4)", $"{testDescription}Tests this node's float4 operation.", CreateSelfContainedTestGraph(nodeName, In(a, b), Out(expected), subGraphType));
         }
 
 
-        protected static (Graph, Node) CreateSelfContainedTestGraph(string nodeStr, Dictionary<string, Value> values, Dictionary<string, IProperty> expectedResults, ComparisonType subGraphType)
+        protected static void TestNodeWithAllFloatNInputVariants(string fileName, string testName, string testDescription, string nodeName, float4 a, float4 b, float4 c, float4 expected, ComparisonType subGraphType = ComparisonType.Approximately)
+        {
+            QueueTest(nodeName, $"{fileName}-float-x", $"{testName} (float-x)", $"{testDescription}Uses the x-components of the float4 version of this test to test this node's float operation.", CreateSelfContainedTestGraph(nodeName, In(a.x, b.x, c.x), Out(expected.x), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float-y", $"{testName} (float-y)", $"{testDescription}Uses the y-components of the float4 version of this test to test this node's float operation.", CreateSelfContainedTestGraph(nodeName, In(a.y, b.y, c.y), Out(expected.y), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float-z", $"{testName} (float-z)", $"{testDescription}Uses the z-components of the float4 version of this test to test this node's float operation.", CreateSelfContainedTestGraph(nodeName, In(a.z, b.z, c.z), Out(expected.z), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float-w", $"{testName} (float-w)", $"{testDescription}Uses the w-components of the float4 version of this test to test this node's float operation.", CreateSelfContainedTestGraph(nodeName, In(a.w, b.w, c.w), Out(expected.w), subGraphType));
+
+            QueueTest(nodeName, $"{fileName}-float2-xy", $"{testName} (float2-xy)", $"{testDescription}Uses the xy-components of the float4 version of this test to test this node's float2 operation.", CreateSelfContainedTestGraph(nodeName, In(new float2(a.x, a.y), new float2(b.x, b.y), new float2(c.x, c.y)), Out(expected.xy), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float2-zw", $"{testName} (float2-zw)", $"{testDescription}Uses the zw-components of the float4 version of this test to test this node's float2 operation.", CreateSelfContainedTestGraph(nodeName, In(new float2(a.z, a.w), new float2(b.z, b.w), new float2(c.z, c.w)), Out(expected.zw), subGraphType));
+
+            QueueTest(nodeName, $"{fileName}-float3-xyz", $"{testName} (float3-xyz)", $"{testDescription}Uses the xyz-components of the float4 version of this test to test this node's float3 operation.", CreateSelfContainedTestGraph(nodeName, In(new float3(a.x, a.y, a.z), new float3(b.x, b.y, b.z), new float3(c.x, c.y, c.z)), Out(expected.xyz), subGraphType));
+            QueueTest(nodeName, $"{fileName}-float3-yzw", $"{testName} (float3-yzw)", $"{testDescription}Uses the yzw-components of the float4 version of this test to test this node's float3 operation.", CreateSelfContainedTestGraph(nodeName, In(new float3(a.y, a.z, a.w), new float3(b.y, b.z, b.w), new float3(c.y, c.z, c.w)), Out(expected.yzw), subGraphType));
+
+            QueueTest(nodeName, $"{fileName}-float4", $"{testName} (float4)", $"{testDescription}Tests this node's float4 operation.", CreateSelfContainedTestGraph(nodeName, In(a, b, c), Out(expected), subGraphType));
+        }
+
+
+        protected static (Graph, TestValues) CreateSelfContainedTestGraph(string nodeStr, Dictionary<string, Value> values, Dictionary<string, IProperty> expectedResults, ComparisonType subGraphType)
         {
             Graph g = CreateGraphForTest();
 
@@ -188,7 +235,13 @@ namespace UnityGLTF.Interactivity.Tests
 
             GenerateGraphByExpectedValueType(expectedResults, g, opNode, subGraph);
 
-            return (g, opNode);
+            var testValues = new TestValues()
+            {
+                values = new(values),
+                expectedResults = new(expectedResults),
+            };
+
+            return (g, testValues);
         }
 
         private static void GenerateGraphByExpectedValueType(Dictionary<string, IProperty> expectedResults, Graph g, Node opNode, ISubGraph subGraph)
@@ -387,34 +440,44 @@ namespace UnityGLTF.Interactivity.Tests
             return caller;
         }
 
-        protected static void QueueTest(string fileName, Graph graph, GLTFSceneImporter importer)
+        protected static void QueueTest(string nodeName, string fileName, string testName, string testDescription, Graph graph, GLTFSceneImporter importer)
         {
             _testQueue.Add(new TestData()
             {
+                nodeName = nodeName,
                 fileName = fileName,
                 graph = graph,
                 executionTimeoutDuration = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT,
-                importer = importer
+                importer = importer,
+                title = testName,
+                description = testDescription
             });
         }
 
-        protected static void QueueTest(string fileName, Graph graph)
+        protected static void QueueTest(string nodeName, string fileName, string testName, string testDescription, Graph graph)
         {
             _testQueue.Add(new TestData()
             {
+                nodeName = nodeName,
                 fileName = fileName,
                 graph = graph,
-                executionTimeoutDuration = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT
+                executionTimeoutDuration = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT,
+                title = testName,
+                description = testDescription
             });
         }
 
-        protected static void QueueTest(string fileName, (Graph graph, Node node) graphTuple)
+        protected static void QueueTest(string nodeName, string fileName, string testName, string testDescription, (Graph graph, TestValues values) graphTuple)
         {
             _testQueue.Add(new TestData()
             {
+                nodeName = nodeName,
                 fileName = fileName,
                 graph = graphTuple.graph,
-                executionTimeoutDuration = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT
+                executionTimeoutDuration = DEFAULT_MULTI_FRAME_EXECUTION_TIMEOUT,
+                title = testName,
+                description = testDescription,
+                values = graphTuple.values
             });
         }
 
@@ -441,6 +504,22 @@ namespace UnityGLTF.Interactivity.Tests
             outputs.Add(ConstStrings.VALUE, new Property<T>(expected));
 
             return outputs;
+        }
+
+        protected static Dictionary<string, Value> In<T>(params KeyValuePair<string,T>[] inputValues)
+        {
+            Dictionary<string, Value> inputs = new();
+
+            for (int i = 0; i < inputValues.Length; i++)
+            {
+                inputs.Add(inputValues[i].Key, new Value()
+                {
+                    id = inputValues[i].Key,
+                    property = new Property<T>(inputValues[i].Value)
+                });
+            }
+
+            return inputs;
         }
 
         protected static Dictionary<string, IProperty> Out<T>(params KeyValuePair<string, T>[] expectedOutputs)

@@ -30,8 +30,9 @@ namespace UnityGLTF.Interactivity.Tests
             }
 
             for (int i = 0; i < MATERIAL_POINTERS.Length; i++)
-            {
-                QueueTest($"InterpolateAndGetPointer{MATERIAL_POINTERS[i].pointer.Replace('/', '_')}", CreatePointerInterpolateGraph(MATERIAL_POINTERS[i].pointer, MATERIAL_POINTERS[i].type), importer.Result);
+            { 
+                var pointer = MATERIAL_POINTERS[i].pointer.Replace('/', '_');
+                QueueTest("pointer/interpolate", $"InterpolateAndGetPointer{pointer}", $"Pointer Interpolate {pointer}", $"Tests that pointer/interpolate and pointer/get work for {pointer}.", CreatePointerInterpolateGraph(MATERIAL_POINTERS[i].pointer, MATERIAL_POINTERS[i].type), importer.Result);
             }
         }
 
@@ -46,7 +47,8 @@ namespace UnityGLTF.Interactivity.Tests
 
             for (int i = 0; i < MATERIAL_POINTERS.Length; i++)
             {
-                QueueTest($"SetAndGetPointer{MATERIAL_POINTERS[i].pointer.Replace('/', '_')}", CreatePointerSetGraph(MATERIAL_POINTERS[i].pointer, MATERIAL_POINTERS[i].type), importer.Result);
+                var pointer = MATERIAL_POINTERS[i].pointer.Replace('/', '_');
+                QueueTest("pointer/set", $"SetAndGetPointer{pointer}", $"Pointer Set/Get {pointer}", $"Tests that pointer/set and pointer/get work for {pointer}.", CreatePointerSetGraph(MATERIAL_POINTERS[i].pointer, MATERIAL_POINTERS[i].type), importer.Result);
             }
         }
 
@@ -153,20 +155,6 @@ namespace UnityGLTF.Interactivity.Tests
             branch.AddFlow(failLog, ConstStrings.FALSE);
             complete.AddConfiguration(ConstStrings.EVENT, COMPLETED_EVENT_INDEX);
             return g;
-        }
-
-        public IEnumerator TestPointerInterpolateFloat(string pointer, float targetValue)
-        {
-            var importer = LoadTestModel("material_pointers_test.gltf");
-            while (!importer.IsCompleted)
-            {
-                yield return null;
-            }
-
-            for (int i = 0; i < MATERIAL_POINTERS.Length; i++)
-            {
-                QueueTest($"SetAndGetPointer{MATERIAL_POINTERS[i].pointer.Replace('/', '_')}", CreatePointerInterpolateGraph(MATERIAL_POINTERS[i].pointer, MATERIAL_POINTERS[i].type), importer.Result);
-            }
         }
     }
 }

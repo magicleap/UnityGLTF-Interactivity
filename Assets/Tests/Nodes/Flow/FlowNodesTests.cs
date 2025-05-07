@@ -17,43 +17,43 @@ namespace UnityGLTF.Interactivity.Tests
         [Test]
         public void Branch_TrueCondition_TrueFlow()
         {
-            QueueTest(GetCallerName(), CreateFlowBranchGraph(true));
+            QueueTest("flow/branch", GetCallerName(), "Branch", "Fails if the false flow is triggered or the true flow fails to trigger.", CreateFlowBranchGraph(true));
         }
 
         [Test]
         public void Branch_FalseCondition_FalseFlow()
         {
-            QueueTest(GetCallerName(), CreateFlowBranchGraph(false));
+            QueueTest("flow/branch", GetCallerName(), "Branch", "Fails if the true flow is triggered or the false flow fails to trigger.", CreateFlowBranchGraph(false));
         }
 
         [Test]
         public void For_Starti0Endi6Initiali3_CorrectNumberOfIterationsAndCompletedFlowActivates()
         {
-            QueueTest(GetCallerName(), CreateForTestGraph(0, 6, 3));
+            QueueTest("flow/for", GetCallerName(), "For Test 1", "Test fails if the loopBody flow is triggered an incorrect number of times or the completed flow never triggers.", CreateForTestGraph(0, 6, 3));
         }
 
         [Test]
         public void For_Starti0Endi4Initiali0_CorrectNumberOfIterationsAndCompletedFlowActivates()
         {
-            QueueTest(GetCallerName(), CreateForTestGraph(0, 4, 0));
+            QueueTest("flow/for", GetCallerName(), "For Test 2", "Test fails if the loopBody flow is triggered an incorrect number of times or the completed flow never triggers.", CreateForTestGraph(0, 4, 0));
         }
 
         [Test]
         public void Sequence_AllFlowsActivateAndInOrder()
         {
-            QueueTest(GetCallerName(), CreateFlowSequenceGraph(5));
+            QueueTest("flow/sequence", GetCallerName(), "Sequence", "Test fails if any of the output flows does not trigger or if they occur out of order.", CreateFlowSequenceGraph(5));
         }
 
         [Test]
         public void FlowSwitch_AllCasesActivatedOutOfOrderThenDefaultCase_AllFlowsActivated()
         {
-            QueueTest(GetCallerName(), CreateSwitchGraph());
+            QueueTest("flow/switch", GetCallerName(), "Switch", "Runs through 4 case flows out of order and then feeds in a case value that is not present to trigger the default flow. Test fails if it's detected that not all flows have been triggered by the time the default flow is triggered.", CreateSwitchGraph());
         }
 
         [Test]
         public void While_LoopBodyActivatesCorrectNumberOfTimesAndCompletedActivatesAtTheEnd()
         {
-            QueueTest(GetCallerName(), GenerateWhileTestGraph(5));
+            QueueTest("flow/while", GetCallerName(), "While", "Test fails if loopBody does not activate the correct number of times or if completed flow never activates.", GenerateWhileTestGraph(5));
         }
 
         private Graph CreateFlowBranchGraph(bool outputSocketFromBranchNode)
