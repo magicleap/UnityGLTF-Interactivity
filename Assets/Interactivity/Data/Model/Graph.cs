@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UnityGLTF.Interactivity
@@ -132,6 +133,21 @@ namespace UnityGLTF.Interactivity
 
         public void AddDefaultTypes()
         {
+            systemTypes = new List<Type>()
+            {
+                typeof(bool),
+                typeof(int),
+                typeof(float),
+                typeof(float2),
+                typeof(float3),
+                typeof(float4),
+                typeof(float2x2),
+                typeof(float3x3),
+                typeof(float4x4),
+                typeof(string),
+            };
+
+
             types = new List<InteractivityType>()
             {
                 new InteractivityType() { signature = "bool" },

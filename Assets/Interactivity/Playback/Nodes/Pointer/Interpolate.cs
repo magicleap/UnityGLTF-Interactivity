@@ -20,7 +20,7 @@ namespace UnityGLTF.Interactivity
 
         protected override void Execute(string socket, ValidationResult validationResult)
         {
-            if(validationResult != ValidationResult.Valid)
+            if(validationResult != ValidationResult.Valid || _pointer.GetSystemType() != _interpGoal.GetSystemType())
             {
                 TryExecuteFlow(ConstStrings.ERR);
                 return;

@@ -107,11 +107,11 @@ namespace UnityGLTF.Interactivity
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
-            }
+                Debug.LogWarning(ex);
 
-            pointer = default;
-            return false;
+                pointer = default;
+                return false;
+            }
         }
 
         public void SetAnimationWrapper(AnimationWrapper wrapper, Animation animation)

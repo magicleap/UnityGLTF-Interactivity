@@ -58,7 +58,9 @@ namespace UnityGLTF.Interactivity
                     p.setter(prop.value);
                     break;
                 default:
-                    throw new InvalidOperationException($"Either the property type you're attempting to set is unsupported ({_property.GetType()}) or the pointer type does not match it ({_pointer.GetType()}).");
+                    Debug.LogWarning($"Either the property type you're attempting to set is unsupported ({_property.GetTypeSignature()}) or the pointer type does not match it ({_pointer.GetSystemType()}).");
+                    TryExecuteFlow(ConstStrings.ERR);
+                    return;
             }
 
             TryExecuteFlow(ConstStrings.OUT);

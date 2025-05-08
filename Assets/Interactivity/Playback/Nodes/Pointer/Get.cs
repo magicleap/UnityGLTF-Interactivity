@@ -7,8 +7,12 @@ namespace UnityGLTF.Interactivity
 {
     public class PointerGet : BehaviourEngineNode
     {
+        private int _type;
+
         public PointerGet(BehaviourEngine engine, Node node) : base(engine, node)
         {
+            if (!TryGetConfig(ConstStrings.TYPE, out _type))
+                Debug.LogError("This pointer/get node has no defined type in its config!");
         }
 
         public override IProperty GetOutputValue(string id)
@@ -32,9 +36,8 @@ namespace UnityGLTF.Interactivity
 
         private IProperty ResolvePointerValue()
         {
-            // TODO: Spec does not say what should happen here so we throw
             if (!TryGetPointerFromConfiguration(out IPointer pointer))
-                throw new InvalidOperationException($"Cannot get value for invalid pointer.");
+                return engine.graph.GetDefaultPropertyForType(_type);
 
             return pointer switch
             {
