@@ -23,7 +23,14 @@ namespace UnityGLTF.Interactivity
     {
         public bool Interpolate(float t);
     }
-   
+
+    public class InterpolatorException : Exception
+    {
+        public InterpolatorException(){}
+        public InterpolatorException(string message) : base(message){}
+        public InterpolatorException(string message, Exception innerException) : base(message, innerException) {}
+    }
+
     public class PointerInterpolationManager
     {
         public struct Interpolator<T> : IInterpolator
@@ -98,7 +105,7 @@ namespace UnityGLTF.Interactivity
                 Property<float3x3> property => GetInterpolator(property, data),
                 Property<float4x4> property => GetInterpolator(property, data),
 
-                _ => throw new InvalidOperationException($"Type {data.endValue.GetTypeSignature()} is not supported for interpolation."),
+                _ => throw new InterpolatorException($"Type {data.endValue.GetTypeSignature()} is not supported for interpolation."),
             };
 
             data.interpolator = interpolator;
@@ -122,7 +129,7 @@ namespace UnityGLTF.Interactivity
                 Pointer<Color3> => GetInterpolator(new Property<Color3>(property.value.ToColor()), data),
                 Pointer<quaternion> => GetInterpolator(new Property<quaternion>(quaternion.Euler(property.value)), data),
 
-                _ => throw new InvalidOperationException($"Pointer type {data.pointer.GetSystemType()} is not supported for this float3 property."),
+                _ => throw new InterpolatorException($"Pointer type {data.pointer.GetSystemType()} is not supported for this float3 property."),
             };
         }
 
@@ -134,7 +141,7 @@ namespace UnityGLTF.Interactivity
                 Pointer<Color> => GetInterpolator(new Property<Color>(property.value.ToColor()), data),
                 Pointer<quaternion> => GetInterpolator(new Property<quaternion>(property.value.ToQuaternion()), data),
 
-                _ => throw new InvalidOperationException($"Pointer type {data.pointer.GetSystemType()} is not supported for this float4 property."),
+                _ => throw new InterpolatorException($"Pointer type {data.pointer.GetSystemType()} is not supported for this float4 property."),
             };
         }
 

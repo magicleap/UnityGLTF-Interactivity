@@ -20,13 +20,11 @@ namespace UnityGLTF.Interactivity
 
         protected override void Execute(string socket, ValidationResult validationResult)
         {
-            if(validationResult != ValidationResult.Valid || _pointer.GetSystemType() != _interpGoal.GetSystemType())
+            if(validationResult != ValidationResult.Valid)
             {
                 TryExecuteFlow(ConstStrings.ERR);
                 return;
             }
-
-            TryExecuteFlow(ConstStrings.OUT);
 
             var data = new PointerInterpolateData()
             {
@@ -39,7 +37,17 @@ namespace UnityGLTF.Interactivity
                 done = () => TryExecuteFlow(ConstStrings.DONE)
             };
 
-            engine.pointerInterpolationManager.StartInterpolation(ref data);
+            try
+            {
+                engine.pointerInterpolationManager.StartInterpolation(ref data);
+
+                TryExecuteFlow(ConstStrings.OUT);
+            }
+            catch(InterpolatorException ex)
+            {
+                Debug.LogWarning(ex);
+                TryExecuteFlow(ConstStrings.ERR);
+            }
         }
 
         public override bool ValidateConfiguration(string socket)

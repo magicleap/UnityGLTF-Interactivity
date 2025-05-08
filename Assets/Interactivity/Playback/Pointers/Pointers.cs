@@ -5,6 +5,7 @@ namespace UnityGLTF.Interactivity
     public interface IPointer
     {
         public Type GetSystemType();
+        public string GetTypeSignature();
     }
 
     public interface IPointer<T> : IPointer
@@ -42,6 +43,11 @@ namespace UnityGLTF.Interactivity
         {
             return typeof(T);
         }
+
+        public string GetTypeSignature()
+        {
+            return Helpers.GetSignatureBySystemType(typeof(T));
+        }
     }
 
     public struct Pointer<T> : IPointer<T>
@@ -58,6 +64,11 @@ namespace UnityGLTF.Interactivity
         public Type GetSystemType()
         {
             return typeof(T);
+        }
+
+        public string GetTypeSignature()
+        {
+            return Helpers.GetSignatureBySystemType(typeof(T));
         }
     }
 }
