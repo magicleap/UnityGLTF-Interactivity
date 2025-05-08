@@ -26,7 +26,7 @@ namespace UnityGLTF.Interactivity
             writer.WritePropertyName(ConstStrings.ID);
             writer.WriteValue(variable.id);
 
-            NodesSerializer.WriteValueLiteral(writer, variable.property, typeIndexByType);
+            NodesSerializer.WriteValueLiteral(writer, variable.initialValue, typeIndexByType);
 
             writer.WriteEndObject();
         }

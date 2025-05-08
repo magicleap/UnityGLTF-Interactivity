@@ -150,9 +150,9 @@ namespace UnityGLTF.Interactivity
 
         public static readonly Dictionary<string, NodeSpecifications> nodeSpecs = new()
         {
-            // ["animation/start"] = new AnimationStartSpec(),
-            // ["animation/stop"] = new AnimationStopSpec(),
-            // ["animation/stopAt"] = new AnimationStopAtSpec(),
+            ["animation/start"] = new AnimationStartSpec(),
+            ["animation/stop"] = new AnimationStopSpec(),
+            ["animation/stopAt"] = new AnimationStopAtSpec(),
             ["debug/log"] = new DebugLogSpec(),
             ["debug/assert"] = new DebugAssertSpec(),
             // ["event/onHoverIn"] = new EventOnHoverInSpec(),

@@ -37,7 +37,7 @@ namespace UnityGLTF.Interactivity
 
         private bool ValidateStopTime(float stopTime)
         {
-            return stopTime != float.NaN;
+            return !float.IsNaN(stopTime);
         }
 
         private bool ValidateAnimationIndex(int animationIndex)

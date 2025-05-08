@@ -1,5 +1,6 @@
 #define GENERATE_TEST_FILES
 
+using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,11 +9,10 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
-using NUnit.Framework;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.TestTools;
-using UnityGLTF.Interactivity;
+using UnityGLTF.Interactivity.Extensions;
 using UnityGLTF.Loader;
 
 namespace UnityGLTF.Interactivity.Tests
@@ -53,7 +53,7 @@ namespace UnityGLTF.Interactivity.Tests
 
                 var dependencies = new ValueStringBuilder();
 
-                foreach(var declaration in declarations)
+                foreach (var declaration in declarations)
                 {
                     dependencies.Append(declaration.Key);
                     dependencies.Append(',');
@@ -77,7 +77,7 @@ namespace UnityGLTF.Interactivity.Tests
         protected const string TEST_GRAPH_SAVE_DIRECTORY = "TestGraphJson";
 
         protected bool _testSuccessful = false;
-        private GraphSerializer _serializer = new(Newtonsoft.Json.Formatting.Indented);
+        private readonly GraphSerializer _serializer = new(Newtonsoft.Json.Formatting.Indented);
 
         protected string _testGraphDirectory;
         protected abstract string _subDirectory { get; }
@@ -134,7 +134,7 @@ namespace UnityGLTF.Interactivity.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
-            foreach(var test in _testQueue)
+            foreach (var test in _testQueue)
             {
                 var endTime = Time.time + test.executionTimeoutDuration;
                 _testSuccessful = false;
@@ -381,6 +381,8 @@ namespace UnityGLTF.Interactivity.Tests
         {
             BehaviourEngine eng = new BehaviourEngine(g, importer);
 
+            AddAnimationSupportIfApplicable(eng, importer);
+
             if (onEventFired != null)
                 eng.onCustomEventFired += onEventFired;
 
@@ -388,6 +390,15 @@ namespace UnityGLTF.Interactivity.Tests
                 eng.StartPlayback();
 
             return eng;
+        }
+
+        private static void AddAnimationSupportIfApplicable(BehaviourEngine eng, GLTFSceneImporter importer)
+        {
+            if (importer == null || importer.AnimationCache.IsNullOrEmpty())
+                return;
+
+            var animationWrapper = importer.SceneParent.gameObject.AddComponent<AnimationWrapper>();
+            eng.SetAnimationWrapper(animationWrapper, importer.LastLoadedScene.GetComponents<Animation>()[0]);
         }
 
         protected static async Task<GLTFSceneImporter> LoadTestModel(string modelName, Action<GameObject, ExceptionDispatchInfo, GLTFSceneImporter> onLoadComplete = null)
@@ -506,7 +517,7 @@ namespace UnityGLTF.Interactivity.Tests
             return outputs;
         }
 
-        protected static Dictionary<string, Value> In<T>(params KeyValuePair<string,T>[] inputValues)
+        protected static Dictionary<string, Value> In<T>(params KeyValuePair<string, T>[] inputValues)
         {
             Dictionary<string, Value> inputs = new();
 

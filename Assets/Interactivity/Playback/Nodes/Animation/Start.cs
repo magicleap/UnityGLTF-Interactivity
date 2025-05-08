@@ -24,8 +24,6 @@ namespace UnityGLTF.Interactivity
 
             Util.Log($"Playing animation index {_animationIndex} with speed {_speed} and start/end times of {_startTime}/{_endTime}");
 
-            TryExecuteFlow(ConstStrings.OUT);
-
             var data = new AnimationPlayData()
             {
                 index = _animationIndex,
@@ -38,6 +36,8 @@ namespace UnityGLTF.Interactivity
             };
 
             engine.PlayAnimation(data);
+
+            TryExecuteFlow(ConstStrings.OUT);
         }
 
         public override bool ValidateValues(string socket)
@@ -53,7 +53,7 @@ namespace UnityGLTF.Interactivity
 
         private static bool ValidateSpeed(float speed)
         {
-            return speed > 0 && speed != float.NaN && speed != float.PositiveInfinity;
+            return speed > 0 && !float.IsNaN(speed) && !float.IsInfinity(speed);
         }
 
         private bool ValidateAnimationIndex(int animationIndex)
@@ -71,13 +71,10 @@ namespace UnityGLTF.Interactivity
 
         private static bool ValidateStartAndEndTimes(float startTime, float endTime)
         {
-            if (startTime == float.NaN || endTime == float.NaN)
+            if (float.IsNaN(startTime) || float.IsNaN(endTime))
                 return false;
 
-            if (startTime == float.PositiveInfinity || startTime < 0)
-                return false;
-
-            if (startTime > endTime)
+            if (float.IsInfinity(startTime))
                 return false;
 
             return true;
