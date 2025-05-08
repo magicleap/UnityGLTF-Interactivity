@@ -2,9 +2,9 @@ using GLTF.Schema;
 using System;
 using System.Runtime.ExceptionServices;
 using UnityEngine;
-using UnityGLTF.Interactivity.Extensions;
+using UnityGLTF.Interactivity.Playback.Extensions;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public class InteractivityManager : MonoBehaviour
     {

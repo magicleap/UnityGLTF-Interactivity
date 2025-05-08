@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine.TestTools;
 
-namespace UnityGLTF.Interactivity.Tests
+namespace UnityGLTF.Interactivity.Playback.Tests
 {
     public class AnimationNodeTests : NodeTestHelpers
     {

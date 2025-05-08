@@ -1,7 +1,7 @@
 using GLTF.Schema;
 using UnityGLTF.Plugins;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public class InteractivityImportPlugin : GLTFImportPlugin
     {

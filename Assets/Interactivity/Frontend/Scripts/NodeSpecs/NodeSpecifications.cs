@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.UIElements;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public struct NodeFlow
     {

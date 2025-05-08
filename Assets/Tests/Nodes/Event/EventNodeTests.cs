@@ -6,7 +6,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace UnityGLTF.Interactivity.Tests
+namespace UnityGLTF.Interactivity.Playback.Tests
 {
     public class EventNodeTests : NodeTestHelpers
     {

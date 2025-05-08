@@ -1,6 +1,6 @@
 using System.Threading;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public interface ICancelToken
     {

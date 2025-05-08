@@ -1,14 +1,14 @@
 {
-    "name": "UnityGLTF.Interactivity.Tests.Flow",
+    "name": "UnityGLTF.Interactivity.Playback.Tests.Animation",
     "rootNamespace": "",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "UnityGLTF.Interactivity.Common",
         "Unity.Mathematics",
         "UnityGLTFScripts",
-        "UnityGLTF.Interactivity",
-        "UnityGLTF.Interactivity.Tests.Common"
+        "UnityGLTF.Interactivity.Playback",
+        "UnityGLTF.Interactivity.Playback.Common",
+        "UnityGLTF.Interactivity.Playback.Tests.Common"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

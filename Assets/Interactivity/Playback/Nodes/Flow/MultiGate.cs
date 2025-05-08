@@ -1,7 +1,7 @@
 using System;
-using UnityGLTF.Interactivity.Extensions;
+using UnityGLTF.Interactivity.Playback.Extensions;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public class FlowMultiGate : BehaviourEngineNode
     {

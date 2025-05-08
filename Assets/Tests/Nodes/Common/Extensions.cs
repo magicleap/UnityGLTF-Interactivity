@@ -1,17 +1,10 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using NUnit.Framework;
-using Unity.Mathematics;
-using UnityEditor;
-using UnityEngine;
-using UnityGLTF.Interactivity;
 
-namespace UnityGLTF.Interactivity.Tests
+namespace UnityGLTF.Interactivity.Playback.Tests
 {
     public static class Extensions
     {
-        public static void AddValue<T>(this Dictionary<string, Value>inputs, string id, T value)
+        public static void AddValue<T>(this Dictionary<string, Value> inputs, string id, T value)
         {
             inputs.Add(id, new Value()
             {

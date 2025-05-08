@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace UnityGLTF.Interactivity.Materials
+namespace UnityGLTF.Interactivity.Playback.Materials
 {
     public static class PointerHelpers
     {

@@ -1,7 +1,7 @@
 using System;
 using Unity.Mathematics;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public class DebugAssertSpec : NodeSpecifications
     {

@@ -3,9 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityGLTF.Interactivity.Extensions;
+using UnityGLTF.Interactivity.Playback.Extensions;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public class PointerInterpolate : BehaviourEngineNode
     {

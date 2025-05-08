@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-namespace UnityGLTF.Interactivity.Tests
+namespace UnityGLTF.Interactivity.Playback.Tests
 {
     partial class FlowNodesTests
     {

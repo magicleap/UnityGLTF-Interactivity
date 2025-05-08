@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityGLTF.Interactivity.Frontend.Extensions;
+using UnityGLTF.Interactivity.Playback.Frontend.Extensions;
 
-namespace UnityGLTF.Interactivity.Frontend
+namespace UnityGLTF.Interactivity.Playback.Frontend
 {
     public class VariableMenuUI : MonoBehaviour
     {

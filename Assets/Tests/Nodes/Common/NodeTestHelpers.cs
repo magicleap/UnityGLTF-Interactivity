@@ -1,4 +1,5 @@
 #define GENERATE_TEST_FILES
+#define WRITE_TO_TEST_MANIFEST
 
 using NUnit.Framework;
 using System;
@@ -12,10 +13,10 @@ using System.Threading.Tasks;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.TestTools;
-using UnityGLTF.Interactivity.Extensions;
+using UnityGLTF.Interactivity.Playback.Extensions;
 using UnityGLTF.Loader;
 
-namespace UnityGLTF.Interactivity.Tests
+namespace UnityGLTF.Interactivity.Playback.Tests
 {
     public abstract class NodeTestHelpers
     {
@@ -139,10 +140,11 @@ namespace UnityGLTF.Interactivity.Tests
                 var endTime = Time.time + test.executionTimeoutDuration;
                 _testSuccessful = false;
 #if GENERATE_TEST_FILES
+#if WRITE_TO_TEST_MANIFEST
                 var e = test.CreateManifestEntry();
 
                 File.AppendAllTextAsync(_manifestPath, $"|{e.fileName}|{e.nodeName}|{e.title}|{e.description}|{e.dependencies}|\n");
-
+#endif
                 Task.Run(() =>
                 {
                     // Record graph to json file.

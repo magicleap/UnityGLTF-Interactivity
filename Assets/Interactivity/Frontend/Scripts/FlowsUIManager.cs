@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityGLTF.Interactivity.Frontend.Extensions;
+using UnityGLTF.Interactivity.Playback.Frontend.Extensions;
 
-namespace UnityGLTF.Interactivity.Frontend
+namespace UnityGLTF.Interactivity.Playback.Frontend
 {
     public class FlowsUIManager : MonoBehaviour
     {

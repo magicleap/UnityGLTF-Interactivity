@@ -4,7 +4,7 @@ using System.Threading;
 using Unity.Properties;
 using UnityEngine;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     // Made partial so that extension methods could be added elsewhere without bloating this code file with a bunch of overloaded methods.
     // Did not use actual extension methods for this since they would require the use of "this" keyword to access if used in a node script.

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityGLTF.Interactivity.Frontend
+namespace UnityGLTF.Interactivity.Playback.Frontend
 {
     public class FlowsInNodeUI
     {

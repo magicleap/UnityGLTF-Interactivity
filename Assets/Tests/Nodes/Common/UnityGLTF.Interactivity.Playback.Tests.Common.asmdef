@@ -1,14 +1,13 @@
 {
-    "name": "UnityGLTF.Interactivity.Tests.Pointer",
+    "name": "UnityGLTF.Interactivity.Playback.Tests.Common",
     "rootNamespace": "",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "UnityGLTF.Interactivity.Common",
         "Unity.Mathematics",
         "UnityGLTFScripts",
-        "UnityGLTF.Interactivity",
-        "UnityGLTF.Interactivity.Tests.Common"
+        "UnityGLTF.Interactivity.Playback",
+        "UnityGLTF.Interactivity.Playback.Common"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

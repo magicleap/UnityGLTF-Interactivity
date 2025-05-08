@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public static class Util
     {

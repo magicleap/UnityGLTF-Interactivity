@@ -4,7 +4,7 @@ using System.IO;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace UnityGLTF.Interactivity.Tests
+namespace UnityGLTF.Interactivity.Playback.Tests
 {
     public class VariableNodeTests : NodeTestHelpers
     {

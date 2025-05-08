@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityGLTF.Plugins;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
 
     public class InteractivityExportContext : GLTFExportPluginContext

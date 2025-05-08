@@ -2,7 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 
-namespace UnityGLTF.Interactivity.Frontend
+namespace UnityGLTF.Interactivity.Playback.Frontend
 {
     public class ConfigEntry : MonoBehaviour
     {

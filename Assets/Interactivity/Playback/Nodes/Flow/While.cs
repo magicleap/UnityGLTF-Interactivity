@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public class FlowWhile : BehaviourEngineNode
     {

@@ -1,6 +1,6 @@
 using UnityGLTF.Plugins;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public class InteractivityExportPlugin : GLTFExportPlugin
     {

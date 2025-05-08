@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
 
-namespace UnityGLTF.Interactivity.Frontend
+namespace UnityGLTF.Interactivity.Playback.Frontend
 {
     public class GraphUI : MonoBehaviour
     {

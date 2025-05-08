@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace UnityGLTF.Interactivity.Tests
+namespace UnityGLTF.Interactivity.Playback.Tests
 {
     public class TypeNodesTests : NodeTestHelpers
     {

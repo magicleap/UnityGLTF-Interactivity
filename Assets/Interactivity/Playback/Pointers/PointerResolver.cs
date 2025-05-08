@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
-using UnityGLTF.Interactivity.Extensions;
-using UnityGLTF.Interactivity.Materials;
+using UnityGLTF.Interactivity.Playback.Extensions;
+using UnityGLTF.Interactivity.Playback.Materials;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public class PointerResolver
     {

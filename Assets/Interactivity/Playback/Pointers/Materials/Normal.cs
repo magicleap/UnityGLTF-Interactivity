@@ -1,8 +1,8 @@
 using System;
 using UnityEngine;
-using UnityGLTF.Interactivity.Extensions;
+using UnityGLTF.Interactivity.Playback.Extensions;
 
-namespace UnityGLTF.Interactivity.Materials
+namespace UnityGLTF.Interactivity.Playback.Materials
 {
     public struct NormalPointers
     {

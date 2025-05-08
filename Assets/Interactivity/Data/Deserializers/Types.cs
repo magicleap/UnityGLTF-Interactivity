@@ -1,7 +1,7 @@
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public static class TypesDeserializer
     {

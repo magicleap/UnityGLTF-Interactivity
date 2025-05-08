@@ -3,7 +3,7 @@ using System;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public struct Color3
     {

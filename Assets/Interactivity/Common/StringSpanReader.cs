@@ -2,7 +2,7 @@
 
 using System;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public ref struct StringSpanReader
     {

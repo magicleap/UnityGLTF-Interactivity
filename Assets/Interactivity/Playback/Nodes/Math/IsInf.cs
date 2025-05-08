@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public class MathIsInf : BehaviourEngineNode
     {

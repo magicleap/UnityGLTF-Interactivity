@@ -1,7 +1,7 @@
 using GLTF.Schema;
 using Newtonsoft.Json.Linq;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public class InteractivityGraphFactory : ExtensionFactory
     {

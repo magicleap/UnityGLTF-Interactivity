@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityGLTF.Interactivity.Frontend.Extensions
+namespace UnityGLTF.Interactivity.Playback.Frontend.Extensions
 {
     public static class ExtensionMethods
     {

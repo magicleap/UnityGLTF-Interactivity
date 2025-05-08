@@ -1,13 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
-using Unity.Mathematics;
-using UnityEditor;
-using UnityEngine;
-using UnityGLTF.Interactivity;
-
-namespace UnityGLTF.Interactivity.Tests
+namespace UnityGLTF.Interactivity.Playback.Tests
 {
     public enum ComparisonType
     {
@@ -25,7 +16,7 @@ namespace UnityGLTF.Interactivity.Tests
 
     public class ApproximatelySubGraph : ISubGraph
     {
-        private float _tolerance;
+        private readonly float _tolerance;
         public bool hasBValue => true;
 
         public ApproximatelySubGraph(float tolerance)

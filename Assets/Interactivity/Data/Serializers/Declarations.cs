@@ -2,9 +2,9 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
-using UnityGLTF.Interactivity.Extensions;
+using UnityGLTF.Interactivity.Playback.Extensions;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public static class DeclarationsSerializer
     {
@@ -18,7 +18,6 @@ namespace UnityGLTF.Interactivity
         {
             var declarations = new Dictionary<string, DeclarationData>();
 
-            Type type;
             string nodeName;
             var declarationCount = 0;
             for (int i = 0; i < nodes.Count; i++)

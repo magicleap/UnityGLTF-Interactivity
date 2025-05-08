@@ -1,7 +1,7 @@
 using System;
 using System.Buffers;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public ref struct ValueStringBuilder
     {

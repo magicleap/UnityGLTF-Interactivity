@@ -1,4 +1,4 @@
-namespace UnityGLTF.Interactivity.Extensions
+namespace UnityGLTF.Interactivity.Playback.Extensions
 {
     public static partial class ExtensionMethods
     {

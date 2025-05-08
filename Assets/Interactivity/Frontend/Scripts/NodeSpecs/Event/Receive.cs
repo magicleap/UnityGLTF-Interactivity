@@ -1,4 +1,4 @@
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public class EventReceiveSpec : NodeSpecifications
     {

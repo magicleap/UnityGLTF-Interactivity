@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using Unity.Mathematics;
 
-namespace UnityGLTF.Interactivity.Tests
+namespace UnityGLTF.Interactivity.Playback.Tests
 {
     public class MathNodesTests : NodeTestHelpers
     {

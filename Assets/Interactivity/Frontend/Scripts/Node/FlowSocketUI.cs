@@ -1,4 +1,4 @@
-namespace UnityGLTF.Interactivity.Frontend
+namespace UnityGLTF.Interactivity.Playback.Frontend
 {
     public class FlowSocketUI : SocketUI
     {

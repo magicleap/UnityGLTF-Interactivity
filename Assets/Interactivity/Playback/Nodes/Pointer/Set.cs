@@ -2,9 +2,9 @@ using System;
 using System.Threading;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityGLTF.Interactivity.Extensions;
+using UnityGLTF.Interactivity.Playback.Extensions;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public class PointerSet : BehaviourEngineNode
     {

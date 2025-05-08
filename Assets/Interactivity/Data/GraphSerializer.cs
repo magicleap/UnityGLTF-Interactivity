@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace UnityGLTF.Interactivity
+namespace UnityGLTF.Interactivity.Playback
 {
     public class GraphSerializer
     {

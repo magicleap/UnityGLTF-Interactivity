@@ -8,7 +8,7 @@ using UnityEngine.Pool;
 using UnityEngine.TestTools;
 using UnityGLTF.Interactivity;
 
-namespace UnityGLTF.Interactivity.Tests
+namespace UnityGLTF.Interactivity.Playback.Tests
 {
     partial class FlowNodesTests
     {
