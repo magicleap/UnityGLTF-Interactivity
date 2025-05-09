@@ -245,7 +245,7 @@ namespace UnityGLTF.Interactivity.Playback.Tests
 
             var g = CreateGetErrGraph(pointer: "/materials/{nodeIndex}/alphaCutoff", nodeIndex: -1, type: "float");
 
-            QueueTest("pointer/set", GetCallerName(), "Get Pointer w/ Invalid Parameter", "Tests a pointer/get node with an invalid node index parameter. Test fails if isValid output value is true or the value output is not the default for the given type.", g, importer.Result);
+            QueueTest("pointer/get", GetCallerName(), "Get Pointer w/ Invalid Parameter", "Tests a pointer/get node with an invalid node index parameter. Test fails if isValid output value is true or the value output is not the default for the given type.", g, importer.Result);
         }
 
         [UnityTest]
@@ -259,7 +259,7 @@ namespace UnityGLTF.Interactivity.Playback.Tests
 
             var g = CreateGetErrGraph(pointer: "/materials/{nodeIndex}/unsupported", nodeIndex: 0, type: "float");
 
-            QueueTest("pointer/set", GetCallerName(), "Get Pointer w/ Unsupported Pointer", "Tests a pointer/get node with an unsupported pointer. Test fails if isValid output value is true or the value output is not the default for the given type.", g, importer.Result);
+            QueueTest("pointer/get", GetCallerName(), "Get Pointer w/ Unsupported Pointer", "Tests a pointer/get node with an unsupported pointer. Test fails if isValid output value is true or the value output is not the default for the given type.", g, importer.Result);
         }
 
         [UnityTest]
@@ -273,7 +273,7 @@ namespace UnityGLTF.Interactivity.Playback.Tests
 
             var g = CreateGetValidGraph(pointer: "/materials/{nodeIndex}/alphaCutoff", nodeIndex: 0, type: "float");
 
-            QueueTest("pointer/set", GetCallerName(), "Get Pointer, Check IsValid", "Tests that a pointer/get node with a supported pointer has IsValid == true. Test fails if isValid output value is false.", g, importer.Result);
+            QueueTest("pointer/get", GetCallerName(), "Get Pointer, Check IsValid", "Tests that a pointer/get node with a supported pointer has IsValid == true. Test fails if isValid output value is false.", g, importer.Result);
         }
 
         private Graph CreatePointerInterpolateGraph(string pointer, string type)
