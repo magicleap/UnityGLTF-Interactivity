@@ -1,12 +1,4 @@
-using Newtonsoft.Json.Linq;
 using NUnit.Framework;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using UnityEngine;
-using UnityEngine.Pool;
-using UnityEngine.TestTools;
-using UnityGLTF.Interactivity;
 
 namespace UnityGLTF.Interactivity.Playback.Tests
 {
@@ -242,18 +234,6 @@ namespace UnityGLTF.Interactivity.Playback.Tests
             setDelay.AddFlow(logFailOut);
             setDelay.AddFlow(logFailDone, ConstStrings.DONE);
             return setDelay;
-        }
-
-        private static Node CreateFailSubGraph(Graph g, string failMessage)
-        {
-            var fail = g.CreateNode("event/send");
-            fail.AddConfiguration(ConstStrings.EVENT, FAIL_EVENT_INDEX);
-
-            var log = g.CreateNode("debug/log");
-            log.AddConfiguration(ConstStrings.MESSAGE, failMessage);
-            log.AddFlow(fail);
-
-            return log;
         }
     }
 }
