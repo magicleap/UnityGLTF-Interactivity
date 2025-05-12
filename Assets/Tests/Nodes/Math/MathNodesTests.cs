@@ -227,6 +227,8 @@ namespace UnityGLTF.Interactivity.Playback.Tests
         [Test]
         public void TestEq()
         {
+            QueueTest("math/eq", "Eq_X_Comparison_Infinity", "Eq Inf == Inf", "Tests that infinity == infinity in this implementation.", CreateSelfContainedTestGraph("math/eq", In(float.PositiveInfinity, float.PositiveInfinity), Out(true), ComparisonType.Equals));
+
             var a = new float4(34.0f, 41.0f, 30.0f, 70.0f);
             var b = new float4(30.0f, 40.0f, 50.0f, 60.0f);
 

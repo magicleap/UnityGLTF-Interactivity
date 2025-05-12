@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityGLTF.Interactivity.Playback.Extensions;
 
 namespace UnityGLTF.Interactivity.Playback
@@ -9,7 +10,8 @@ namespace UnityGLTF.Interactivity.Playback
         private readonly bool _isLoop = false;
         private int _lastIndex = -1;
 
-        private readonly int[] _flows;
+        private readonly int[] _flowIndices;
+        private readonly Flow[] _orderedFlows;
         private int _executionIndex;
 
         private const int MAX_OUTPUT_FLOWS = 64;
@@ -25,28 +27,36 @@ namespace UnityGLTF.Interactivity.Playback
                 return;
 
             // node.flows only contains flows out of the node, so we don't have to filter out the input flows.
-            _flows = new int[node.flows.Count];
+            _orderedFlows = new Flow[node.flows.Count];
+            _flowIndices = new int[node.flows.Count];
+
+            for (int i = 0; i < _orderedFlows.Length; i++)
+            {
+                _orderedFlows[i] = node.flows[i];
+            }
+
+            Array.Sort(_orderedFlows, (a, b) => int.Parse(a.fromSocket).CompareTo(int.Parse(b.fromSocket)));
 
             if (!TryGetConfig(ConstStrings.IS_LOOP, out _isLoop) || !TryGetConfig(ConstStrings.IS_RANDOM, out _isRandom))
             {
                 _isLoop = _isRandom = false;
             }
 
-            for (int i = 0; i < _flows.Length; i++)
+            for (int i = 0; i < _flowIndices.Length; i++)
             {
-                _flows[i] = i;
+                _flowIndices[i] = i;
             }
 
             if (_isRandom)
             {
-                _rng.Shuffle(_flows);
+                _rng.Shuffle(_flowIndices);
             }
         }
 
         protected override void Execute(string socket, ValidationResult validationResult)
         {
             // This node does absolutely nothing if there's no output flows.
-            if (_flows.Length <= 0)
+            if (_flowIndices.Length <= 0)
                 return;
 
             switch (socket)
@@ -54,7 +64,7 @@ namespace UnityGLTF.Interactivity.Playback
                 // Reset indices and shuffle the flow order if isRandom.
                 case ConstStrings.RESET:
                     if (_isRandom)
-                        _rng.Shuffle(_flows);
+                        _rng.Shuffle(_flowIndices);
 
                     _lastIndex = -1;
                     _executionIndex = 0;
@@ -62,9 +72,9 @@ namespace UnityGLTF.Interactivity.Playback
                 case ConstStrings.IN:
                     var i = -1;
                     // If we haven't run out of cases, assign i to the next in the array.
-                    if (_executionIndex < _flows.Length)
+                    if (_executionIndex < _flowIndices.Length)
                     {
-                        i = _flows[_executionIndex];
+                        i = _flowIndices[_executionIndex];
                     }
 
                     // We have no remaining cases.
@@ -75,10 +85,10 @@ namespace UnityGLTF.Interactivity.Playback
                         {
                             // If we want randomness we also need to reshuffle the execution array here.
                             if (_isRandom)
-                                _rng.Shuffle(_flows);
+                                _rng.Shuffle(_flowIndices);
 
                             _executionIndex = 0;
-                            i = _flows[_executionIndex];
+                            i = _flowIndices[_executionIndex];
                         }
                         // We ran out of cases and we're also not looping, so we do nothing.
                         else
@@ -90,7 +100,7 @@ namespace UnityGLTF.Interactivity.Playback
                     _executionIndex++;
                     // Using a string array cache to avoid allocating with i.ToString()
                     // If we support >64 cases we'll have to update this array or add a condition to use i.ToString above 63.
-                    TryExecuteFlow(ConstStrings.Numbers[i]);
+                    TryExecuteFlow(_orderedFlows[i].fromSocket);
                     break;
                 default:
                     throw new InvalidOperationException($"Socket {socket} is not a valid input on this MultiGate node!");
