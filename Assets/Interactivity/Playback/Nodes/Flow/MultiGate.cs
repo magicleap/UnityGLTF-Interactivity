@@ -35,7 +35,7 @@ namespace UnityGLTF.Interactivity.Playback
                 _orderedFlows[i] = node.flows[i];
             }
 
-            Array.Sort(_orderedFlows, (a, b) => int.Parse(a.fromSocket).CompareTo(int.Parse(b.fromSocket)));
+            Array.Sort(_orderedFlows, (a, b) => a.CompareTo(b));
 
             if (!TryGetConfig(ConstStrings.IS_LOOP, out _isLoop) || !TryGetConfig(ConstStrings.IS_RANDOM, out _isRandom))
             {
