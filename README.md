@@ -5,7 +5,7 @@ Package for supporting the Interactivity extension for GLTFs. Built on top of Un
 Focused on playing back interactive GLTFs at runtime. Future work may include runtime authoring/export to allow for editors to be made.
 
 > [!WARNING]
-> **The GLTF KHR_interactivity spec is not finalized and is subject to change. This project is up to date with [this version of the spec.](https://github.com/KhronosGroup/glTF/blob/6f6b10d8149778d62aa166dee8493291a99c6fdf/extensions/2.0/Khronos/KHR_interactivity/Specification.adoc)**
+> **This project has been converted into a package and is in the process of being merged into [UnityGLTF](https://github.com/KhronosGroup/UnityGLTF/pull/849). All further development will take place in the UnityGLTF repo, this repo is now a read-only snapshot from before then.**
 
 ## Supported Nodes
 
